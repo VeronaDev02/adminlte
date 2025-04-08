@@ -48,13 +48,12 @@
                 <table class="table table-striped table-bordered table-hover" id="dataTable">
                     <thead>
                         <tr>
-                            <th class="sortable" width="6%">ID <i class="fas fa-sort"></i></th>
+                            <th class="sortable" width="5%">ID <i class="fas fa-sort"></i></th>
                             <th class="sortable" width="6%">Nome <i class="fas fa-sort"></i></th>
                             <th class="sortable" width="10%">IP <i class="fas fa-sort"></i></th>
                             <th class="sortable" width="45%">RTSP URL <i class="fas fa-sort"></i></th>
-                            <th class="sortable" width="12%">Unidade <i class="fas fa-sort"></i></th>
-                            <th class="sortable" width="8%">Data Criação <i class="fas fa-sort"></i></th>
-                            <th class="text-center" width="12%">Ações</th>
+                            <th class="sortable" width="9%">Unidade <i class="fas fa-sort"></i></th>
+                            <th class="text-center" width="13%">Ações</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -64,8 +63,7 @@
                             <td>{{ $self->sel_name }}</td>
                             <td>{{ $self->sel_pdv_ip }}</td>
                             <td>{{ $self->sel_rtsp_url }}</td>
-                            <td>{{ $self->unidade ? $self->unidade->uni_codigo . ' - ' . $self->unidade->uni_descricao : 'Sem Unidade' }}</td>
-                            <td>{{ $self->created_at ? $self->created_at->format('d/m/Y') : '' }}</td>
+                            <td>{{ $self->unidade ? $self->unidade->uni_codigo : 'Sem Unidade' }}</td>
                             <td class="text-center">
                                 <a href="{{ route('selfs.edit', $self->sel_id) }}" class="btn btn-xs btn-default text-primary" title="Editar">
                                     <i class="fas fa-pencil-alt"></i>

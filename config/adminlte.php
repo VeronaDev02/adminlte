@@ -333,15 +333,15 @@ return [
                     'admin' => true,
                 ],
                 [
-                    'text' => 'IPs & RTSPs',
-                    'url' => '/selfs',
-                    'icon' => 'fas fa-fw fa-network-wired',
-                    'admin' => true,
-                ],
-                [
                     'text' => 'Funções',
                     'url' => '/roles',
                     'icon' => 'fas fa-fw fa-user-tag',
+                    'admin' => true,
+                ],
+                [
+                    'text' => 'IPs & RTSPs',
+                    'url' => '/selfs',
+                    'icon' => 'fas fa-fw fa-network-wired',
                     'admin' => true,
                 ],
             ],

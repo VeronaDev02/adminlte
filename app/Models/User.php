@@ -62,7 +62,6 @@ class User extends Authenticatable
         'use_active',
         'use_login_ativo',
         'use_allow_updates',
-        'use_uni_id',
         'use_rol_id',
     ];
 
@@ -119,16 +118,6 @@ class User extends Authenticatable
     }
 
     /**
-     * Relacionamento com a unidade
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
-     */
-    public function unidade()
-    {
-        return $this->belongsTo(Unidade::class, 'use_uni_id', 'uni_id');
-    }
-
-    /**
      * Relacionamento com a role
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
@@ -139,7 +128,7 @@ class User extends Authenticatable
     }
 
     /**
-     * Relacionamento many-to-many com unidades através da tabela unit_user
+     * Relacionamento many-to-many com unidades através da tabela units
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
@@ -147,12 +136,22 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(
             Unidade::class,
-            'unit_user',
-            'unu_use_id',
-            'unu_uni_id',
+            'units',
+            'unit_use_id',
+            'unit_uni_id',
             'use_id',
             'uni_id'
         )->withTimestamps();
+    }
+
+    /**
+     * Obtém a unidade principal do usuário (a primeira associada)
+     *
+     * @return \App\Models\Unidade|null
+     */
+    public function unidade()
+    {
+        return $this->unidades()->first();
     }
 
     public function getNameAttribute()
@@ -164,6 +163,7 @@ class User extends Authenticatable
     {
         return $this->use_email;
     }
+    
     public function adminlte_profile_url()
     {
         return route('perfil'); // Supondo que você tenha uma rota chamada 'perfil'
