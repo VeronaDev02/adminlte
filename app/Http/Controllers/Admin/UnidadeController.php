@@ -39,7 +39,7 @@ class UnidadeController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'uni_codigo' => 'required|string|max:50|unique:unidade,uni_codigo',
+            'uni_codigo' => 'required|regex:"^\\d+$" |max:3|unique:unidade,uni_codigo',
             'uni_descricao' => 'required|string|max:255',
             'uni_cidade' => 'required|string|max:100',
             'uni_uf' => 'required|string|size:2',
@@ -81,7 +81,7 @@ class UnidadeController extends Controller
         $unidade = Unidade::findOrFail($id);
         
         $validator = Validator::make($request->all(), [
-            'uni_codigo' => 'required|string|max:50|unique:unidade,uni_codigo,' . $id . ',uni_id',
+            'uni_codigo' => 'required|regex:"^\\d+$" |max:3|unique:unidade,uni_codigo,' . $id . ',uni_id',
             'uni_descricao' => 'required|string|max:255',
             'uni_cidade' => 'required|string|max:100',
             'uni_uf' => 'required|string|size:2',

@@ -42,7 +42,14 @@ class Unidade extends Model
      */
     public function users()
     {
-        return $this->hasMany(User::class, 'use_uni_id', 'uni_id');
+        return $this->belongsToMany(
+            User::class,
+            'units',
+            'unit_uni_id',
+            'unit_use_id',
+            'uni_id',
+            'use_id'
+        );
     }
 
     /**
@@ -65,15 +72,4 @@ class Unidade extends Model
  *
  * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
  */
-    public function todosUsuarios()
-    {
-        return $this->belongsToMany(
-            User::class,
-            'units',
-            'unit_uni_id',
-            'unit_use_id',
-            'uni_id',
-            'use_id'
-        );
-    }
 }

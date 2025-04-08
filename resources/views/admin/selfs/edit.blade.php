@@ -51,7 +51,7 @@
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="sel_rtsp_url">URL RTSP (opcional)</label>
+                            <label for="sel_rtsp_url">URL RTSP</label>
                             <input type="text" class="form-control @error('sel_rtsp_url') is-invalid @enderror" 
                                    id="sel_rtsp_url" name="sel_rtsp_url" value="{{ old('sel_rtsp_url', $self->sel_rtsp_url) }}" 
                                    placeholder="Digite a URL RTSP">
@@ -112,13 +112,24 @@
 @stop
 
 @section('js')
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+
         const statusSwitch = document.getElementById('sel_status');
         const statusLabel = statusSwitch.nextElementSibling;
 
         statusSwitch.addEventListener('change', function() {
             statusLabel.textContent = this.checked ? 'Ativo' : 'Inativo';
+        });
+
+        $(document).ready(function(){
+            $('#sel_pdv_ip').mask('0ZZ.0ZZ.0ZZ.0ZZ', {
+                translation: {
+                'Z': {pattern: /[0-9]/, optional: true}
+                }
+            });
         });
     });
 </script>

@@ -43,8 +43,8 @@ class SelfsController extends Controller
         // Validação dos dados
         $validator = Validator::make($request->all(), [
             'sel_name' => 'required|string|max:255',
-            'sel_pdv_ip' => 'required|ip',
-            'sel_rtsp_url' => 'nullable|url',
+            'sel_pdv_ip' => 'required|ip|unique:selfs,sel_pdv_ip',
+            'sel_rtsp_url' => 'required|url|unique:selfs,sel_rtsp_url',
             'sel_uni_id' => 'required|exists:unidade,uni_id',
             'sel_status' => 'boolean'
         ]);
@@ -88,8 +88,8 @@ class SelfsController extends Controller
         // Validação dos dados
         $validator = Validator::make($request->all(), [
             'sel_name' => 'required|string|max:255',
-            'sel_pdv_ip' => 'required|ip',
-            'sel_rtsp_url' => 'nullable|url',
+            'sel_pdv_ip' => 'required|ip|unique:selfs,sel_pdv_ip,'.$self->sel_id.',sel_id',
+            'sel_rtsp_url' => 'required|url|unique:selfs,sel_rtsp_url,'.$self->sel_id.',sel_id',
             'sel_uni_id' => 'required|exists:unidade,uni_id',
             'sel_status' => 'boolean'
         ]);

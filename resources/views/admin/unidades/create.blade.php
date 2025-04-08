@@ -119,3 +119,26 @@
         }
     </style>
 @stop
+
+@section('js')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const codigoInput = document.getElementById('uni_codigo');
+        
+        if(codigoInput) {
+            codigoInput.addEventListener('input', function(e) {
+                // Remove qualquer caractere que não seja número
+                let value = e.target.value.replace(/\D/g, '');
+                
+                // Limite de 3 dígitos, geralmente a unidade é 00 + dígitos
+                if (value.length > 3) {
+                    value = value.substring(0, 3);
+                }
+                
+                // Atualiza o valor do campo
+                e.target.value = value;
+            });
+        }
+    });
+</script>
+@stop

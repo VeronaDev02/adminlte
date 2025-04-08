@@ -155,12 +155,11 @@
 @section('js')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Previous search and sorting scripts remain the same...
 
-        // Prevent toggle status refresh
+        // Tggle Status configurado pra não atualizar a página (o refresh)
         document.querySelectorAll('form[action*="toggle-status"]').forEach(function(form) {
             form.addEventListener('submit', function(e) {
-                e.preventDefault(); // Stop the form from submitting normally
+                e.preventDefault();
                 
                 const button = this.querySelector('button');
                 const icon = button.querySelector('i');
@@ -174,7 +173,6 @@
                 })
                 .then(response => response.json())
                 .then(data => {
-                    // Toggle button visual state
                     if (data.status) {
                         button.classList.remove('text-secondary');
                         button.classList.add('text-success');
@@ -192,6 +190,43 @@
                 .catch(error => {
                     console.error('Error:', error);
                     alert('Erro ao alterar o status do SelfCheckout');
+                });
+            });
+        });
+
+        // Busca dinâmica
+        document.getElementById('searchInput').addEventListener('keyup', function() {
+            var value = this.value.toLowerCase();
+            var rows = document.querySelectorAll('#dataTable tbody tr');
+            
+            rows.forEach(function(row) {
+                var text = row.textContent.toLowerCase();
+                row.style.display = text.indexOf(value) > -1 ? '' : 'none';
+            });
+        });
+        
+        // Ordenação
+        document.querySelectorAll('.sortable').forEach(function(header) {
+            header.addEventListener('click', function() {
+                var table = this.closest('table');
+                var index = Array.from(this.parentNode.children).indexOf(this);
+                var asc = this.hasAttribute('data-asc') ? !JSON.parse(this.getAttribute('data-asc')) : true;
+                this.setAttribute('data-asc', asc);
+                
+                var rows = Array.from(table.querySelectorAll('tbody tr')).sort(function(a, b) {
+                    var valA = a.children[index].textContent.trim();
+                    var valB = b.children[index].textContent.trim();
+                    
+                    if (!isNaN(valA) && !isNaN(valB)) {
+                        return asc ? valA - valB : valB - valA;
+                    } else {
+                        return asc ? valA.localeCompare(valB) : valB.localeCompare(valA);
+                    }
+                });
+                
+                var tbody = table.querySelector('tbody');
+                rows.forEach(function(row) {
+                    tbody.appendChild(row);
                 });
             });
         });

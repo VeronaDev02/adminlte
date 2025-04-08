@@ -174,7 +174,7 @@
                             <table class="table table-striped table-bordered">
                                 <tbody id="usersAssociadosTable">
                                     @php
-                                        // Buscar usuários associados à unidade através da tabela units
+                                        // Buscar usuários que estão associados a unidade através da tabela units que serve pra isso
                                         $usuariosAssociados = \App\Models\Unit::where('unit_uni_id', $unidade->uni_id)
                                             ->join('users', 'users.use_id', '=', 'units.unit_use_id')
                                             ->select('users.*')
@@ -257,7 +257,7 @@
         </div>
     </div>
     
-    <!-- Forms ocultos para AJAX -->
+    <!-- Forms ocultos para AJAX para adicionarmos e removermos os usuários daquela unidade -->
     <form id="form-add-user" action="{{ route('unidades.add.usuario', $unidade->uni_id) }}" method="POST" style="display: none;">
         @csrf
         <input type="hidden" name="user_id" id="add_user_id">
@@ -301,17 +301,17 @@
 @section('js')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Pesquisa para SelfCheckouts Associados
+        // Pesquisa para os SelfCheckouts Associados
         document.getElementById('searchSelfsAssociados').addEventListener('keyup', function() {
             filterTable('searchSelfsAssociados', 'selfsAssociadosTable');
         });
         
-        // Pesquisa para Usuários Disponíveis
+        // Pesquisa para os Usuários Disponíveis
         document.getElementById('searchUsersDisponiveis').addEventListener('keyup', function() {
             filterTable('searchUsersDisponiveis', 'usersDisponiveisTable');
         });
         
-        // Pesquisa para Usuários Associados
+        // Pesquisa para os Usuários Associados
         document.getElementById('searchUsersAssociados').addEventListener('keyup', function() {
             filterTable('searchUsersAssociados', 'usersAssociadosTable');
         });
@@ -336,7 +336,7 @@
             }
         }
         
-        // Adicionar usuário via AJAX
+        // Adicionar usuário via AJAX (para não ficar dando o refresh/atualizar na página)
         document.querySelectorAll('.btn-add-user').forEach(function(button) {
             button.addEventListener('click', function() {
                 const userId = this.getAttribute('data-user-id');
@@ -387,7 +387,7 @@
             });
         });
         
-        // Funções para manipular usuários
+        // Funções para manipular os usuários
         function addUser(userId, userName, showConfirmation = true) {
             const formData = new FormData();
             formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
@@ -490,8 +490,58 @@
                 alert('Erro ao processar a requisição.');
             });
         }
-        
-        
+
+        const codigoInput = document.getElementById('uni_codigo');
+        if(codigoInput) {
+            codigoInput.addEventListener('input', function(e) {
+                // Remove qualquer caractere que não seja número
+                let value = e.target.value.replace(/\D/g, '');
+                
+                // Limita a 3 dígitos (004, 001, coisas assim, geralmente é 00 + dígitos)
+                if (value.length > 3) {
+                    value = value.substring(0, 3);
+                }
+                
+                // Atualiza o valor do campo
+                e.target.value = value;
+            });
+        }
     });
+    // Busca dinâmica
+        document.getElementById('searchInput').addEventListener('keyup', function() {
+            var value = this.value.toLowerCase();
+            var rows = document.querySelectorAll('#dataTable tbody tr');
+            
+            rows.forEach(function(row) {
+                var text = row.textContent.toLowerCase();
+                row.style.display = text.indexOf(value) > -1 ? '' : 'none';
+            });
+        });
+        
+        // Ordenação
+        document.querySelectorAll('.sortable').forEach(function(header) {
+            header.addEventListener('click', function() {
+                var table = this.closest('table');
+                var index = Array.from(this.parentNode.children).indexOf(this);
+                var asc = this.hasAttribute('data-asc') ? !JSON.parse(this.getAttribute('data-asc')) : true;
+                this.setAttribute('data-asc', asc);
+                
+                var rows = Array.from(table.querySelectorAll('tbody tr')).sort(function(a, b) {
+                    var valA = a.children[index].textContent.trim();
+                    var valB = b.children[index].textContent.trim();
+                    
+                    if (!isNaN(valA) && !isNaN(valB)) {
+                        return asc ? valA - valB : valB - valA;
+                    } else {
+                        return asc ? valA.localeCompare(valB) : valB.localeCompare(valA);
+                    }
+                });
+                
+                var tbody = table.querySelector('tbody');
+                rows.forEach(function(row) {
+                    tbody.appendChild(row);
+                });
+            });
+        });
 </script>
 @stop
