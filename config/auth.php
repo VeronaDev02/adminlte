@@ -2,6 +2,12 @@
 
 return [
 
+    'assets' => [
+        'css' => [
+                'css/custom.css', // Caminho para o arquivo de estilos
+            ],
+    ],
+    
     /*
     |--------------------------------------------------------------------------
     | Authentication Defaults

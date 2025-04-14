@@ -32,18 +32,17 @@ Route::post('/logout', [LoginController::class, 'logout'])
 Route::middleware(['auth:web', 'verifica.permissions.users'])->group(function () {
 
     // ------------------------- Unidades ------------------------------------
-    Route::resource('unidades', App\Http\Controllers\Admin\UnidadeController::class);
-    Route::get('unidades/search', [App\Http\Controllers\Admin\UnidadeController::class, 'search'])->name('unidades.search');
-    Route::get('unidades/{unidade}/usuarios', [App\Http\Controllers\Admin\UnidadeController::class, 'usuarios'])->name('unidades.usuarios');
-    // Rotas para gerenciar usuários nas unidades
+    Route::resource('unidades', App\Http\Controllers\Admin\UnidadeController::class)
+    ->except(['store', 'update']); 
     Route::post('unidades/{id}/processar-usuarios', [App\Http\Controllers\Admin\UnidadeController::class, 'processarUsuarios'])
     ->name('unidades.process-usuarios');
 
     // ------------------------- Selfs ------------------------------------
-    Route::resource('selfs', App\Http\Controllers\Admin\SelfsController::class);
-    Route::get('selfs/search', [App\Http\Controllers\Admin\SelfsController::class, 'search'])->name('selfs.search');
-    Route::post('selfs/{self}/toggle-status', [App\Http\Controllers\Admin\SelfsController::class, 'toggleStatus'])->name('selfs.toggle-status');
-
+    Route::prefix('selfs')->name('selfs.')->group(function () {
+        Route::get('/', App\Http\Livewire\Selfs\SelfCheckoutList::class)->name('index');
+        Route::get('/create', App\Http\Livewire\Selfs\SelfCheckoutForm::class)->name('create');
+        Route::get('/{self}/edit', App\Http\Livewire\Selfs\SelfCheckoutForm::class)->name('edit');
+    });
     // ------------------------- Roles ------------------------------------
     Route::resource('roles', App\Http\Controllers\Admin\RoleController::class);
     Route::get('roles/search', [App\Http\Controllers\Admin\RoleController::class, 'search'])->name('roles.search');
@@ -55,12 +54,10 @@ Route::middleware(['auth:web', 'verifica.permissions.users'])->group(function ()
     // ------------------------- Users ------------------------------------
     Route::resource('users', App\Http\Controllers\Admin\UserController::class);
     Route::get('users/search', [App\Http\Controllers\Admin\UserController::class, 'search'])->name('users.search');
-    Route::get('users/{id}/unidades', [App\Http\Controllers\Admin\UserController::class, 'unidades'])->name('users.unidades');
-    Route::post('users/{id}/add-unidade', [App\Http\Controllers\Admin\UserController::class, 'addUnidade'])->name('users.add-unidade');
-    Route::delete('users/{id}/remove-unidade', [App\Http\Controllers\Admin\UserController::class, 'removeUnidade'])->name('users.remove-unidade');
+    Route::get('users/get-funcionario', [App\Http\Controllers\Admin\UserController::class, 'getFuncionario'])->name('users.get-funcionario');
     Route::post('users/{user}/toggle-status', [App\Http\Controllers\Admin\UserController::class, 'toggleStatus'])->name('users.toggle-status');
     Route::post('users/{id}/processar-unidades', [App\Http\Controllers\Admin\UserController::class, 'processarUnidades'])
-    ->name('users.processar-unidades');
+        ->name('users.processar-unidades');
 
     
 

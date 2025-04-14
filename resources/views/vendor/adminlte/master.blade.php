@@ -2,7 +2,7 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
-
+    @livewireStyles
     {{-- Base Meta Tags --}}
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -130,7 +130,7 @@
 
     {{-- Custom Scripts --}}
     @yield('adminlte_js')
-
+@livewireScripts
 </body>
 
 </html>
