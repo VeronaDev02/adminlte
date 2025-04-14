@@ -2,9 +2,14 @@
 
 namespace App\Http\Controllers\Auth;
 
+use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\LoginRequest;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use App\Events\User;
 
 class LoginController extends Controller
 {
@@ -35,16 +40,69 @@ class LoginController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('guest')->except('logout');
+        $this->middleware("guest")->except("logout");
     }
 
-    /**
-     * Get the login username to be used by the controller.
-     *
-     * @return string
-     */
+    public function showLoginForm()
+    {
+        return view("auth.login");
+    }
+
+    public function login(LoginRequest $request)
+    {
+        $this->validateLogin($request);
+
+        if (
+            method_exists($this, "hasTooManyLoginAttempts") &&
+            $this->hasTooManyLoginAttempts($request)
+        ) {
+            $this->fireLockoutEvent($request);
+
+            return $this->sendLockoutResponse($request);
+        }
+
+        if ($this->attemptLogin($request)) {
+            if ($request->hasSession()) {
+                $request->session()->put("auth.password_confirmed_at", time());
+            }
+            event(new User\Auth\Login($request->use_username, $request->getIp()));
+            return $this->sendLoginResponse($request);
+        }
+        event(
+            new User\Auth\FailedLoginAttempt(
+                $request->use_username,
+                $request->getIp()
+            )
+        );
+
+        $this->incrementLoginAttempts($request);
+
+        return $this->sendFailedLoginResponse($request);
+    }
+
     public function username()
     {
-        return 'use_username';
+        return "use_username";
+    }
+
+    public function logout(Request $request)
+    {
+        $username = Auth::user() ? Auth::user()->use_username : null;
+        
+        if ($username) {
+            try {
+                $ip = $request->ip();
+                event(new User\Auth\Logout($username, $ip));
+            } catch (\Exception $e) {
+            }
+        } 
+        $this->guard()->logout();
+        
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        
+        return $request->wantsJson()
+            ? new JsonResponse([], 204)
+            : redirect('/');
     }
 }

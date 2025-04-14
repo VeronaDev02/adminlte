@@ -1,5 +1,5 @@
 @extends('adminlte::page')
-
+@include('components.alert.sweet-alert')
 @section('title', 'Nova Unidade')
 
 @section('content_header')
@@ -20,8 +20,11 @@
 @section('content')
     <div class="card">
         <div class="card-body">
-            <form action="{{ route('unidades.store') }}" method="POST">
+            <form action="{{ route('unidades.store') }}" method="POST" id="formUnidade">
                 @csrf
+                
+                <!-- Campos ocultos para armazenar a lista de usuários -->
+                <input type="hidden" name="usuarios_vincular" id="usuarios_vincular" value="">
                 
                 <div class="row">
                     <div class="col-md-6">
@@ -100,45 +103,352 @@
                     <a href="{{ route('unidades.index') }}" class="btn btn-secondary mr-2">
                         <i class="fas fa-times"></i> Cancelar
                     </a>
-                    <button type="submit" class="btn btn-success">
+                    <button type="button" class="btn btn-success" id="btnSalvar">
                         <i class="fas fa-save"></i> Salvar
                     </button>
                 </div>
             </form>
+            
+            <!-- Gerenciamento de Usuários -->
+            <h4 class="mt-4">Gerenciamento de Usuários</h4>
+            <div class="row">
+                <div class="col-md-5">
+                    <div class="card card-outline card-primary">
+                        <div class="card-header">
+                            <h3 class="card-title">Usuários Disponíveis</h3>
+                            <div class="card-tools">
+                                <div class="input-group input-group-sm" style="width: 150px;">
+                                    <input type="text" id="searchUsersDisponiveis" class="form-control float-right" placeholder="Pesquisar">
+                                    <div class="input-group-append">
+                                        <button type="button" class="btn btn-default">
+                                            <i class="fas fa-search"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body p-0" style="max-height: 300px; overflow-y: auto;">
+                            <table class="table table-striped table-bordered">
+                                <tbody id="usersDisponiveisTable">
+                                    @foreach($todosUsuarios ?? [] as $user)
+                                    <tr data-user-id="{{ $user->use_id }}">
+                                        <td>{{ $user->use_name }}</td>
+                                        <td class="text-right" style="width: 80px;">
+                                            <button type="button" class="btn btn-xs btn-success btn-add-user" data-user-id="{{ $user->use_id }}" data-user-name="{{ $user->use_name }}">
+                                                <i class="fas fa-plus"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="card-footer text-center">
+                            <button type="button" class="btn btn-sm btn-primary" id="addAllUsers">
+                                <i class="fas fa-angle-double-right"></i> Adicionar Todos
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-2 d-flex align-items-center justify-content-center">
+                    <div class="text-center">
+                        <i class="fas fa-exchange-alt fa-2x text-muted mb-2"></i>
+                    </div>
+                </div>
+                
+                <div class="col-md-5">
+                    <div class="card card-outline card-success">
+                        <div class="card-header">
+                            <h3 class="card-title">Usuários Selecionados</h3>
+                            <div class="card-tools">
+                                <div class="input-group input-group-sm" style="width: 150px;">
+                                    <input type="text" id="searchUsersSelecionados" class="form-control float-right" placeholder="Pesquisar">
+                                    <div class="input-group-append">
+                                        <button type="button" class="btn btn-default">
+                                            <i class="fas fa-search"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body p-0" style="max-height: 300px; overflow-y: auto;">
+                            <table class="table table-striped table-bordered">
+                                <tbody id="usersSelecionadosTable">
+                                    <!-- Tabela de usuários selecionados inicialmente vazia -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="card-footer text-center">
+                            <button type="button" class="btn btn-sm btn-danger" id="removeAllUsers">
+                                <i class="fas fa-angle-double-left"></i> Remover Todos
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 @stop
 
 @section('css')
     <style>
+        .btn-xs {
+            padding: .125rem .25rem;
+            font-size: .75rem;
+            line-height: 1.5;
+            border-radius: .15rem;
+        }
+        .btn-success {
+            background-color: #007bff;
+        }
+        .btn-xs i {
+            font-size: 0.875rem;
+        }
         .card-outline {
             border-top: 3px solid;
         }
         .card-outline.card-primary {
             border-top-color: #007bff;
         }
+        .card-outline.card-success {
+            border-top-color: #28a745;
+        }
+        .loading-indicator {
+            display: none;
+            text-align: center;
+            padding: 15px;
+        }
     </style>
 @stop
 
 @section('js')
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const codigoInput = document.getElementById('uni_codigo');
+    <script>
+        var unidadesIndexUrl = "{{ route('unidades.index') }}";
         
-        if(codigoInput) {
-            codigoInput.addEventListener('input', function(e) {
-                // Remove qualquer caractere que não seja número
-                let value = e.target.value.replace(/\D/g, '');
+        // Variável global para tracking de usuários que vamos adicionar ou remover da nossa unidade
+        var usuariosSelecionados = [];
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Pesquisa para os Usuários Disponíveis
+            document.getElementById('searchUsersDisponiveis').addEventListener('keyup', function() {
+                filterTable('searchUsersDisponiveis', 'usersDisponiveisTable');
+            });
+            
+            // Pesquisa para os Usuários Selecionados
+            document.getElementById('searchUsersSelecionados').addEventListener('keyup', function() {
+                filterTable('searchUsersSelecionados', 'usersSelecionadosTable');
+            });
+            
+            // Função de filtro para tabelas
+            function filterTable(inputId, tableId) {
+                var input = document.getElementById(inputId);
+                var filter = input.value.toUpperCase();
+                var table = document.getElementById(tableId);
+                var tr = table.getElementsByTagName("tr");
                 
-                // Limite de 3 dígitos, geralmente a unidade é 00 + dígitos
-                if (value.length > 3) {
-                    value = value.substring(0, 3);
+                for (var i = 0; i < tr.length; i++) {
+                    var td = tr[i].getElementsByTagName("td")[0];
+                    if (td) {
+                        var txtValue = td.textContent || td.innerText;
+                        if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                            tr[i].style.display = "";
+                        } else {
+                            tr[i].style.display = "none";
+                        }
+                    }
+                }
+            }
+            
+            // Adicionar usuário localmente
+            document.querySelectorAll('.btn-add-user').forEach(function(button) {
+                button.addEventListener('click', function() {
+                    const userId = this.getAttribute('data-user-id');
+                    const userName = this.getAttribute('data-user-name');
+                    
+                    addUserLocally(userId, userName);
+                });
+            });
+            
+            // Adicionar todos os usuários localmente
+            document.getElementById('addAllUsers').addEventListener('click', function() {
+                const users = document.querySelectorAll('#usersDisponiveisTable tr');
+                if (users.length === 0) {
+                    mostrarAlerta('Não há usuários disponíveis para adicionar.', 'erro');
+                    return;
+                }
+                users.forEach(function(row) {
+                    const userId = row.getAttribute('data-user-id');
+                    const userName = row.querySelector('td').textContent.trim();
+                    
+                    addUserLocally(userId, userName);
+                });
+            });
+            
+            // Remover todos os usuários localmente
+            document.getElementById('removeAllUsers').addEventListener('click', function() {
+                const users = document.querySelectorAll('#usersSelecionadosTable tr');
+                if (users.length === 0) {
+                    mostrarAlerta('Não há usuários selecionados para remover.', 'erro');
+                    return;
                 }
                 
-                // Atualiza o valor do campo
-                e.target.value = value;
+                users.forEach(function(row) {
+                    const userId = row.getAttribute('data-user-id');
+                    const userName = row.querySelector('td').textContent.trim();
+                    
+                    removeUserLocally(userId, userName);
+                });
             });
+            
+            // Evento para o botão salvar
+            document.getElementById('btnSalvar').addEventListener('click', function() {
+                // Preencher o campo oculto com a lista de usuários
+                document.getElementById('usuarios_vincular').value = JSON.stringify(usuariosSelecionados);
+                
+                // Submeter o formulário com os dados da unidade e lista de usuários
+                const form = document.getElementById('formUnidade');
+                const formData = new FormData(form);
+                
+                // Mostrar loader ou desabilitar o botão
+                const btnSalvar = document.getElementById('btnSalvar');
+                const originalText = btnSalvar.innerHTML;
+                btnSalvar.disabled = true;
+                btnSalvar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+                
+                // Enviar a requisição pro back
+                fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Redirecionar após sucesso
+                        Swal.fire({
+                            title: 'Sucesso!',
+                            text: 'Unidade criada com sucesso!',
+                            icon: 'success',
+                            confirmButtonText: 'OK',
+                            confirmButtonColor: '#28a745'
+                        }).then(() => {
+                            window.location.href = data.redirect || unidadesIndexUrl;
+                        });
+                    } else {
+                        // Restaurar o botão
+                        btnSalvar.disabled = false;
+                        btnSalvar.innerHTML = originalText;
+                        
+                        // Exibir erros do formulário
+                        if (data.errors) {
+                            let errorMessage = 'Erros de validação:\n';
+                            for (const field in data.errors) {
+                                errorMessage += `- ${data.errors[field].join('\n- ')}\n`;
+                            }
+                            mostrarAlerta(errorMessage, 'erro');
+                        } else {
+                            mostrarAlerta('Erro ao criar unidade: ' + (data.message || 'Erro desconhecido'), 'erro');
+                        }
+                    }
+                })
+                .catch(error => {
+                    // Restaurar o botão
+                    btnSalvar.disabled = false;
+                    btnSalvar.innerHTML = originalText;
+                    
+                    console.error('Erro:', error);
+                    mostrarAlerta('Erro ao processar a requisição.', 'erro');
+                });
+            });
+            
+            const codigoInput = document.getElementById('uni_codigo');
+            if(codigoInput) {
+                codigoInput.addEventListener('input', function(e) {
+                    // Remove qualquer caractere que não seja número
+                    let value = e.target.value.replace(/\D/g, '');
+                    
+                    // Limita a 3 dígitos (004, 001, coisas assim, geralmente é --)
+                    if (value.length > 3) {
+                        value = value.substring(0, 3);
+                    }
+                    // Atualiza o valor do campo
+                    e.target.value = value;
+                });
+            }
+        });
+        
+        // Funções para manipular os usuários localmente
+        function addUserLocally(userId, userName) {
+            // Verificar se o usuário já está na lista de selecionados
+            if (usuariosSelecionados.includes(userId)) {
+                return;
+            }
+            
+            // Adicionar à lista de selecionados
+            usuariosSelecionados.push(userId);
+            
+            // Mover o usuário para a tabela de selecionados (apenas visualmente)
+            const row = document.querySelector(`#usersDisponiveisTable tr[data-user-id="${userId}"]`);
+            if (row) {
+                // Criar a nova linha para a tabela de selecionados
+                const newRow = document.createElement('tr');
+                newRow.setAttribute('data-user-id', userId);
+                newRow.innerHTML = `
+                    <td>${userName}</td>
+                    <td class="text-right" style="width: 80px;">
+                        <button type="button" class="btn btn-xs btn-danger btn-remove-user" data-user-id="${userId}" data-user-name="${userName}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                
+                // Adicionar evento ao novo botão
+                newRow.querySelector('.btn-remove-user').addEventListener('click', function() {
+                    removeUserLocally(userId, userName);
+                });
+                
+                // Adicionar à tabela de selecionados
+                document.getElementById('usersSelecionadosTable').appendChild(newRow);
+                
+                // Remover da tabela de disponíveis
+                row.remove();
+            }
+            
+            console.log('Usuários selecionados:', usuariosSelecionados);
         }
-    });
-</script>
+        
+        function removeUserLocally(userId, userName) {
+            // Remover da lista de selecionados
+            const index = usuariosSelecionados.indexOf(userId);
+            if (index !== -1) {
+                usuariosSelecionados.splice(index, 1);
+            }
+            
+            // Mover o usuário para a tabela de disponíveis visaulmente falando
+            const row = document.querySelector(`#usersSelecionadosTable tr[data-user-id="${userId}"]`);
+            if (row) {
+                // Criar a nova linha para a tabela de disponíveis
+                const newRow = document.createElement('tr');
+                newRow.setAttribute('data-user-id', userId);
+                newRow.innerHTML = `
+                    <td>${userName}</td>
+                    <td class="text-right" style="width: 80px;">
+                        <button type="button" class="btn btn-xs btn-success btn-add-user" data-user-id="${userId}" data-user-name="${userName}">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </td>
+                `;
+                newRow.querySelector('.btn-add-user').addEventListener('click', function() {
+                    addUserLocally(userId, userName);
+                });
+                document.getElementById('usersDisponiveisTable').appendChild(newRow);
+                row.remove();
+            }
+            
+            console.log('Usuários selecionados:', usuariosSelecionados);
+        }
+    </script>
 @stop

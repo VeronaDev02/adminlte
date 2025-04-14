@@ -1,5 +1,7 @@
 @extends('adminlte::page')
+@component('components.alert.sweet-alert')
 
+@endcomponent
 @section('title', 'Editar SelfCheckout')
 
 @section('content_header')
@@ -20,9 +22,10 @@
 @section('content')
     <div class="card">
         <div class="card-body">
-            <form action="{{ route('selfs.update', $self->sel_id) }}" method="POST">
+            <form id="update-form" action="{{ route('selfs.update', $self->sel_id) }}" method="POST">
                 @csrf
                 @method('PUT')
+                
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
@@ -98,8 +101,8 @@
 
                 <div class="row mt-3">
                     <div class="col-12">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save"></i> Atualizar
+                        <button type="submit" class="btn btn-primary" id="save-button">
+                            <i class="fas fa-save"></i> Salvar
                         </button>
                         <a href="{{ route('selfs.index') }}" class="btn btn-secondary ml-2">
                             <i class="fas fa-arrow-left"></i> Voltar
@@ -115,22 +118,85 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function() {
+    // Validação Inicial
+    @if($errors->any())
+        mostrarErro('Por favor, verifique os campos do formulário.', 'Erro de Validação');
+    @endif
 
-        const statusSwitch = document.getElementById('sel_status');
-        const statusLabel = statusSwitch.nextElementSibling;
+    // Status Switch
+    const statusSwitch = document.getElementById('sel_status');
+    const statusLabel = statusSwitch.nextElementSibling;
+    statusSwitch.addEventListener('change', () => {
+        statusLabel.textContent = statusSwitch.checked ? 'Ativo' : 'Inativo';
+    });
 
-        statusSwitch.addEventListener('change', function() {
-            statusLabel.textContent = this.checked ? 'Ativo' : 'Inativo';
-        });
-
-        $(document).ready(function(){
-            $('#sel_pdv_ip').mask('0ZZ.0ZZ.0ZZ.0ZZ', {
-                translation: {
-                'Z': {pattern: /[0-9]/, optional: true}
+    // Submissão do Formulário
+    const form = document.getElementById('update-form');
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Configurar valor do status
+        statusSwitch.value = statusSwitch.checked ? 1 : 0;
+        
+        const formData = new FormData(form);
+        const saveButton = document.getElementById('save-button');
+        const originalText = saveButton.innerHTML;
+        
+        // Desabilitar botão durante o envio
+        saveButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+        saveButton.disabled = true;
+        
+        // Envio AJAX
+        fetch(form.action, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json',
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Armazenar mensagem de sucesso
+                localStorage.setItem('redirectMessage', data.message || 'SelfCheckout atualizado com sucesso.');
+                localStorage.setItem('redirectMessageType', 'success');
+                
+                // Redirecionar
+                window.location.href = "{{ route('selfs.index') }}";
+            } else {
+                // Restaurar botão
+                saveButton.innerHTML = originalText;
+                saveButton.disabled = false;
+                
+                // Mostrar erros
+                if (data.errors) {
+                    const errorMessages = Object.values(data.errors).flat();
+                    mostrarErro(errorMessages.join('<br>'), 'Erro de Validação');
+                } else {
+                    mostrarErro(data.message || 'Ocorreu um erro ao atualizar o SelfCheckout.', 'Erro');
                 }
-            });
+            }
+        })
+        .catch(error => {
+            // Restaurar botão e mostrar erro
+            saveButton.innerHTML = originalText;
+            saveButton.disabled = false;
+            
+            mostrarErro('Erro ao processar a requisição. Por favor, tente novamente.', 'Erro');
+            console.error('Error:', error);
         });
     });
+
+    // Máscara de IP
+    $(document).ready(function(){
+        $('#sel_pdv_ip').mask('0ZZ.0ZZ.0ZZ.0ZZ', {
+            translation: {
+                'Z': {pattern: /[0-9]/, optional: true}
+            }
+        });
+    });
+});
 </script>
 @stop

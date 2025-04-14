@@ -20,6 +20,22 @@ class EventServiceProvider extends ServiceProvider
         ],
     ];
 
+    protected $subscribe = [
+        // User Auth Listeners
+        \App\Listeners\User\Auth\UserAuthEventSubscriber::class,
+        
+        // User Profile Listeners
+        \App\Listeners\User\User\UserEventSubscriber::class,
+
+        // Admin Listeners
+        \App\Listeners\Admin\User\UserEventSubscriber::class,
+        \App\Listeners\Admin\Role\RoleEventSubscriber::class,
+        \App\Listeners\Admin\Selfs\SelfsEventSubscriber::class,
+        \App\Listeners\Admin\Unidade\UnidadeEventSubscriber::class,
+        \App\Listeners\Admin\Unit\UnitEventSubscriber::class
+        
+    ];
+
     /**
      * Register any events for your application.
      *

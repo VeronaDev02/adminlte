@@ -26,12 +26,15 @@ class MenuFilter implements FilterInterface
             return Auth::check() &&
                 Auth::user()
                     ->role()
-                    ->value("rol_id") == 1;
+                    ->value("rol_id") == 1 &&
+                Auth::user()->use_active == true;
+
         } elseif (isset($item["user"]) && $item["user"]) {
             return Auth::check() &&
                 Auth::user()
                     ->role()
-                    ->value("rol_id") == 2;
+                    ->value("rol_id") == 2 &&
+                    Auth::user()->use_active == true;
         } elseif (!isset($item["guard"])) {
             return true;
         }

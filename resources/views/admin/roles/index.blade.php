@@ -1,5 +1,5 @@
 @extends('adminlte::page')
-
+@include('components.alert.sweet-alert')
 @section('title', 'Roles')
 
 @section('content_header')
@@ -66,10 +66,10 @@
                                 <a href="{{ route('roles.edit', $role->rol_id) }}" class="btn btn-xs btn-default text-primary" title="Editar">
                                     <i class="fas fa-pencil-alt"></i>
                                 </a>
-                                <form method="POST" action="{{ route('roles.destroy', $role->rol_id) }}" class="d-inline" onsubmit="return confirm('Tem certeza que deseja excluir este role? Esta ação excluirá todos os usuários associados.')">
+                                <form method="POST" action="{{ route('roles.destroy', $role->rol_id) }}" class="d-inline">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn btn-xs btn-default text-danger" title="Excluir">
+                                    <button type="button" class="btn btn-xs btn-default text-danger delete-btn" title="Excluir">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </form>
@@ -144,8 +144,36 @@
 @stop
 
 @section('js')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Confirmar exclusão da Role
+        document.querySelectorAll('.delete-btn').forEach(function(deleteButton) {
+            deleteButton.addEventListener('click', function() {
+                
+                const role = this.closest('tr').querySelector('td:nth-child(2)').textContent;
+                const form = this.closest('form');
+
+                // Exibe o SweetAlert
+                Swal.fire({
+                    title: 'Confirmar exclusão?',
+                    html: `Você está prestes a excluir a função/cargo <strong>${role}</strong>.<br>Esta ação não pode ser desfeita!`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Sim, excluir!',
+                    cancelButtonText: 'Cancelar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Se confirmado, envia o formulário pro back
+                        form.submit(); 
+                    }
+                    // Se cancelado, nada acontece
+                });
+            })
+        });
+
         // Busca dinâmica
         document.getElementById('searchInput').addEventListener('keyup', function() {
             var value = this.value.toLowerCase();

@@ -1,5 +1,5 @@
 @extends('adminlte::page')
-
+@include('components.alert.sweet-alert')
 @section('title', 'Editar Unidade')
 
 @section('content_header')
@@ -20,9 +20,13 @@
 @section('content')
     <div class="card">
         <div class="card-body">
-            <form action="{{ route('unidades.update', $unidade->uni_id) }}" method="POST">
+            <form action="{{ route('unidades.update', $unidade->uni_id) }}" method="POST" id="formUnidade">
                 @csrf
                 @method('PUT')
+                
+                <!-- Campos ocultos para armazenar as listas de usuários -->
+                <input type="hidden" name="usuarios_adicionar" id="usuarios_adicionar" value="">
+                <input type="hidden" name="usuarios_remover" id="usuarios_remover" value="">
                 
                 <div class="row">
                     <div class="col-md-6">
@@ -101,7 +105,7 @@
                     <a href="{{ route('unidades.index') }}" class="btn btn-secondary mr-2">
                         <i class="fas fa-times"></i> Cancelar
                     </a>
-                    <button type="submit" class="btn btn-primary">
+                    <button type="button" class="btn btn-primary" id="btnSalvar">
                         <i class="fas fa-save"></i> Salvar
                     </button>
                 </div>
@@ -248,7 +252,7 @@
                                         </td>
                                     </tr>
                                     @endforeach
-                                </tbody>
+                                    </tbody>
                             </table>
                         </div>
                     </div>
@@ -256,20 +260,7 @@
             </div>
         </div>
     </div>
-    
-    <!-- Forms ocultos para AJAX para adicionarmos e removermos os usuários daquela unidade -->
-    <form id="form-add-user" action="{{ route('unidades.add.usuario', $unidade->uni_id) }}" method="POST" style="display: none;">
-        @csrf
-        <input type="hidden" name="user_id" id="add_user_id">
-    </form>
-    
-    <form id="form-remove-user" action="{{ route('unidades.remove.usuario', $unidade->uni_id) }}" method="POST" style="display: none;">
-        @csrf
-        @method('DELETE')
-        <input type="hidden" name="user_id" id="remove_user_id">
-    </form>
 @stop
-
 @section('css')
     <style>
         .btn-xs {
@@ -299,249 +290,307 @@
 @stop
 
 @section('js')
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Pesquisa para os SelfCheckouts Associados
-        document.getElementById('searchSelfsAssociados').addEventListener('keyup', function() {
-            filterTable('searchSelfsAssociados', 'selfsAssociadosTable');
-        });
+    <script>
+        // Definir URLs para uso no JavaScript
+        var processarUsuariosUrl = "{{ route('unidades.process-usuarios', ':id') }}";
+        var unidadesIndexUrl = "{{ route('unidades.index') }}";
         
-        // Pesquisa para os Usuários Disponíveis
-        document.getElementById('searchUsersDisponiveis').addEventListener('keyup', function() {
-            filterTable('searchUsersDisponiveis', 'usersDisponiveisTable');
-        });
-        
-        // Pesquisa para os Usuários Associados
-        document.getElementById('searchUsersAssociados').addEventListener('keyup', function() {
-            filterTable('searchUsersAssociados', 'usersAssociadosTable');
-        });
-        
-        // Função de filtro para tabelas
-        function filterTable(inputId, tableId) {
-            var input = document.getElementById(inputId);
-            var filter = input.value.toUpperCase();
-            var table = document.getElementById(tableId);
-            var tr = table.getElementsByTagName("tr");
+        // Variáveis globais para tracking de usuários
+        var usuariosParaAdicionar = [];
+        var usuariosParaRemover = [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Pesquisa para os SelfCheckouts Associados
+            document.getElementById('searchSelfsAssociados').addEventListener('keyup', function() {
+                filterTable('searchSelfsAssociados', 'selfsAssociadosTable');
+            });
             
-            for (var i = 0; i < tr.length; i++) {
-                var td = tr[i].getElementsByTagName("td")[0];
-                if (td) {
-                    var txtValue = td.textContent || td.innerText;
-                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                        tr[i].style.display = "";
+            // Pesquisa para os Usuários Disponíveis
+            document.getElementById('searchUsersDisponiveis').addEventListener('keyup', function() {
+                filterTable('searchUsersDisponiveis', 'usersDisponiveisTable');
+            });
+            
+            // Pesquisa para os Usuários Associados
+            document.getElementById('searchUsersAssociados').addEventListener('keyup', function() {
+                filterTable('searchUsersAssociados', 'usersAssociadosTable');
+            });
+            
+            // Função de filtro para tabelas
+            function filterTable(inputId, tableId) {
+                var input = document.getElementById(inputId);
+                var filter = input.value.toUpperCase();
+                var table = document.getElementById(tableId);
+                var tr = table.getElementsByTagName("tr");
+                
+                for (var i = 0; i < tr.length; i++) {
+                    var td = tr[i].getElementsByTagName("td")[0];
+                    if (td) {
+                        var txtValue = td.textContent || td.innerText;
+                        if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                            tr[i].style.display = "";
+                        } else {
+                            tr[i].style.display = "none";
+                        }
+                    }
+                }
+            }
+            
+            // Adicionar usuário localmente (sem AJAX)
+            document.querySelectorAll('.btn-add-user').forEach(function(button) {
+                button.addEventListener('click', function() {
+                    const userId = this.getAttribute('data-user-id');
+                    const userName = this.getAttribute('data-user-name');
+                    
+                    addUserLocally(userId, userName);
+                });
+            });
+            
+            // Remover usuário localmente
+            document.querySelectorAll('.btn-remove-user').forEach(function(button) {
+                button.addEventListener('click', function() {
+                    const userId = this.getAttribute('data-user-id');
+                    const userName = this.getAttribute('data-user-name');
+                    
+                    removeUserLocally(userId, userName);
+                });
+            });
+            
+            // Adicionar todos os usuários localmente
+            document.getElementById('addAllUsers').addEventListener('click', function() {
+                const users = document.querySelectorAll('#usersDisponiveisTable tr');
+                if (users.length === 0) {
+                    mostrarAlerta('Não há usuários disponíveis para adicionar.', 'erro');
+                    return;
+                }
+                users.forEach(function(row) {
+                    const userId = row.getAttribute('data-user-id');
+                    const userName = row.querySelector('td').textContent.trim();
+                    
+                    addUserLocally(userId, userName);
+                });
+            });
+            
+            // Remover todos os usuários localmente
+            document.getElementById('removeAllUsers').addEventListener('click', function() {
+                const users = document.querySelectorAll('#usersAssociadosTable tr');
+                if (users.length === 0) {
+                    mostrarAlerta('Não há usuários associados para remover.', 'erro');
+                    return;
+                }
+                
+                users.forEach(function(row) {
+                    const userId = row.getAttribute('data-user-id');
+                    const userName = row.querySelector('td').textContent.trim();
+                    
+                    removeUserLocally(userId, userName);
+                });
+            });
+            
+            // Evento para o botão salvar
+            document.getElementById('btnSalvar').addEventListener('click', function() {
+                // Preencher os campos ocultos com os arrays de usuários
+                document.getElementById('usuarios_adicionar').value = JSON.stringify(usuariosParaAdicionar);
+                document.getElementById('usuarios_remover').value = JSON.stringify(usuariosParaRemover);
+                
+                // Submeter o formulário com os dados da unidade e arrays de usuários
+                const form = document.getElementById('formUnidade');
+                const formData = new FormData(form);
+                const btnSalvar = document.getElementById('btnSalvar');
+                const originalText = btnSalvar.innerHTML;
+                btnSalvar.disabled = true;
+                btnSalvar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+                
+                // Enviar a requisição p back
+                fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Se a atualização da unidade foi bem-sucedida, processar as alterações de usuários
+                        if (usuariosParaAdicionar.length > 0 || usuariosParaRemover.length > 0) {
+                            const unidadeId = form.action.split('/').pop().split('?')[0];
+                            const processarUrl = processarUsuariosUrl.replace(':id', unidadeId);
+                            
+                            const usuariosData = new FormData();
+                            usuariosData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+                            usuariosData.append('adicionar', JSON.stringify(usuariosParaAdicionar));
+                            usuariosData.append('remover', JSON.stringify(usuariosParaRemover));
+                            
+                            return fetch(processarUrl, {
+                                method: 'POST',
+                                body: usuariosData,
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest'
+                                }
+                            })
+                            .then(response => response.json())
+                            .then(userData => {
+                                if (userData.success) {
+                                    // Redirecionar após sucesso
+                                    Swal.fire({
+                                        title: 'Sucesso!',
+                                        text: 'Unidade atualizada com sucesso!',
+                                        icon: 'success',
+                                        confirmButtonText: 'OK',
+                                        confirmButtonColor: '#28a745'
+                                    }).then(() => {
+                                        window.location.href = data.redirect || unidadesIndexUrl;
+                                    });
+                                } else {
+                                    // Restaurar o botão
+                                    btnSalvar.disabled = false;
+                                    btnSalvar.innerHTML = originalText;
+                                    
+                                    mostrarAlerta('Erro ao processar usuários: ' + (userData.message || 'Erro desconhecido'), 'erro');
+                                }
+                            });
+                        } else {
+                            // Se não houver alterações de usuários, apenas redirecionar
+                            Swal.fire({
+                                title: 'Sucesso!',
+                                text: 'Unidade atualizada com sucesso!',
+                                icon: 'success',
+                                confirmButtonText: 'OK',
+                                confirmButtonColor: '#28a745'
+                            }).then(() => {
+                                window.location.href = data.redirect || unidadesIndexUrl;
+                            });
+                        }
                     } else {
-                        tr[i].style.display = "none";
+                        // Restaurar o botão
+                        btnSalvar.disabled = false;
+                        btnSalvar.innerHTML = originalText;
+                        
+                        // Exibir erros do formulário
+                        if (data.errors) {
+                            let errorMessage = 'Erros de validação:\n';
+                            for (const field in data.errors) {
+                                errorMessage += `- ${data.errors[field].join('\n- ')}\n`;
+                            }
+                            mostrarAlerta(errorMessage, 'erro');
+                        } else {
+                            mostrarAlerta('Erro ao atualizar unidade: ' + (data.message || 'Erro desconhecido'), 'erro');
+                        }
                     }
-                }
+                })
+                .catch(error => {
+                    // Restaurar o botão
+                    btnSalvar.disabled = false;
+                    btnSalvar.innerHTML = originalText;
+                    
+                    console.error('Erro:', error);
+                    mostrarAlerta('Erro ao processar a requisição.', 'erro');
+                });
+            });
+            
+            const codigoInput = document.getElementById('uni_codigo');
+            if(codigoInput) {
+                codigoInput.addEventListener('input', function(e) {
+                    // Remove qualquer caractere que não seja número
+                    let value = e.target.value.replace(/\D/g, '');
+                    
+                    // Limita a 3 dígitos (004, 001, coisas assim, geralmente é --)
+                    if (value.length > 3) {
+                        value = value.substring(0, 3);
+                    }
+                    
+                    // Atualiza o valor do campo
+                    e.target.value = value;
+                });
             }
-        }
-        
-        // Adicionar usuário via AJAX (para não ficar dando o refresh/atualizar na página)
-        document.querySelectorAll('.btn-add-user').forEach(function(button) {
-            button.addEventListener('click', function() {
-                const userId = this.getAttribute('data-user-id');
-                const userName = this.getAttribute('data-user-name');
-                
-                addUser(userId, userName);
-            });
         });
-        
-        // Remover usuário via AJAX
-        document.querySelectorAll('.btn-remove-user').forEach(function(button) {
-            button.addEventListener('click', function() {
-                const userId = this.getAttribute('data-user-id');
-                const userName = this.getAttribute('data-user-name');
-                
-                removeUser(userId, userName);
-            });
-        });
-        
-        // Adicionar todos os usuários
-        document.getElementById('addAllUsers').addEventListener('click', function() {
-            const users = document.querySelectorAll('#usersDisponiveisTable tr');
-            if (users.length === 0) {
-                alert('Não há usuários disponíveis para adicionar.');
+
+        // Funções para manipular os usuários localmente
+        function addUserLocally(userId, userName) {
+            // Verificar se o usuário já está na lista para adicionar
+            if (usuariosParaAdicionar.includes(userId)) {
                 return;
             }
-            users.forEach(function(row) {
-                const userId = row.getAttribute('data-user-id');
-                const userName = row.querySelector('td').textContent.trim();
-                
-                addUser(userId, userName, false); // false = não mostrar confirmação individual
-            });
-        });
-        
-        // Remover todos os usuários
-        document.getElementById('removeAllUsers').addEventListener('click', function() {
-            const users = document.querySelectorAll('#usersAssociadosTable tr');
-            if (users.length === 0) {
-                alert('Não há usuários associados para remover.');
-                return;
+            
+            // Se o usuário estava na lista para remover, remove ele de lá
+            const indexToRemove = usuariosParaRemover.indexOf(userId);
+            if (indexToRemove !== -1) {
+                usuariosParaRemover.splice(indexToRemove, 1);
+            } else {
+                // Caso contrário, adiciona ele a lista para adicionar
+                usuariosParaAdicionar.push(userId);
             }
             
-            users.forEach(function(row) {
-                const userId = row.getAttribute('data-user-id');
-                const userName = row.querySelector('td').textContent.trim();
+            // Mover o usuário para a tabela de associados visualmente falando
+            const row = document.querySelector(`#usersDisponiveisTable tr[data-user-id="${userId}"]`);
+            if (row) {
+                // Criar a nova linha para a tabela de associados
+                const newRow = document.createElement('tr');
+                newRow.setAttribute('data-user-id', userId);
+                newRow.innerHTML = `
+                    <td>${userName}</td>
+                    <td class="text-right" style="width: 80px;">
+                        <button type="button" class="btn btn-xs btn-danger btn-remove-user" data-user-id="${userId}" data-user-name="${userName}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
                 
-                removeUser(userId, userName, false); // false = não mostrar confirmação individual
-            });
-        });
-        
-        // Funções para manipular os usuários
-        function addUser(userId, userName, showConfirmation = true) {
-            const formData = new FormData();
-            formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
-            formData.append('user_id', userId);
+                newRow.querySelector('.btn-remove-user').addEventListener('click', function() {
+                    removeUserLocally(userId, userName);
+                });
+                
+                document.getElementById('usersAssociadosTable').appendChild(newRow);
+                row.remove();
+            }
             
-            fetch(`{{ route('unidades.add.usuario', $unidade->uni_id) }}`, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Mover o usuário para a tabela de associados
-                    const row = document.querySelector(`#usersDisponiveisTable tr[data-user-id="${userId}"]`);
-                    if (row) {
-                        // Criar a nova linha para a tabela de associados
-                        const newRow = document.createElement('tr');
-                        newRow.setAttribute('data-user-id', userId);
-                        newRow.innerHTML = `
-                            <td>${userName}</td>
-                            <td class="text-right" style="width: 80px;">
-                                <button type="button" class="btn btn-xs btn-danger btn-remove-user" data-user-id="${userId}" data-user-name="${userName}">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </td>
-                        `;
-                        
-                        // Adicionar evento ao novo botão
-                        newRow.querySelector('.btn-remove-user').addEventListener('click', function() {
-                            removeUser(userId, userName);
-                        });
-                        
-                        // Adicionar à tabela de associados
-                        document.getElementById('usersAssociadosTable').appendChild(newRow);
-                        
-                        // Remover da tabela de disponíveis
-                        row.remove();
-                    }
-                } else {
-                    alert('Erro ao adicionar usuário: ' + (data.message || 'Erro desconhecido'));
-                }
-            })
-            .catch(error => {
-                console.error('Erro:', error);
-                alert('Erro ao processar a requisição.');
-            });
-        }
-        
-        function removeUser(userId, userName, showConfirmation = true) {
-            const formData = new FormData();
-            formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
-            formData.append('_method', 'DELETE');
-            formData.append('user_id', userId);
-            
-            fetch(`{{ route('unidades.remove.usuario', $unidade->uni_id) }}`, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Mover o usuário para a tabela de disponíveis
-                    const row = document.querySelector(`#usersAssociadosTable tr[data-user-id="${userId}"]`);
-                    if (row) {
-                        // Criar a nova linha para a tabela de disponíveis
-                        const newRow = document.createElement('tr');
-                        newRow.setAttribute('data-user-id', userId);
-                        newRow.innerHTML = `
-                            <td>${userName}</td>
-                            <td class="text-right" style="width: 80px;">
-                                <button type="button" class="btn btn-xs btn-success btn-add-user" data-user-id="${userId}" data-user-name="${userName}">
-                                    <i class="fas fa-plus"></i>
-                                </button>
-                            </td>
-                        `;
-                        
-                        // Adicionar evento ao novo botão
-                        newRow.querySelector('.btn-add-user').addEventListener('click', function() {
-                            addUser(userId, userName);
-                        });
-                        
-                        // Adicionar à tabela de disponíveis
-                        document.getElementById('usersDisponiveisTable').appendChild(newRow);
-                        
-                        // Remover da tabela de associados
-                        row.remove();
-                    }
-                } else {
-                    alert('Erro ao remover usuário: ' + (data.message || 'Erro desconhecido'));
-                }
-            })
-            .catch(error => {
-                console.error('Erro:', error);
-                alert('Erro ao processar a requisição.');
-            });
+            console.log('Usuários para adicionar:', usuariosParaAdicionar);
+            console.log('Usuários para remover:', usuariosParaRemover);
         }
 
-        const codigoInput = document.getElementById('uni_codigo');
-        if(codigoInput) {
-            codigoInput.addEventListener('input', function(e) {
-                // Remove qualquer caractere que não seja número
-                let value = e.target.value.replace(/\D/g, '');
-                
-                // Limita a 3 dígitos (004, 001, coisas assim, geralmente é 00 + dígitos)
-                if (value.length > 3) {
-                    value = value.substring(0, 3);
-                }
-                
-                // Atualiza o valor do campo
-                e.target.value = value;
-            });
-        }
-    });
-    // Busca dinâmica
-        document.getElementById('searchInput').addEventListener('keyup', function() {
-            var value = this.value.toLowerCase();
-            var rows = document.querySelectorAll('#dataTable tbody tr');
+        function removeUserLocally(userId, userName) {
+            // Verificar se o usuário já está na lista para remover
+            if (usuariosParaRemover.includes(userId)) {
+                return;
+            }
             
-            rows.forEach(function(row) {
-                var text = row.textContent.toLowerCase();
-                row.style.display = text.indexOf(value) > -1 ? '' : 'none';
-            });
-        });
-        
-        // Ordenação
-        document.querySelectorAll('.sortable').forEach(function(header) {
-            header.addEventListener('click', function() {
-                var table = this.closest('table');
-                var index = Array.from(this.parentNode.children).indexOf(this);
-                var asc = this.hasAttribute('data-asc') ? !JSON.parse(this.getAttribute('data-asc')) : true;
-                this.setAttribute('data-asc', asc);
+            // Se o usuário estava na lista para adicionar, remove ele de lá
+            const indexToRemove = usuariosParaAdicionar.indexOf(userId);
+            if (indexToRemove !== -1) {
+                usuariosParaAdicionar.splice(indexToRemove, 1);
+            } else {
+                // Caso contrário, adicione ele na lista para remover
+                usuariosParaRemover.push(userId);
+            }
+            
+            // Mover o usuário para a tabela de disponíveis visualmente falando
+            const row = document.querySelector(`#usersAssociadosTable tr[data-user-id="${userId}"]`);
+            if (row) {
+                // Criar a nova linha para a tabela de disponíveis
+                const newRow = document.createElement('tr');
+                newRow.setAttribute('data-user-id', userId);
+                newRow.innerHTML = `
+                    <td>${userName}</td>
+                    <td class="text-right" style="width: 80px;">
+                        <button type="button" class="btn btn-xs btn-success btn-add-user" data-user-id="${userId}" data-user-name="${userName}">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </td>
+                `;
                 
-                var rows = Array.from(table.querySelectorAll('tbody tr')).sort(function(a, b) {
-                    var valA = a.children[index].textContent.trim();
-                    var valB = b.children[index].textContent.trim();
-                    
-                    if (!isNaN(valA) && !isNaN(valB)) {
-                        return asc ? valA - valB : valB - valA;
-                    } else {
-                        return asc ? valA.localeCompare(valB) : valB.localeCompare(valA);
-                    }
+                newRow.querySelector('.btn-add-user').addEventListener('click', function() {
+                    addUserLocally(userId, userName);
                 });
                 
-                var tbody = table.querySelector('tbody');
-                rows.forEach(function(row) {
-                    tbody.appendChild(row);
-                });
-            });
-        });
-</script>
+                // Adicionar à tabela de disponíveis
+                document.getElementById('usersDisponiveisTable').appendChild(newRow);
+                
+                // Remover da tabela de associados
+                row.remove();
+            }
+            
+            console.log('Usuários para adicionar:', usuariosParaAdicionar);
+            console.log('Usuários para remover:', usuariosParaRemover);
+        }
+    </script>
 @stop

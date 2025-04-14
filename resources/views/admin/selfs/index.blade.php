@@ -1,5 +1,7 @@
 @extends('adminlte::page')
+@component('components.alert.sweet-alert')
 
+@endcomponent
 @section('title', '- IPs & RTSPs')
 
 @section('content_header')
@@ -68,20 +70,24 @@
                                 <a href="{{ route('selfs.edit', $self->sel_id) }}" class="btn btn-xs btn-default text-primary" title="Editar">
                                     <i class="fas fa-pencil-alt"></i>
                                 </a>
-                                <form method="POST" action="{{ route('selfs.destroy', $self->sel_id) }}" class="d-inline" onsubmit="return confirm('Tem certeza que deseja excluir este PDV?')">
+                                <form method="POST" action="{{ route('selfs.destroy', $self->sel_id) }}" class="d-inline" onsubmit="return ">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn btn-xs btn-default text-danger" title="Excluir">
+                                    <button 
+                                        class="btn btn-xs btn-default text-danger btn-delete" 
+                                        data-id="{{ $self->sel_id }}"
+                                        data-route="{{ route('selfs.destroy', $self->sel_id) }}"
+                                        title="Excluir"
+                                    >
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </form>
-                                <form method="POST" action="{{ route('selfs.toggle-status', $self->sel_id) }}" class="d-inline">
-                                    @csrf
-                                    @method('PUT')
-                                    <button type="submit" class="btn btn-xs btn-default {{ $self->sel_status ? 'text-success' : 'text-secondary' }}" title="{{ $self->sel_status ? 'Desativar' : 'Ativar' }}">
-                                        <i class="fas fa-toggle-{{ $self->sel_status ? 'on' : 'off' }}"></i>
-                                    </button>
-                                </form>
+                                <button type="button" class="btn btn-xs btn-default toggle-status {{ $self->sel_status ? 'text-success' : 'text-secondary' }}" 
+                                        data-url="{{ route('selfs.toggle-status', $self->sel_id) }}" 
+                                        data-self-id="{{ $self->sel_id }}" 
+                                        title="{{ $self->sel_status ? 'Desativar' : 'Ativar' }}">
+                                    <i class="fas fa-toggle-{{ $self->sel_status ? 'on' : 'off' }}"></i>
+                                </button>
                             </td>
                         </tr>
                         @empty
@@ -139,12 +145,7 @@
             line-height: 1.5;
             border-radius: .15rem;
         }
-        .btn-success {
-            padding: 20px 31px;
-            font-size: 19px;
-            border-radius: 8px;
-        }
-        .btn-primary {
+        .btn-success, .btn-primary {
             padding: 20px 31px;
             font-size: 19px;
             border-radius: 8px;
@@ -153,83 +154,135 @@
 @stop
 
 @section('js')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Gerenciamento de Mensagens de Redirecionamento para quando editarmos um Selfcheckout não ter que esperar a mensagem.
+        const redirectMessage = localStorage.getItem('redirectMessage');
+        const redirectMessageType = localStorage.getItem('redirectMessageType');
+        
+        if (redirectMessage) {
+            const method = redirectMessageType === 'success' ? mostrarSucesso : mostrarErro;
+            method(redirectMessage, redirectMessageType === 'success' ? 'Sucesso' : 'Erro');
+            
+            localStorage.removeItem('redirectMessage');
+            localStorage.removeItem('redirectMessageType');
+        }
 
-        // Tggle Status configurado pra não atualizar a página (o refresh)
-        document.querySelectorAll('form[action*="toggle-status"]').forEach(function(form) {
-            form.addEventListener('submit', function(e) {
+        // Configuração dos Eventos
+        setupDeleteButtons();
+        setupToggleStatusButtons();
+        setupSearchInput();
+        setupSortableColumns();
+    });
+
+    // Configuração dos Botões de excluir
+    function setupDeleteButtons() {
+        document.querySelectorAll('.btn-delete').forEach(function(button) {
+            button.addEventListener('click', function(e) {
                 e.preventDefault();
                 
-                const button = this.querySelector('button');
-                const icon = button.querySelector('i');
+                const form = this.closest('form');
+                const route = this.getAttribute('data-route');
+
+                Swal.fire({
+                    title: 'Confirmação',
+                    text: 'Tem certeza que deseja excluir este SelfCheckout?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Sim, excluir!',
+                    cancelButtonText: 'Cancelar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            });
+        });
+    }
+
+    // Configuração dos botões de status, aquele toggle pra selfcheckout ativo/inativo
+    function setupToggleStatusButtons() {
+        document.querySelectorAll('.toggle-status').forEach(function(button) {
+            button.addEventListener('click', function() {
+                const url = this.getAttribute('data-url');
+                const icon = this.querySelector('i');
                 
-                fetch(this.action, {
+                fetch(url, {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        'Accept': 'application/json'
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
                     }
                 })
                 .then(response => response.json())
                 .then(data => {
+                    const statusText = data.status ? 'Ativo' : 'Inativo';
+
                     if (data.status) {
-                        button.classList.remove('text-secondary');
-                        button.classList.add('text-success');
+                        this.classList.remove('text-secondary');
+                        this.classList.add('text-success');
                         icon.classList.remove('fa-toggle-off');
                         icon.classList.add('fa-toggle-on');
-                        button.setAttribute('title', 'Desativar');
+                        this.setAttribute('title', 'Desativar');
                     } else {
-                        button.classList.remove('text-success');
-                        button.classList.add('text-secondary');
+                        this.classList.remove('text-success');
+                        this.classList.add('text-secondary');
                         icon.classList.remove('fa-toggle-on');
                         icon.classList.add('fa-toggle-off');
-                        button.setAttribute('title', 'Ativar');
+                        this.setAttribute('title', 'Ativar');
                     }
+                    
+                    mostrarSucesso(`O SelfCheckout foi marcado como ${statusText}.`, 'Status alterado!');
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('Erro ao alterar o status do SelfCheckout');
+                    mostrarErro('Erro ao alterar o status do SelfCheckout', 'Erro!');
                 });
             });
         });
+    }
 
-        // Busca dinâmica
+    // Configuração para fazermos a busca dinâmica
+    function setupSearchInput() {
         document.getElementById('searchInput').addEventListener('keyup', function() {
-            var value = this.value.toLowerCase();
-            var rows = document.querySelectorAll('#dataTable tbody tr');
+            const value = this.value.toLowerCase();
+            const rows = document.querySelectorAll('#dataTable tbody tr');
             
             rows.forEach(function(row) {
-                var text = row.textContent.toLowerCase();
-                row.style.display = text.indexOf(value) > -1 ? '' : 'none';
+                row.style.display = row.textContent.toLowerCase().includes(value) ? '' : 'none';
             });
         });
-        
-        // Ordenação
+    }
+
+    // Configuração para conseguir ordenar a lista/tabela que temos
+    function setupSortableColumns() {
         document.querySelectorAll('.sortable').forEach(function(header) {
             header.addEventListener('click', function() {
-                var table = this.closest('table');
-                var index = Array.from(this.parentNode.children).indexOf(this);
-                var asc = this.hasAttribute('data-asc') ? !JSON.parse(this.getAttribute('data-asc')) : true;
+                const table = this.closest('table');
+                const index = Array.from(this.parentNode.children).indexOf(this);
+                const asc = this.hasAttribute('data-asc') ? !JSON.parse(this.getAttribute('data-asc')) : true;
                 this.setAttribute('data-asc', asc);
                 
-                var rows = Array.from(table.querySelectorAll('tbody tr')).sort(function(a, b) {
-                    var valA = a.children[index].textContent.trim();
-                    var valB = b.children[index].textContent.trim();
-                    
-                    if (!isNaN(valA) && !isNaN(valB)) {
-                        return asc ? valA - valB : valB - valA;
-                    } else {
-                        return asc ? valA.localeCompare(valB) : valB.localeCompare(valA);
-                    }
-                });
+                const rows = Array.from(table.querySelectorAll('tbody tr'))
+                    .sort((a, b) => {
+                        const valA = a.children[index].textContent.trim();
+                        const valB = b.children[index].textContent.trim();
+                        
+                        if (!isNaN(valA) && !isNaN(valB)) {
+                            return asc ? valA - valB : valB - valA;
+                        } else {
+                            return asc ? valA.localeCompare(valB) : valB.localeCompare(valA);
+                        }
+                    });
                 
-                var tbody = table.querySelector('tbody');
-                rows.forEach(function(row) {
-                    tbody.appendChild(row);
-                });
+                const tbody = table.querySelector('tbody');
+                rows.forEach(row => tbody.appendChild(row));
             });
         });
-    });
+    }
 </script>
 @stop

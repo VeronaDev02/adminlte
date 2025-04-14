@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Events\Admin\Role\Create as CreateEvent;
+use App\Events\Admin\Role\Edit as EditEvent;
+use App\Events\Admin\Role\Delete as DeleteEvent;
 use App\Http\Controllers\Controller;
 use App\Models\Role;
 use App\Models\User;
@@ -10,33 +13,17 @@ use Illuminate\Support\Facades\Validator;
 
 class RoleController extends Controller
 {
-    /**
-     * Exibe uma lista de todos os roles.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
         $roles = Role::orderBy('rol_id', 'asc')->paginate(15);
         return view('admin.roles.index', compact('roles'));
     }
 
-    /**
-     * Mostra o formulário para criar um novo role.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function create()
     {
         return view('admin.roles.create');
     }
 
-    /**
-     * Armazena um novo role no banco de dados.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -49,32 +36,22 @@ class RoleController extends Controller
                 ->withInput();
         }
 
-        Role::create([
-            'rol_name' => $request->rol_name
+        $role = Role::create([
+            'rol_name'=> $request->rol_name
         ]);
+
+        event(new CreateEvent($role->rol_id, request()->ip()));
 
         return redirect()->route('roles.index')
             ->with('success', 'Role criado com sucesso!');
     }
 
-    /**
-     * Exibe um role específico.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function show($id)
     {
         $role = Role::findOrFail($id);
         return view('admin.roles.show', compact('role'));
     }
 
-    /**
-     * Mostra o formulário para editar um role existente.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function edit($id)
     {
         $role = Role::findOrFail($id);
@@ -92,13 +69,6 @@ class RoleController extends Controller
         return view('admin.roles.edit', compact('role', 'usuariosDisponiveis'));
     }
 
-    /**
-     * Atualiza um role existente no banco de dados.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request, $id)
     {
         $role = Role::findOrFail($id);
@@ -117,24 +87,25 @@ class RoleController extends Controller
             'rol_name' => $request->rol_name
         ]);
 
+        event(new EditEvent($role->rol_id, request()->ip()));
+
         return redirect()->route('roles.index')
             ->with('success', 'Role atualizado com sucesso!');
     }
 
-    /**
-     * Remove um role do banco de dados.
-     * Realiza exclusão em cascata de todos os usuários associados.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function destroy($id)
     {
         $role = Role::findOrFail($id);
-        
-        // Excluir todos os usuários associados a este role
-        $role->users()->delete();
-        
+
+        $usuariosAssociados = User::where('use_rol_id', $id)->count();
+        if($usuariosAssociados > 0) {
+            $errorMessage = 'Não é possível excluir este cargo/função, Existem usuários associados.';
+            return redirect()->route('roles.index')
+                ->with('error', $errorMessage);
+        }
+
+        event(new DeleteEvent($role->rol_name, request()->ip()));
+
         // Finalmente excluir o role
         $role->delete();
 
@@ -142,12 +113,6 @@ class RoleController extends Controller
             ->with('success', 'Role excluído com sucesso!');
     }
 
-    /**
-     * Obtém todos os usuários associados a um role específico.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function getUsers($id)
     {
         $role = Role::findOrFail($id);
@@ -156,12 +121,6 @@ class RoleController extends Controller
         return view('admin.roles.users', compact('role', 'users'));
     }
 
-    /**
-     * Busca roles com base em critérios de filtro.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function search(Request $request)
     {
         $query = Role::query();
@@ -175,13 +134,6 @@ class RoleController extends Controller
         return view('admin.roles.index', compact('roles'));
     }
 
-    /**
-     * Adiciona um usuário ao role.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function addUser(Request $request, $id)
     {
         $role = Role::findOrFail($id);
@@ -209,13 +161,6 @@ class RoleController extends Controller
         }
     }
 
-    /**
-     * Remove um usuário do role.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function removeUser(Request $request, $id)
     {
         $userId = $request->input('user_id');

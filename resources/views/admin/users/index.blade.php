@@ -1,5 +1,5 @@
 @extends('adminlte::page')
-
+@include('components.alert.sweet-alert')
 @section('title', 'Usuários')
 
 @section('content_header')
@@ -50,10 +50,10 @@
                         <tr>
                             <th class="sortable" width="7%">ID <i class="fas fa-sort"></i></th>
                             <th class="sortable" width="15%">Nome <i class="fas fa-sort"></i></th>
-                            <th class="sortable" width="15%">Username <i class="fas fa-sort"></i></th>
+                            <th class="sortable" width="15%">Usuário <i class="fas fa-sort"></i></th>
                             <th class="sortable" width="15%">Email <i class="fas fa-sort"></i></th>
                             <th class="sortable" width="15%">Unidades <i class="fas fa-sort"></i></th>
-                            <th class="sortable" width="10%">Role <i class="fas fa-sort"></i></th>
+                            <th class="sortable" width="10%">Cargo/Função <i class="fas fa-sort"></i></th>
                             <th class="sortable" width="8%">Status <i class="fas fa-sort"></i></th>
                             <th class="text-center" width="15%">Ações</th>
                         </tr>
@@ -85,10 +85,10 @@
                                 <a href="{{ route('users.edit', $user->use_id) }}" class="btn btn-xs btn-default text-primary" title="Editar">
                                     <i class="fas fa-pencil-alt"></i>
                                 </a>
-                                <form method="POST" action="{{ route('users.destroy', $user->use_id) }}" class="d-inline" onsubmit="return confirm('Tem certeza que deseja excluir este usuário?')">
+                                <form method="POST" action="{{ route('users.destroy', $user->use_id) }}" class="d-inline">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn btn-xs btn-default text-danger" title="Excluir">
+                                    <button type="button" class="btn btn-xs btn-default text-danger delete-btn" title="Excluir">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </form>
@@ -187,8 +187,34 @@
 @stop
 
 @section('js')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // SweetAlert para confirmação de exclusão
+        document.querySelectorAll('.delete-btn').forEach(function(deleteButton) {
+            deleteButton.addEventListener('click', function() {
+                // Pega o nome do usuário
+                const userName = this.closest('tr').querySelector('td:nth-child(2)').textContent;
+                const form = this.closest('form'); 
+                
+                // Exibe o SweetAlert
+                Swal.fire({
+                    title: 'Confirmar exclusão?',
+                    html: `Você está prestes a excluir o usuário <strong>${userName}</strong>.<br>Esta ação não pode ser desfeita!`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Sim, excluir!',
+                    cancelButtonText: 'Cancelar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit(); 
+                    }
+                    // Se cancelado, nada acontece
+                });
+            });
+        });
         // Busca dinâmica
         document.getElementById('searchInput').addEventListener('keyup', function() {
             var value = this.value.toLowerCase();
@@ -226,7 +252,7 @@
             });
         });
 
-        // Toggle status com AJAX
+        // Toggle status
         document.querySelectorAll('.toggle-status').forEach(function(button) {
             button.addEventListener('click', function() {
                 const userId = this.getAttribute('data-user-id');
@@ -244,7 +270,9 @@
                 })
                 .then(response => response.json())
                 .then(data => {
-                    // Toggle button visual state
+
+                    const statusText = data.status ?'Ativo' : 'Inativo';
+
                     if (data.status) {
                         this.classList.remove('text-secondary');
                         this.classList.add('text-success');
@@ -252,7 +280,6 @@
                         icon.classList.add('fa-toggle-on');
                         this.setAttribute('title', 'Desativar');
                         
-                        // Update status badge
                         statusCell.classList.remove('bg-secondary');
                         statusCell.classList.add('bg-success');
                         statusCell.textContent = 'Ativo';
@@ -263,11 +290,18 @@
                         icon.classList.add('fa-toggle-off');
                         this.setAttribute('title', 'Ativar');
                         
-                        // Update status badge
                         statusCell.classList.remove('bg-success');
                         statusCell.classList.add('bg-secondary');
                         statusCell.textContent = 'Inativo';
                     }
+                    Swal.fire({
+                        title: 'Status alterado!',
+                        text: `O usuário foi marcado como ${statusText}.`,
+                        icon: 'success',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#007bff'
+                        
+                    });
                 })
                 .catch(error => {
                     console.error('Error:', error);

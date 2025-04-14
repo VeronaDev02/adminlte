@@ -1,49 +1,51 @@
 <?php
 
-namespace Database\Seeders;
-
-use App\Models\Selfs;
-use App\Models\Unidade;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class SelfsSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
     public function run()
     {
-        // Obter IDs de unidades
-        $unidades = Unidade::all();
-        
-        // Para cada unidade, criar alguns PDVs
-        foreach ($unidades as $unidade) {
-            // Criar 3 PDVs para cada unidade
-            for ($i = 1; $i <= 3; $i++) {
-                $pdvNumber = str_pad($i, 2, '0', STR_PAD_LEFT);
-                $ipBase = '192.168.' . $unidade->uni_id . '.';
-                
-                Selfs::create([
-                    'sel_name' => 'PDV ' . $pdvNumber . ' - ' . $unidade->uni_descricao,
-                    'sel_pdv_ip' => $ipBase . (10 + $i),
-                    'sel_rtsp_url' => 'rtsp://' . $ipBase . (10 + $i) . ':554/cam' . $i,
-                    'sel_status' => true,
-                    'sel_uni_id' => $unidade->uni_id,
-                ]);
-            }
-            
-            // Adicionar um PDV inativo para testes
-            if ($unidade->uni_id === 1) {
-                Selfs::create([
-                    'sel_name' => 'PDV Inativo - ' . $unidade->uni_descricao,
-                    'sel_pdv_ip' => '192.168.' . $unidade->uni_id . '.99',
-                    'sel_rtsp_url' => 'rtsp://192.168.' . $unidade->uni_id . '.99:554/cam99',
-                    'sel_status' => false,
-                    'sel_uni_id' => $unidade->uni_id,
-                ]);
-            }
-        }
+        DB::table('selfs')->insert([
+            'sel_id' => 60,
+            'sel_name' => 'PDV 05',
+            'sel_pdv_ip' => '192.168.104.205',
+            'sel_rtsp_url' => 'rtsp://progrmadorl04:v3r0nal004@192.168.101.250:554/cam/realmonitor?channel=2&subtype=0',
+            'sel_status' => '1',
+            'sel_uni_id' => 1,
+            'created_at' => '2025-04-09 17:19:02',
+            'updated_at' => '2025-04-09 18:36:06',
+        ]);
+        DB::table('selfs')->insert([
+            'sel_id' => 62,
+            'sel_name' => 'PDV 18',
+            'sel_pdv_ip' => '192.168.104.218',
+            'sel_rtsp_url' => 'rtsp://progrmadorl04:v3r0nal004@192.168.101.250:554/cam/realmonitor?channel=4&subtype=0',
+            'sel_status' => '1',
+            'sel_uni_id' => 1,
+            'created_at' => '2025-04-09 17:19:42',
+            'updated_at' => '2025-04-09 17:19:42',
+        ]);
+        DB::table('selfs')->insert([
+            'sel_id' => 61,
+            'sel_name' => 'PDV 16',
+            'sel_pdv_ip' => '192.168.104.216',
+            'sel_rtsp_url' => 'rtsp://progrmadorl04:v3r0nal004@192.168.101.250:554/cam/realmonitor?channel=3&subtype=0',
+            'sel_status' => '1',
+            'sel_uni_id' => 1,
+            'created_at' => '2025-04-09 17:19:25',
+            'updated_at' => '2025-04-09 17:19:44',
+        ]);
+        DB::table('selfs')->insert([
+            'sel_id' => 59,
+            'sel_name' => 'PDV 01',
+            'sel_pdv_ip' => '192.168.104.201',
+            'sel_rtsp_url' => 'rtsp://progrmadorl04:v3r0nal004@192.168.101.250:554/cam/realmonitor?channel=1&subtype=0',
+            'sel_status' => '1',
+            'sel_uni_id' => 1,
+            'created_at' => '2025-04-09 17:18:26',
+            'updated_at' => '2025-04-09 18:08:36',
+        ]);
     }
 }

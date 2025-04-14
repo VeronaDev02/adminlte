@@ -1,5 +1,5 @@
 @extends('adminlte::page')
-
+@include('components.alert.sweet-alert')
 @section('title', 'Unidades')
 
 @section('content_header')
@@ -17,6 +17,22 @@
 @stop
 
 @section('content')
+    @if(session('success'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                mostrarAlerta('{{ session('success') }}', 'sucesso');
+            });
+        </script>
+    @endif
+
+    @if(session('error'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                mostrarAlerta('{{ session('error') }}', 'erro');
+            });
+        </script>
+    @endif
+
     <div class="row mb-3">
         <div class="col-12 text-right">
             <a href="{{ route('unidades.create') }}" class="btn btn-success">
@@ -70,18 +86,19 @@
                                 <a href="{{ route('unidades.edit', $unidade->uni_id) }}" class="btn btn-xs btn-default text-primary" title="Editar">
                                     <i class="fas fa-pencil-alt"></i>
                                 </a>
-                                <form method="POST" action="{{ route('unidades.destroy', $unidade->uni_id) }}" class="d-inline" onsubmit="return confirm('Tem certeza que deseja excluir esta unidade? Esta ação excluirá todos os usuários e selfs associados.')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-xs btn-default text-danger" title="Excluir">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </form>
+                                <button 
+                                    class="btn btn-xs btn-default text-danger btn-delete" 
+                                    data-id="{{ $unidade->uni_id }}"
+                                    data-route="{{ route('unidades.destroy', $unidade->uni_id) }}"
+                                    title="Excluir"
+                                >
+                                    <i class="fas fa-trash"></i>
+                                </button>
                             </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="5" class="text-center">Nenhuma unidade encontrada</td>
+                            <td colspan="7" class="text-center">Nenhuma unidade encontrada</td>
                         </tr>
                         @endforelse
                     </tbody>
@@ -183,6 +200,41 @@
                 var tbody = table.querySelector('tbody');
                 rows.forEach(function(row) {
                     tbody.appendChild(row);
+                });
+            });
+        });
+
+        // Adicionar evento p excluir a unidade
+        document.querySelectorAll('.btn-delete').forEach(function(button) {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const route = this.getAttribute('data-route');
+                
+                // Usar nosso método de confirmação do SweetAlert
+                confirmarAcao('Tem certeza que deseja excluir esta unidade? Esta ação será permanente.', () => {
+                    // Criar um formulário de submissão dinâmico
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = route;
+
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]');
+
+                    if (csrfToken) {
+                        const csrfInput = document.createElement('input');
+                        csrfInput.type = 'hidden';
+                        csrfInput.name = '_token';
+                        csrfInput.value = csrfToken.content;
+                        form.appendChild(csrfInput);
+                    }
+                    
+                    const methodInput = document.createElement('input');
+                    methodInput.type = 'hidden';
+                    methodInput.name = '_method';
+                    methodInput.value = 'DELETE';
+                    form.appendChild(methodInput);
+                    document.body.appendChild(form);
+                    form.submit();
                 });
             });
         });

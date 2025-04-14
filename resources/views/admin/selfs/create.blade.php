@@ -1,5 +1,7 @@
 @extends('adminlte::page')
+@component('components.alert.sweet-alert')
 
+@endcomponent
 @section('title', '- Criar novo SelfCheckout')
 
 @section('content_header')
@@ -20,7 +22,7 @@
 @section('content')
     <div class="card">
         <div class="card-body">
-            <form action="{{ route('selfs.store') }}" method="POST">
+            <form id="create-form" action="{{ route('selfs.store') }}" method="POST">
                 @csrf
                 <div class="row">
                     <div class="col-md-6">
@@ -86,7 +88,7 @@
                             <div class="custom-control custom-switch">
                                 <input type="checkbox" class="custom-control-input" 
                                        id="sel_status" name="sel_status" 
-                                       value="1" {{ old('sel_status') ? 'checked' : '' }}>
+                                       value="0" {{ old('sel_status') ? 'checked' : '' }}>
                                 <label class="custom-control-label" for="sel_status">
                                     {{ old('sel_status') ? 'Ativo' : 'Inativo' }}
                                 </label>
@@ -97,7 +99,7 @@
 
                 <div class="row mt-3">
                     <div class="col-12">
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="btn btn-primary" id="save-button">
                             <i class="fas fa-save"></i> Salvar
                         </button>
                         <a href="{{ route('selfs.index') }}" class="btn btn-secondary ml-2">
@@ -115,19 +117,113 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        initializeForm();
+        setupStatusSwitch();
+        setupIpMask();
+    });
+
+    function initializeForm() {
+        @if($errors->any())
+            mostrarErro('Por favor, verifique os campos do formulário.', 'Erro de Validação');
+        @endif
+
+        const form = document.getElementById('create-form');
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const statusSwitch = document.getElementById('sel_status');
+            statusSwitch.value = statusSwitch.checked ? 1 : 0;
+            
+            const formData = new FormData(form);
+            const saveButton = document.getElementById('save-button');
+            const originalText = saveButton.innerHTML;
+            
+            updateButtonState(saveButton, true, originalText);
+            
+            sendFormData(form, formData, saveButton, originalText);
+        });
+    }
+
+    function updateButtonState(button, isLoading, originalText) {
+        if (isLoading) {
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+            button.disabled = true;
+        } else {
+            button.innerHTML = originalText;
+            button.disabled = false;
+        }
+    }
+
+    function sendFormData(form, formData, saveButton, originalText) {
+        fetch(form.action, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(Object.fromEntries(formData))
+        })
+        .then(response => {
+            // Verificar se a resposta é JSON
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                throw new Error('Resposta não é JSON');
+            }
+            return response.json();
+        })
+        .then(data => handleFormResponse(data, saveButton, originalText))
+        .catch(error => {
+            console.error('Erro completo:', error);
+            handleFormError(error, saveButton, originalText);
+        });
+    }
+
+    function handleFormResponse(data, saveButton, originalText) {
+        if (data.success) {
+            localStorage.setItem('redirectMessage', data.message || 'SelfCheckout criado com sucesso.');
+            localStorage.setItem('redirectMessageType', 'success');
+            
+            window.location.href = "{{ route('selfs.index') }}";
+        } else {
+            updateButtonState(saveButton, false, originalText);
+            
+            if (data.errors) {
+                const errorMessages = Object.values(data.errors).flat();
+                mostrarErro(errorMessages.join('<br>'), 'Erro de Validação');
+            } else {
+                mostrarErro(data.message || 'Ocorreu um erro ao criar o SelfCheckout.', 'Erro');
+            }
+        }
+    }
+
+    function handleFormError(error, saveButton, originalText) {
+        updateButtonState(saveButton, false, originalText);
+        
+        // Log detalhado do erro
+        console.error('Erro de envio:', error);
+        
+        // Mensagem amigável
+        mostrarErro('Não foi possível processar a solicitação. Verifique sua conexão e tente novamente.', 'Erro de Comunicação');
+    }
+
+    function setupStatusSwitch() {
         const statusSwitch = document.getElementById('sel_status');
         const statusLabel = statusSwitch.nextElementSibling;
 
         statusSwitch.addEventListener('change', function() {
             statusLabel.textContent = this.checked ? 'Ativo' : 'Inativo';
         });
-    });
-    $(document).ready(function(){
-        $('#sel_pdv_ip').mask('0ZZ.0ZZ.0ZZ.0ZZ', {
-            translation: {
-            'Z': {pattern: /[0-9]/, optional: true}
-            }
+    }
+
+    function setupIpMask() {
+        $(document).ready(function(){
+            $('#sel_pdv_ip').mask('0ZZ.0ZZ.0ZZ.0ZZ', {
+                translation: {
+                    'Z': {pattern: /[0-9]/, optional: true}
+                }
+            });
         });
-    });
+    }
 </script>
 @stop

@@ -29,8 +29,8 @@ class LoginRequest extends FormRequest
     public function rules()
     {
         return [
-            'email' => ['required', 'string', 'email'],
-            'password' => ['required', 'string'],
+            "use_username" => ["required", "string"],
+            "password" => ["required", "string"],
         ];
     }
 
@@ -45,11 +45,16 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
+        if (
+            !Auth::attempt(
+                $this->only("use_username", "password"),
+                $this->boolean("remember")
+            )
+        ) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
-                'email' => trans('auth.failed'),
+                "use_username" => trans("auth.failed"),
             ]);
         }
 
@@ -65,7 +70,7 @@ class LoginRequest extends FormRequest
      */
     public function ensureIsNotRateLimited()
     {
-        if (! RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
+        if (!RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
             return;
         }
 
@@ -74,9 +79,9 @@ class LoginRequest extends FormRequest
         $seconds = RateLimiter::availableIn($this->throttleKey());
 
         throw ValidationException::withMessages([
-            'email' => trans('auth.throttle', [
-                'seconds' => $seconds,
-                'minutes' => ceil($seconds / 60),
+            "use_username" => trans("auth.throttle", [
+                "seconds" => $seconds,
+                "minutes" => ceil($seconds / 60),
             ]),
         ]);
     }
@@ -88,6 +93,31 @@ class LoginRequest extends FormRequest
      */
     public function throttleKey()
     {
-        return Str::lower($this->input('email')).'|'.$this->ip();
+        return Str::lower($this->input("use_username")) . "|" . $this->ip();
+    }
+
+    public function getIp()
+    {
+        foreach (
+            [
+                "HTTP_CLIENT_IP",
+                "HTTP_X_FORWARDED_FOR",
+                "HTTP_X_FORWARDED",
+                "HTTP_X_CLUSTER_CLIENT_IP",
+                "HTTP_FORWARDED_FOR",
+                "HTTP_FORWARDED",
+                "REMOTE_ADDR",
+            ]
+            as $key
+        ) {
+            if (array_key_exists($key, $this->server->all()) === true) {
+                foreach (explode(",", $this->server->get($key)) as $ip) {
+                    $ip = trim($ip);
+                    if (filter_var($ip, FILTER_VALIDATE_IP) !== false) {
+                        return $ip;
+                    }
+                }
+            }
+        }
     }
 }
