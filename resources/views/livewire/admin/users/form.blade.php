@@ -156,7 +156,7 @@
                                         @foreach($unidades as $unidade)
                                             @if(!in_array($unidade->uni_id, $usuariosSelecionados))
                                             <tr data-unidade-id="{{ $unidade->uni_id }}">
-                                                <td>{{ $unidade->uni_codigo }} - {{ $unidade->uni_descricao }} ({{ $unidade->uni_cidade }}/{{ $unidade->uni_uf }})</td>
+                                                <td>{{ $unidade->uni_codigo }} - {{ $unidade->nome }}</td>
                                                 <td class="text-right" style="width: 80px;">
                                                     <button type="button" 
                                                             wire:click="adicionarUnidade({{ $unidade->uni_id }})" 
@@ -205,7 +205,7 @@
                                         @foreach($unidades as $unidade)
                                             @if(in_array($unidade->uni_id, $usuariosSelecionados))
                                             <tr data-unidade-id="{{ $unidade->uni_id }}">
-                                                <td>{{ $unidade->uni_codigo }} - {{ $unidade->uni_descricao }} ({{ $unidade->uni_cidade }}/{{ $unidade->uni_uf }})</td>
+                                                <td>{{ $unidade->uni_codigo }} - {{ $unidade->nome }}</td>
                                                 <td class="text-right" style="width: 80px;">
                                                     <button type="button" 
                                                             wire:click="removerUnidade({{ $unidade->uni_id }})" 

@@ -6,11 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateContextLogMessagesUserV3 extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
     public function up()
     {
         Schema::create('context_log_messages_user', function (Blueprint $table) {
@@ -20,11 +15,6 @@ class CreateContextLogMessagesUserV3 extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
         Schema::dropIfExists('context_log_messages_user');

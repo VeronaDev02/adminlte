@@ -321,10 +321,60 @@ return [
             'admin' => true,
             'submenu' => [
                 [
-                    'text' => 'Unidades',
+                    'text' => 'Lojas',
                     'url' => '/unidades',
                     'icon' => 'fas fa-fw fa-store',
                     'admin' => true,
+                    'submenu' => [
+                        [
+                            'text' => 'Adega',
+                            'url' => '/tipo-unidade/5',
+                            'icon' => 'far fa-circle',
+                            'icon_color' => 'gray',
+                        ],
+                        [
+                            'text' => 'Box Atacadista',
+                            'url' => '/tipo-unidade/2',
+                            'icon' => 'far fa-circle',
+                            'icon_color' => 'blue',
+                        ],
+                        [
+                            'text' => 'Central ADM',
+                            'url' => '/tipo-unidade/7',
+                            'icon' => 'far fa-circle',
+                            'icon_color' => 'secondary',
+                        ],
+                        [
+                            'text' => 'Farmacia',
+                            'url' => '/tipo-unidade/6',
+                            'icon' => 'far fa-circle',
+                            'icon_color' => 'info',
+                        ],
+                        [
+                            'text' => 'Indústria de Pães',
+                            'url' => '/tipo-unidade/8',
+                            'icon' => 'far fa-circle',
+                            'icon_color' => 'yellow',
+                        ],
+                        [
+                            'text' => 'Posto - Route 366',
+                            'url' => '/tipo-unidade/3',
+                            'icon' => 'far fa-circle',
+                            'icon_color' => 'green',
+                        ],
+                        [
+                            'text' => 'Restaurante',
+                            'url' => '/tipo-unidade/4',
+                            'icon' => 'far fa-circle',
+                            'icon_color' => 'red',
+                        ],
+                        [
+                            'text' => 'Verona',
+                            'url' => '/tipo-unidade/1',
+                            'icon' => 'far fa-circle',
+                            'icon_color' => 'orange',
+                        ],
+                    ],
                 ],
                 [
                     'text' => 'Usuários',

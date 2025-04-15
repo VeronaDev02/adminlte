@@ -32,10 +32,22 @@ Route::post('/logout', [LoginController::class, 'logout'])
 Route::middleware(['auth:web', 'verifica.permissions.users'])->group(function () {
 
     // ------------------------- Unidades ------------------------------------
-    Route::resource('unidades', App\Http\Controllers\Admin\UnidadeController::class)
-    ->except(['store', 'update']); 
-    Route::post('unidades/{id}/processar-usuarios', [App\Http\Controllers\Admin\UnidadeController::class, 'processarUsuarios'])
-    ->name('unidades.process-usuarios');
+    Route::prefix('tipo-unidade')->group(function () {
+        // Listar unidades por tipo
+        Route::get('/{codigo}', [App\Http\Controllers\Admin\TipoUnidadeController::class, 'unidadesPorTipo'])
+            ->name('tipo-unidade.unidades');
+        
+        // Criar nova unidade para o tipo
+        Route::get('/{codigo}/create', [App\Http\Controllers\Admin\TipoUnidadeController::class, 'createUnidade'])
+            ->name('tipo-unidade.create');
+        
+        // Editar unidade do tipo
+        Route::get('/{codigo}/edit/{unidade}', [App\Http\Controllers\Admin\TipoUnidadeController::class, 'editUnidade'])
+            ->name('tipo-unidade.edit');
+
+            Route::get('/unidades', [App\Http\Controllers\Admin\UnidadeController::class, 'index'])->name('unidades.index');
+
+    });
 
     // ------------------------- Selfs ------------------------------------
     Route::prefix('selfs')->name('selfs.')->group(function () {

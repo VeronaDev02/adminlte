@@ -142,7 +142,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                    <button type="button" wire:click="destroy" class="btn btn-danger">Excluirxcluir</button>
+                    <button type="button" wire:click="destroy" class="btn btn-danger">Excluir</button>
                 </div>
             </div>
         </div>

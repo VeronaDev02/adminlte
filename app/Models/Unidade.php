@@ -14,10 +14,13 @@ class Unidade extends Model
 
     protected $fillable = [
         'uni_codigo',
-        'uni_descricao',
-        'uni_cidade',
-        'uni_uf',
+        'uni_tip_id'
     ];
+
+    public function tipoUnidade()
+    {
+        return $this->belongsTo(TipoUnidade::class, 'uni_tip_id', 'tip_id');
+    }
 
     public function users()
     {
@@ -34,5 +37,9 @@ class Unidade extends Model
     public function selfs()
     {
         return $this->hasMany(Selfs::class, 'sel_uni_id', 'uni_id');
+    }
+    public function getNomeAttribute()
+    {
+        return $this->tipoUnidade->tip_nome;
     }
 }

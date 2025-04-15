@@ -4,13 +4,15 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Unidade;
+use App\Models\TipoUnidade;
 use Illuminate\Http\Request;
 
 class UnidadeController extends Controller
 {
     public function index()
     {
-        return view('admin.unidades.index');
+        $tiposUnidade = TipoUnidade::withCount('unidades')->orderBy('tip_nome')->get();
+        return view('admin.unidades.index', compact('tiposUnidade'));
     }
 
     public function create()
@@ -57,14 +59,8 @@ class UnidadeController extends Controller
     public function usuarios($id)
     {
         $unidade = Unidade::findOrFail($id);
-        $usuarios = $unidade->todosUsuarios;
+        $usuarios = $unidade->users;
         
         return view('admin.unidades.usuarios', compact('unidade', 'usuarios'));
-    }
-
-    public function processarUsuarios(Request $request, $id)
-    {
-        return redirect()->route('unidades.edit', $id)
-            ->with('error', 'Processamento de usuários agora é feito pelo componente Livewire');
     }
 }

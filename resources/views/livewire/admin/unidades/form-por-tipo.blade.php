@@ -3,96 +3,32 @@
     
     @section('content_header')
         <div class="d-flex justify-content-between align-items-center">
-            <h1 class="mx-auto" style="font-weight: bold;">{{ $title }}</h1>
+            <h1>{{ $title }}</h1>
         </div>
         <div class="d-flex justify-content-between align-items-center">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb mb-0 bg-transparent p-0">
                     <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
                     <li class="breadcrumb-item"><a href="{{ route('unidades.index') }}">Unidades</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">{{ $title }}</li>
+                    <li class="breadcrumb-item"><a href="{{ route('tipo-unidade.unidades', ['codigo' => $tipoUnidadeCodigo]) }}">{{ $tipoUnidade->tip_nome }}</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ $isEdit ? 'Editar' : 'Criar' }}</li>
                 </ol>
             </nav>
         </div>
+        <h5 class="text-muted">{{ $subtitle }}</h5>
     @stop
     
     <div class="card">
         <div class="card-body">
             <form wire:submit.prevent="save">
                 <div class="row">
-                    <div class="col-md-6">
+                    <div class="col-md-12">
                         <div class="form-group">
                             <label for="uni_codigo">Código</label>
                             <input type="text" class="form-control @error('uni_codigo') is-invalid @enderror" 
                                    id="uni_codigo" wire:model.lazy="uni_codigo" 
                                    placeholder="Digite o código da unidade" required>
                             @error('uni_codigo')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
-                    
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="uni_descricao">Nome</label>
-                            <input type="text" class="form-control @error('uni_descricao') is-invalid @enderror" 
-                                   id="uni_descricao" wire:model.lazy="uni_descricao" 
-                                   placeholder="Digite o nome da unidade" required>
-                            @error('uni_descricao')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="uni_cidade">Cidade</label>
-                            <input type="text" class="form-control @error('uni_cidade') is-invalid @enderror" 
-                                   id="uni_cidade" wire:model.lazy="uni_cidade" 
-                                   placeholder="Digite a cidade" required>
-                            @error('uni_cidade')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
-                    
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="uni_uf">UF</label>
-                            <select class="form-control @error('uni_uf') is-invalid @enderror" 
-                                    id="uni_uf" wire:model="uni_uf" required>
-                                <option value="">Selecione a UF</option>
-                                <option value="AC">AC</option>
-                                <option value="AL">AL</option>
-                                <option value="AM">AM</option>
-                                <option value="AP">AP</option>
-                                <option value="BA">BA</option>
-                                <option value="CE">CE</option>
-                                <option value="DF">DF</option>
-                                <option value="ES">ES</option>
-                                <option value="GO">GO</option>
-                                <option value="MA">MA</option>
-                                <option value="MG">MG</option>
-                                <option value="MS">MS</option>
-                                <option value="MT">MT</option>
-                                <option value="PA">PA</option>
-                                <option value="PB">PB</option>
-                                <option value="PE">PE</option>
-                                <option value="PI">PI</option>
-                                <option value="PR">PR</option>
-                                <option value="RJ">RJ</option>
-                                <option value="RN">RN</option>
-                                <option value="RO">RO</option>
-                                <option value="RR">RR</option>
-                                <option value="RS">RS</option>
-                                <option value="SC">SC</option>
-                                <option value="SE">SE</option>
-                                <option value="SP">SP</option>
-                                <option value="TO">TO</option>
-                            </select>
-                            @error('uni_uf')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
@@ -262,7 +198,7 @@
                                 <i class="fas fa-spinner fa-spin"></i> Salvando...
                             </span>
                         </button>
-                        <a href="{{ route('unidades.index') }}" class="btn btn-secondary ml-2">
+                        <a href="{{ route('tipo-unidade.unidades', ['codigo' => $tipoUnidadeCodigo]) }}" class="btn btn-secondary ml-2">
                             <i class="fas fa-arrow-left"></i> Voltar
                         </a>
                     </div>
@@ -309,7 +245,7 @@
                     
                     isProcessing = false;
                 });
-    }
+            }
 
             document.getElementById('addAllUsers').addEventListener('click', function() {
                 const rows = document.querySelectorAll('#usersDisponiveisTable tr');

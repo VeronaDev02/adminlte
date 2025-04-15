@@ -64,7 +64,7 @@
                                 <option value="">Selecione uma Unidade</option>
                                 @foreach($unidades as $unidade)
                                     <option value="{{ $unidade->uni_id }}">
-                                        {{ $unidade->uni_codigo }} - {{ $unidade->uni_descricao }}
+                                        {{ $unidade->uni_codigo }} - {{ $unidade->nome }}
                                     </option>
                                 @endforeach
                             </select>
