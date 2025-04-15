@@ -173,7 +173,7 @@ class UserController extends Controller
         
         $url = env('LINK_API') . $codFuncionario . '?token=' . $token;
 
-        $response = \Illuminate\Support\Facades\Http::withOptions([
+        $response = Http::withOptions([
             'verify' => false,
         ])->get($url);
 

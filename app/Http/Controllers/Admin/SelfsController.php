@@ -18,15 +18,15 @@ class SelfsController extends Controller
             
             $statusText = $self->sel_status ? 'ativado' : 'desativado';
             
-            $this->dispatchBrowserEvent('admin-toastr', [
-                'type' => 'success',
+            return response()->json([
+                'status' => 'success',
                 'message' => "SelfCheckout {$statusText} com sucesso."
             ]);
         } catch (\Exception $e) {
-            $this->dispatchBrowserEvent('admin-toastr', [
-                'type' => 'error',
+            return response()->json([
+                'status' => 'error',
                 'message' => 'Erro ao alterar o status do SelfCheckout.'
-            ]);
+            ], 500);
         }
     }
 }

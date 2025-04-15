@@ -7,7 +7,6 @@ use Livewire\WithPagination;
 use Livewire\Component;
 use App\Events\Admin\Selfs\Delete as DeleteEvent;
 
-
 class SelfCheckoutList extends Component
 {
     use WithPagination;
@@ -117,7 +116,7 @@ class SelfCheckoutList extends Component
                 $search = '%' . $this->search . '%';
                 return $query->where('sel_name', 'like', $search)
                     ->orWhere('sel_pdv_ip', 'like', $search)
-                    ->orWhere('sel_rtsp_url', 'like', $search);
+                    ->orWhere('sel_dvr_ip', 'like', $search);
             })
             ->orderBy($this->sortField, $this->sortDirection)
             ->paginate(10);

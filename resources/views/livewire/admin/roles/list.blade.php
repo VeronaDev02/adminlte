@@ -150,6 +150,7 @@
     </div>
     
     @section('css')
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
     <style>
         .sortable {
             cursor: pointer;
@@ -162,6 +163,10 @@
         .card-footer {
             padding: 0.75rem 1.25rem;
         }
+        .page-item.active .page-link {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
         .table {
             table-layout: fixed;
             width: 100%;
@@ -171,12 +176,31 @@
             text-overflow: ellipsis;
             white-space: nowrap;
         }
-        .btn-xs {
-            padding: .125rem .25rem;
-            font-size: 1.3em;
-            line-height: 1.5;
-            border-radius: .15rem;
+        .pagination {
+            margin-bottom: 0;
         }
+        
+        /* Solução agressiva para sobrescrever estilos */
+        .table td .btn.btn-xs,
+        .table td .btn-group .btn,
+        .btn.btn-xs {
+            padding: 0.5rem 0.75rem !important;
+            font-size: 1rem !important;
+            line-height: 1.5 !important;
+            border-radius: 0.25rem !important;
+            min-width: 40px;
+            min-height: 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .table td .btn.btn-xs i,
+        .table td .btn-group .btn i,
+        .btn.btn-xs i {
+            font-size: 1rem !important;
+        }
+
         .btn-success, .btn-primary {
             padding: 20px 31px;
             font-size: 19px;

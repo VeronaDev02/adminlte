@@ -54,7 +54,7 @@
                                     <i class="fas fa-sort"></i>
                                 @endif
                             </th>
-                            <th wire:click="sortBy('sel_name')" class="sortable" width="6%">
+                            <th wire:click="sortBy('sel_name')" class="sortable" width="25%">
                                 Nome
                                 @if ($sortField === 'sel_name')
                                     <i class="fas fa-sort-{{ $sortDirection === 'asc' ? 'up' : 'down' }}"></i>
@@ -62,23 +62,7 @@
                                     <i class="fas fa-sort"></i>
                                 @endif
                             </th>
-                            <th wire:click="sortBy('sel_pdv_ip')" class="sortable" width="10%">
-                                IP
-                                @if ($sortField === 'sel_pdv_ip')
-                                    <i class="fas fa-sort-{{ $sortDirection === 'asc' ? 'up' : 'down' }}"></i>
-                                @else
-                                    <i class="fas fa-sort"></i>
-                                @endif
-                            </th>
-                            <th wire:click="sortBy('sel_rtsp_url')" class="sortable" width="45%">
-                                RTSP URL
-                                @if ($sortField === 'sel_rtsp_url')
-                                    <i class="fas fa-sort-{{ $sortDirection === 'asc' ? 'up' : 'down' }}"></i>
-                                @else
-                                    <i class="fas fa-sort"></i>
-                                @endif
-                            </th>
-                            <th wire:click="sortBy('sel_uni_id')" class="sortable" width="9%">
+                            <th wire:click="sortBy('sel_uni_id')" class="sortable" width="25%">
                                 Unidade
                                 @if ($sortField === 'sel_uni_id')
                                     <i class="fas fa-sort-{{ $sortDirection === 'asc' ? 'up' : 'down' }}"></i>
@@ -86,7 +70,8 @@
                                     <i class="fas fa-sort"></i>
                                 @endif
                             </th>
-                            <th class="text-center" width="13%">Ações</th>
+                            <th class="text-center" width="15%">Status</th>
+                            <th class="text-center" width="15%">Ações</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -94,9 +79,12 @@
                         <tr>
                             <td>{{ $self->sel_id }}</td>
                             <td>{{ $self->sel_name }}</td>
-                            <td>{{ $self->sel_pdv_ip }}</td>
-                            <td>{{ $self->sel_rtsp_url }}</td>
-                            <td>{{ $self->unidade ? $self->unidade->uni_codigo : 'Sem Unidade' }}</td>
+                            <td>{{ $self->unidade ? $self->unidade->uni_codigo . ' - ' . $self->unidade->nome : 'Sem Unidade' }}</td>
+                            <td class="text-center">
+                                <span class="badge {{ $self->sel_status ? 'bg-success' : 'bg-secondary' }}">
+                                    {{ $self->sel_status ? 'Ativo' : 'Inativo' }}
+                                </span>
+                            </td>
                             <td class="text-center">
                                 <a href="{{ route('selfs.edit', $self->sel_id) }}" class="btn btn-xs btn-default text-primary" title="Editar">
                                     <i class="fas fa-pencil-alt"></i>
@@ -111,7 +99,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="7" class="text-center">Nenhum SelfCheckout encontrado</td>
+                            <td colspan="5" class="text-center">Nenhum SelfCheckout encontrado</td>
                         </tr>
                         @endforelse
                     </tbody>
@@ -220,7 +208,6 @@
                 "hideMethod": "fadeOut"
             };
         });
-        
         
         window.addEventListener('show-delete-modal', () => {
             $('#deleteModal').modal('show');
