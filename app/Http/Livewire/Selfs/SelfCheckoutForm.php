@@ -22,15 +22,31 @@ class SelfCheckoutForm extends Component
     public $sel_rtsp_path;
     public $sel_uni_id;
     public $sel_status = false;
+    public $sel_pdv_codigo;
     
     public $isEdit = false;
     public $unidades = [];
     
     protected $listeners = [
         'load' => '$refresh',
-        'set:sel_rtsp_path' => 'setRtspPath'
+        'set:sel_rtsp_path' => 'setRtspPath',
+        'select2:updated' => 'handleSelect2Updated'
     ];
     
+    public function handleSelect2Updated($name, $value)
+    {
+        if ($name === 'sel_uni_id') {
+            $this->sel_uni_id = $value;
+        }
+    }
+
+    protected function getListeners()
+    {
+        return array_merge($this->listeners, [
+            'select2:updated' => 'handleSelect2Updated'
+        ]);
+    }
+
     public function setRtspPath($value)
     {
         $this->sel_rtsp_path = $value;
@@ -48,7 +64,8 @@ class SelfCheckoutForm extends Component
             'sel_dvr_porta' => 'required|numeric|max:65535',
             'sel_rtsp_path' => 'required|string|max:250',
             'sel_uni_id' => 'required|exists:unidade,uni_id',
-            'sel_status' => 'boolean'
+            'sel_status' => 'boolean',
+            'sel_pdv_codigo' => 'required|string|max:3',
         ];
     }
     
@@ -70,7 +87,10 @@ class SelfCheckoutForm extends Component
         'sel_rtsp_path.required' => 'O caminho RTSP é obrigatório.',
         
         'sel_uni_id.required' => 'A unidade é obrigatória.',
-        'sel_uni_id.exists' => 'A unidade selecionada não é válida.'
+        'sel_uni_id.exists' => 'A unidade selecionada não é válida.',
+
+        'sel_pdv_codigo.required' => 'O código do PDV é obrigatório',
+        'sel_pdv_codigo.max' => 'O código do PDV não pode ter mais de 3 caracteres.',
     ];
     
     public function mount($self = null)
@@ -82,6 +102,7 @@ class SelfCheckoutForm extends Component
                 $self = Selfs::findOrFail($self);
             }
             
+            $this->sel_pdv_codigo = $self->sel_pdv_codigo;
             $this->selfId = $self->sel_id;
             $this->sel_name = $self->sel_name;
             $this->sel_pdv_ip = $self->sel_pdv_ip;
@@ -107,7 +128,8 @@ class SelfCheckoutForm extends Component
             $validatedData = $this->validate();
             
             $validatedData['sel_status'] = $this->sel_status ? 1 : 0;
-            
+            $validatedData['sel_pdv_codigo'] = $this->sel_pdv_codigo;
+
             if ($this->isEdit) {
                 $self = Selfs::findOrFail($this->selfId);
                 $self->update($validatedData);
@@ -145,6 +167,8 @@ class SelfCheckoutForm extends Component
     {
         $title = $this->isEdit ? 'Editar SelfCheckout' : 'Criar Novo SelfCheckout';
         
+        $this->dispatchBrowserEvent('contentChanged');
+
         return view('livewire.admin.selfs.form', [
             'title' => $title
         ])->extends('adminlte::page')

@@ -82,7 +82,7 @@
                                     $unidades = $user->unidades;
                                     if ($unidades && $unidades->count() > 0) {
                                         $primeiraUnidade = $unidades->first();
-                                        $unidadeInfo = $primeiraUnidade->uni_codigo . ' - ' . $primeiraUnidade->uni_descricao;
+                                        $unidadeInfo = $primeiraUnidade->uni_codigo . ' - ' . $primeiraUnidade->tipoUnidade->tip_nome;
                                     } else {
                                         $unidadeInfo = "Não definida";
                                     }

@@ -68,11 +68,15 @@ class UnidadeForm extends Component
             
             $this->isEdit = true;
         }
+        $this->dispatchBrowserEvent('contentChanged');
     }
     
     public function updated($propertyName)
     {
         $this->validateOnly($propertyName);
+        if ($propertyName === 'uni_tip_id') {
+            $this->dispatchBrowserEvent('contentChanged');
+        }
     }
     
     public function adicionarUsuario($userId)
@@ -80,6 +84,7 @@ class UnidadeForm extends Component
         if (!in_array($userId, $this->usuariosSelecionados)) {
             $this->usuariosSelecionados[] = $userId;
         }
+        $this->dispatchBrowserEvent('contentChanged');
     }
     
     public function removerUsuario($userId)
@@ -87,16 +92,20 @@ class UnidadeForm extends Component
         $this->usuariosSelecionados = array_filter($this->usuariosSelecionados, function($id) use ($userId) {
             return $id != $userId;
         });
+        
+        $this->dispatchBrowserEvent('contentChanged');
     }
     
     public function adicionarTodosUsuarios()
     {
         $this->usuariosSelecionados = $this->usuarios->pluck('use_id')->toArray();
+        $this->dispatchBrowserEvent('contentChanged');
     }
     
     public function removerTodosUsuarios()
     {
         $this->usuariosSelecionados = [];
+        $this->dispatchBrowserEvent('contentChanged');
     }
     
     public function save()
@@ -133,6 +142,7 @@ class UnidadeForm extends Component
     public function render()
     {
         $title = $this->isEdit ? 'Editar Unidade' : 'Criar Nova Unidade';
+        $this->dispatchBrowserEvent('contentChanged');
         
         return view('livewire.admin.unidades.form', [
             'title' => $title

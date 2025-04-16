@@ -34,15 +34,19 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="uni_tip_id">Tipo de Unidade</label>
-                            <select class="form-control @error('uni_tip_id') is-invalid @enderror" 
-                                    id="uni_tip_id" wire:model="uni_tip_id" required>
-                                <option value="">Selecione um tipo</option>
-                                @foreach($tiposUnidade as $tipo)
-                                    <option value="{{ $tipo->tip_id }}">{{ $tipo->tip_nome }}</option>
-                                @endforeach
-                            </select>
+                            <div wire:ignore>
+                                <select class="form-control @error('uni_tip_id') is-invalid @enderror" 
+                                        id="uni_tip_id" required>
+                                    <option value="">Selecione um tipo</option>
+                                    @foreach($tiposUnidade as $tipo)
+                                        <option value="{{ $tipo->tip_id }}" {{ $uni_tip_id == $tipo->tip_id ? 'selected' : '' }}>
+                                            {{ $tipo->tip_nome }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
                             @error('uni_tip_id')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
                         </div>
                     </div>
@@ -217,60 +221,110 @@
             </form>
         </div>
     </div>
-    
-    @section('js')
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-
-            const codigoInput = document.getElementById('uni_codigo');
-    
-            if (codigoInput) {
-                let isProcessing = false;
-                
-                codigoInput.addEventListener('input', function(e) {
-                    if (isProcessing) return;
-                    isProcessing = true;
-                    
-                    const start = this.selectionStart;
-                    const end = this.selectionEnd;
-                    
-                    let value = e.target.value.replace(/\D/g, '');
-                    
-                    if (value.length > 3) {
-                        value = value.substring(0, 3);
-                    }
-                    
-                    e.target.value = value;
-                    
-                    window.livewire.find(@this.id).set('uni_codigo', value);
-                    
-                    this.setSelectionRange(start, end);
-                    
-                    isProcessing = false;
-                });
-            }
-
-            function filterTable(inputId, tableId) {
-                const input = document.getElementById(inputId);
-                const filter = input.value.toUpperCase();
-                const rows = document.querySelectorAll(`#${tableId} tr`);
-                
-                rows.forEach(row => {
-                    const td = row.querySelector('td');
-                    if (td) {
-                        const txtValue = td.textContent || td.innerText;
-                        row.style.display = txtValue.toUpperCase().includes(filter) ? '' : 'none';
-                    }
-                });
-            }
-
-            document.getElementById('searchUsersDisponiveis').addEventListener('keyup', () => filterTable('searchUsersDisponiveis', 'usersDisponiveisTable'));
-            document.getElementById('searchUsersSelecionados').addEventListener('keyup', () => filterTable('searchUsersSelecionados', 'usersSelecionadosTable'));
-            
-            @if($isEdit)
-            document.getElementById('searchSelfsAssociados').addEventListener('keyup', () => filterTable('searchSelfsAssociados','selfsAssociadosTable'));
-            @endif
-        });
-    </script>
-    @stop
 </div>
+
+@section('css')
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+<style>
+    .select2-container--default .select2-selection--single {
+        height: 38px;
+        border: 1px solid #ced4da;
+        border-radius: .25rem;
+        display: flex;
+        align-items: center;
+    }
+    
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: normal;
+        padding-top: 0;
+        padding-bottom: 0;
+        display: flex;
+        align-items: center;
+        height: 100%;
+        padding-right: 45px; 
+    }
+    
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 36px;
+        display: flex;
+        align-items: center;
+        right: 5px;
+    }
+    
+    .select2-container--default .select2-selection--single .select2-selection__clear {
+        position: absolute;
+        right: 25px; 
+        margin-right: 0;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        font-size: 18px; 
+        color: #777;
+        font-weight: normal;
+    }
+    
+    .select2-results__option {
+        padding: 8px 12px;
+    }
+</style>
+@stop
+
+@section('js')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+<script>
+    var select2Initialized = false;
+    
+    function initSelect2() {
+        if (select2Initialized) return;
+        
+        $('#uni_tip_id').select2({
+            placeholder: 'Selecione um tipo',
+            allowClear: true
+        });
+        
+        $('#uni_tip_id').on('change', function() {
+            @this.set('uni_tip_id', $(this).val());
+        });
+        
+        select2Initialized = true;
+    }
+    
+    $(document).ready(function() {
+        initSelect2();
+    });
+    
+    function filterTable(inputId, tableId) {
+        const input = document.getElementById(inputId);
+        if (!input) return;
+        
+        const filter = input.value.toUpperCase();
+        const rows = document.querySelectorAll(`#${tableId} tr`);
+        
+        rows.forEach(row => {
+            const td = row.querySelector('td');
+            if (td) {
+                const txtValue = td.textContent || td.innerText;
+                row.style.display = txtValue.toUpperCase().includes(filter) ? '' : 'none';
+            }
+        });
+    }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchUsersDisponiveis = document.getElementById('searchUsersDisponiveis');
+        if (searchUsersDisponiveis) {
+            searchUsersDisponiveis.addEventListener('keyup', () => filterTable('searchUsersDisponiveis', 'usersDisponiveisTable'));
+        }
+        
+        const searchUsersSelecionados = document.getElementById('searchUsersSelecionados');
+        if (searchUsersSelecionados) {
+            searchUsersSelecionados.addEventListener('keyup', () => filterTable('searchUsersSelecionados', 'usersSelecionadosTable'));
+        }
+        
+        const searchSelfsAssociados = document.getElementById('searchSelfsAssociados');
+        if (searchSelfsAssociados) {
+            searchSelfsAssociados.addEventListener('keyup', () => filterTable('searchSelfsAssociados', 'selfsAssociadosTable'));
+        }
+    });
+</script>
+@stop

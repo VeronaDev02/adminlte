@@ -30,7 +30,6 @@ class UnidadeList extends Component
     
     public function mount()
     {
-        // Usando apenas as mensagens flash padrão do Laravel
     }
     
     public function updateSearch($value)

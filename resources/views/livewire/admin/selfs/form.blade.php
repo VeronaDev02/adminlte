@@ -33,6 +33,20 @@
                         @enderror
                     </div>
                 </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label for="sel_pdv_codigo">Código do PDV</label>
+                        <input type="text" 
+                            class="form-control @error('sel_pdv_codigo') is-invalid @enderror" 
+                            id="sel_pdv_codigo" 
+                            wire:model.lazy="sel_pdv_codigo" 
+                            placeholder="Código (máx 3 caracteres)" 
+                            maxlength="3">
+                        @error('sel_pdv_codigo')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="sel_pdv_ip">Endereço IP do PDV</label>
@@ -87,19 +101,19 @@
                 <div class="col-md-4">
                     <div class="form-group">
                         <label for="sel_uni_id">Unidade</label>
-                        <select class="form-control @error('sel_uni_id') is-invalid @enderror" 
-                                id="sel_uni_id" 
-                                wire:model.lazy="sel_uni_id" 
-                                required>
-                            <option value="">Selecione uma Unidade</option>
-                            @foreach($unidades as $unidade)
-                                <option value="{{ $unidade->uni_id }}">
-                                    {{ $unidade->uni_codigo }} - {{ $unidade->nome }}
-                                </option>
-                            @endforeach
-                        </select>
+                        <div wire:ignore>
+                            <select class="form-control @error('sel_uni_id') is-invalid @enderror" 
+                                    id="sel_uni_id" required>
+                                <option value="">Selecione uma Unidade</option>
+                                @foreach($unidades as $unidade)
+                                    <option value="{{ $unidade->uni_id }}" {{ $sel_uni_id == $unidade->uni_id ? 'selected' : '' }}>
+                                        {{ $unidade->uni_codigo }} - {{ $unidade->nome }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
                         @error('sel_uni_id')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
                         @enderror
                     </div>
                 </div>
@@ -284,23 +298,89 @@
     </div>
 </div>
 
+@section('css')
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+<style>
+    .select2-container--default .select2-selection--single {
+        height: 38px;
+        border: 1px solid #ced4da;
+        border-radius: .25rem;
+        display: flex;
+        align-items: center;
+    }
+    
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: normal;
+        padding-top: 0;
+        padding-bottom: 0;
+        display: flex;
+        align-items: center;
+        height: 100%;
+        padding-right: 45px; 
+    }
+    
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 36px;
+        display: flex;
+        align-items: center;
+        right: 5px; 
+    }
+    
+    .select2-container--default .select2-selection--single .select2-selection__clear {
+        position: absolute;
+        right: 25px; 
+        margin-right: 0;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        font-size: 18px; 
+        color: #777; 
+        font-weight: normal; 
+    }
+    
+    .select2-results__option {
+        padding: 8px 12px;
+    }
+</style>
+@stop
+
 @section('js')
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        setupIpMask();
+    $(document).ready(function() {
+        aplicarMascaras();
+
+        $('#sel_uni_id').select2({
+            placeholder: 'Selecione uma Unidade',
+            allowClear: true,
+            width: '100%',
+            language: {
+                noResults: function() {
+                    return "Nenhum resultado encontrado";
+                },
+                searching: function() {
+                    return "Buscando...";
+                }
+            }
+        }).on('change', function() {
+            @this.set('sel_uni_id', $(this).val());
+        });
+        
         initTemplateEditor();
+        
         document.getElementById('path_rtsp').value = '';
     });
     
-    function setupIpMask() {
-        $(document).ready(function(){
-            $('#sel_pdv_ip, #sel_dvr_ip').mask('0ZZ.0ZZ.0ZZ.0ZZ', {
-                translation: {
-                    'Z': {pattern: /[0-9]/, optional: true}
-                }
-            });
+    function aplicarMascaras() {
+        $('#sel_pdv_ip, #sel_dvr_ip').mask('999.999.999.999', {
+            placeholder: "___.___.___.___"
+        });
+        
+        $('#sel_pdv_codigo').mask('999', {
+            placeholder: '___'
         });
     }
     

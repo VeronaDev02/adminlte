@@ -111,12 +111,32 @@ class SelfCheckoutList extends Component
     
     public function render()
     {
-        $selfs = Selfs::with('unidade')
+        $selfs = Selfs::with('unidade.tipoUnidade')
             ->when($this->search, function ($query) {
-                $search = '%' . $this->search . '%';
-                return $query->where('sel_name', 'like', $search)
-                    ->orWhere('sel_pdv_ip', 'like', $search)
-                    ->orWhere('sel_dvr_ip', 'like', $search);
+                $search = $this->search;
+    
+                if ($search === 'Ativo' || $search === 'ativo')  {
+                    $search = 'true';
+                } elseif ($search === 'Inativo' || $search === 'inativo') {
+                    $search = 'false';
+                } else {
+                    $search = '%' . $search . '%';
+                }
+    
+                return $query->where(function($q) use ($search) {
+                    
+                    $q->where('sel_name', 'like', $search)
+                      ->orWhere('sel_pdv_ip', 'like', $search)
+                      ->orWhere('sel_status', 'like', $search)
+                      ->orWhere('sel_pdv_codigo', 'like', $search);
+                })
+                ->orWhereHas('unidade', function($query) use ($search) {
+                   
+                    $query->where('uni_codigo', 'like', $search)
+                          ->orWhereHas('tipoUnidade', function($q) use ($search) {
+                              $q->where('tip_nome', 'like', $search);
+                          });
+                });
             })
             ->orderBy($this->sortField, $this->sortDirection)
             ->paginate(10);

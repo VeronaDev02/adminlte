@@ -24,13 +24,13 @@ class Selfs extends Model
         'sel_rtsp_path',
         'sel_status',  
         'sel_uni_id',
+        'sel_pdv_codigo',
     ];
 
     protected $casts = [
         'sel_status' => 'boolean',
     ];
 
-    // Mutators para campos que precisam ser criptografados
     public function setSelPdvIpAttribute($value)
     {
         $this->attributes['sel_pdv_ip'] = Crypt::encryptString($value);
@@ -102,10 +102,8 @@ class Selfs extends Model
         }
     }
 
-    // Método para gerar URL RTSP
     public function getRtspUrlAttribute()
     {
-        // Verifica se todos os campos necessários estão preenchidos
         if (!$this->sel_dvr_username || 
             !$this->sel_dvr_password || 
             !$this->sel_dvr_ip || 
@@ -114,8 +112,6 @@ class Selfs extends Model
             !$this->sel_camera_canal) {
             return null;
         }
-
-        // Criptografa a URL RTSP completa
         return Crypt::encryptString(sprintf(
             'rtsp://%s:%s@%s:%s/%s?channel=%s&subtype=0',
             $this->sel_dvr_username,
@@ -140,5 +136,10 @@ class Selfs extends Model
     public function scopeInactive($query)
     {
         return $query->where('sel_status', false);
+    }
+
+    public function getSelNomeUnidadeAttribute() 
+    {
+        return $this->unidade->uni_codigo . ' - ' . $this->unidade->tipoUnidade->tip_nome;
     }
 }
