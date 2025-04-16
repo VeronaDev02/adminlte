@@ -47,16 +47,13 @@ class UserForm extends Component
             'use_rol_id' => 'required|exists:role,rol_id',
         ];
         
-        // Alterar regras para edição
         if ($this->isEdit) {
             $rules['use_username'] .= ',' . $this->userId . ',use_id';
             $rules['use_email'] .= ',' . $this->userId . ',use_id';
             $rules['use_cod_func'] .= ',' . $this->userId . ',use_id';
             
-            // Senha opcional na edição
             $rules['use_password'] = 'nullable|string|min:6';
         } else {
-            // Senha obrigatória na criação
             $rules['use_password'] = 'required|string|min:6';
         }
         
@@ -83,7 +80,6 @@ class UserForm extends Component
         $this->unidades = Unidade::all();
         
         if ($user) {
-            // Se $user for um ID (número) ou string, busque o objeto
             if (is_numeric($user) || is_string($user)) {
                 $user = User::findOrFail($user);
             }
@@ -98,7 +94,6 @@ class UserForm extends Component
             $this->use_active = (bool) $user->use_active;
             $this->use_login_ativo = (bool) $user->use_login_ativo;
             
-            // Buscar unidades já associadas ao usuário
             $this->usuariosSelecionados = $user->unidades()->pluck('uni_id')->toArray();
             
             $this->isEdit = true;
@@ -110,13 +105,11 @@ class UserForm extends Component
         $this->validateOnly($propertyName);
     }
     
-    // Este método é chamado automaticamente pelo Livewire
     public function updatedUseName()
     {
         $this->use_username = $this->gerarUsername($this->use_name);
     }
     
-    // Novo método público que pode ser chamado via JavaScript
     public function gerarUsernameAutomatico()
     {
         if ($this->use_name) {
@@ -126,21 +119,16 @@ class UserForm extends Component
     
     private function gerarUsername($nome)
     {
-        // Remover acentos e converter para minúsculas
         $nome = Str::of($nome)->ascii()->lower();
         
-        // Dividir o nome em partes
         $partes = explode(' ', $nome);
         
-        // Se tiver mais de uma parte, usar primeiro_ultimo
         if (count($partes) > 1) {
             $username = $partes[0] . '_' . $partes[count($partes) - 1];
         } else {
-            // Se for apenas uma palavra, usar ela mesma
             $username = $partes[0];
         }
         
-        // Substituir caracteres especiais por underscores
         $username = preg_replace('/[^a-z0-9_]/', '', $username);
         
         return $username;
@@ -168,31 +156,27 @@ class UserForm extends Component
             if ($this->isEdit) {
                 $user = User::findOrFail($this->userId);
                 
-                // Remover campos de senha se estiverem vazios
                 if (empty($validatedData['use_password'])) {
                     unset($validatedData['use_password']);
                 }
-                
-                // Garantir que os valores booleanos sejam tratados corretamente
+
                 $validatedData['use_active'] = (bool) $this->use_active;
                 $validatedData['use_login_ativo'] = (bool) $this->use_login_ativo;
                 
                 $user->update($validatedData);
                 
                 event(new EditEvent($user->use_id, request()->ip()));
-                
-                // Atualizar unidades associadas
+
                 $user->unidades()->sync($this->usuariosSelecionados);
                 
                 session()->flash('success', 'Usuário atualizado com sucesso.');
             } else {
-                // Garantir que os valores booleanos sejam tratados corretamente
+
                 $validatedData['use_active'] = (bool) $this->use_active;
                 $validatedData['use_login_ativo'] = (bool) $this->use_login_ativo;
                 
                 $user = User::create($validatedData);
                 
-                // Vincular unidades para criar usuário
                 $user->unidades()->sync($this->usuariosSelecionados);
                 
                 event(new CreateEvent($user->use_id, request()->ip()));
@@ -200,7 +184,6 @@ class UserForm extends Component
                 session()->flash('success', 'Usuário criado com sucesso.');
             }
             
-            // Redirecionar após salvar
             return redirect()->route('users.index');
         } catch (\Exception $e) {
             session()->flash('error', 'Ocorreu um erro: ' . $e->getMessage());
@@ -234,24 +217,18 @@ class UserForm extends Component
         }
         
         try {
-            // Criar um request simulado para passar ao controller
             $request = new Request();
             $request->merge(['use_cod_func' => $codFuncionario]);
             
-            // Chamar o método do controller diretamente
             $response = $this->userController->getFuncionario($request);
             
-            // Converter a resposta JSON para array
             $data = json_decode($response->getContent(), true);
             
             if (isset($data['name'])) {
-                // Atualizar o nome
                 $this->use_name = $data['name'];
                 
-                // Atualizar o nome de usuário baseado no nome
                 $this->use_username = $this->gerarUsername($this->use_name);
                 
-                // Emitir evento para atualizar a interface
                 $this->emit('load');
                 
                 $this->dispatchBrowserEvent('admin-toastr', [

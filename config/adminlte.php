@@ -321,10 +321,11 @@ return [
             'admin' => true,
             'submenu' => [
                 [
-                    'text' => 'Lojas',
+                    'text' => 'Unidades',
                     'url' => '/unidades',
                     'icon' => 'fas fa-fw fa-store',
                     'admin' => true,
+                    /*
                     'submenu' => [
                         [
                             'text' => 'Adega',
@@ -375,6 +376,7 @@ return [
                             'icon_color' => 'orange',
                         ],
                     ],
+                    */
                 ],
                 [
                     'text' => 'Usuários',

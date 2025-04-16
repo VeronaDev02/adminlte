@@ -273,67 +273,49 @@
             
             const nomeInput = document.getElementById('use_name');
             if (nomeInput) {
-                // Usamos um debounce para evitar chamadas excessivas
                 let debounceTimeout;
                 
                 nomeInput.addEventListener('input', function() {
-                    // Cancelar timeout anterior se existir
                     if (debounceTimeout) {
                         clearTimeout(debounceTimeout);
                     }
                     
-                    // Só executa se não estiver em modo de edição
                     if (!@this.isEdit) {
-                        // Definir um novo timeout
                         debounceTimeout = setTimeout(() => {
-                            // Não precisamos chamar @this.set('use_name', nome) aqui
-                            // porque o wire:model.debounce.500ms já faz isso
-                            
-                            // Chamar o método para gerar username após 600ms
                             @this.call('gerarUsernameAutomatico');
-                        }, 600); // Um pouco mais que o debounce do wire:model para garantir que o valor já foi atualizado
+                        }, 600); 
                     }
                 });
             }
 
-            // Máscara para código do funcionário
             const codigoInput = document.getElementById('use_cod_func');
     
             if (codigoInput) {
-                // Usar um flag para evitar chamadas recursivas
                 let isProcessing = false;
                 
                 codigoInput.addEventListener('input', function(e) {
-                    // Evitar processamento recursivo
                     if (isProcessing) return;
                     isProcessing = true;
                     
-                    // Obter a posição do cursor antes da alteração
                     const start = this.selectionStart;
                     const end = this.selectionEnd;
                     
-                    // Remove qualquer caractere que não seja número
                     let value = e.target.value.replace(/\D/g, '');
                     
-                    // Limita a 10 dígitos
                     if (value.length > 10) {
                         value = value.substring(0, 10);
                     }
                     
-                    // Atualiza o valor do campo sem recursão
                     e.target.value = value;
                     
-                    // Atualiza o modelo do Livewire de forma debounced
                     window.livewire.find(@this.id).set('use_cod_func', value);
                     
-                    // Restaurar a posição do cursor
                     this.setSelectionRange(start, end);
                     
                     isProcessing = false;
                 });
             }
 
-            // Buscar funcionário
             const buscarBtn = document.getElementById('buscarFuncionario');
             if (buscarBtn) {
                 buscarBtn.addEventListener('click', function() {
@@ -348,12 +330,10 @@
                         return;
                     }
 
-                    // Chamar método do Livewire para buscar funcionário
                     @this.call('buscarFuncionario', codigoFuncionario);
                 });
             }
 
-            // Filtro de unidades
             function filterTable(inputId, tableId) {
                 const input = document.getElementById(inputId);
                 const filter = input.value.toUpperCase();
@@ -368,11 +348,9 @@
                 });
             }
 
-            // Adicionar listeners de pesquisa
             document.getElementById('searchUnidadesDisponiveis').addEventListener('keyup', () => filterTable('searchUnidadesDisponiveis', 'unidadesDisponiveisTable'));
             document.getElementById('searchUnidadesAssociadas').addEventListener('keyup', () => filterTable('searchUnidadesAssociadas', 'unidadesAssociadasTable'));
 
-            // Adicionar todos os usuários
             document.getElementById('addAllUnidades').addEventListener('click', function() {
                 const rows = document.querySelectorAll('#unidadesDisponiveisTable tr');
                 rows.forEach(row => {
@@ -381,7 +359,6 @@
                 });
             });
 
-            // Remover todos os usuários
             document.getElementById('removeAllUnidades').addEventListener('click', function() {
                 const rows = document.querySelectorAll('#unidadesAssociadasTable tr');
                 rows.forEach(row => {

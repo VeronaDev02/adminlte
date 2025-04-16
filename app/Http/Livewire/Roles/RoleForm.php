@@ -42,7 +42,6 @@ class RoleForm extends Component
     public function mount($role = null)
     {
         if ($role) {
-            // Se $role for um ID (número) ou string, busque o objeto
             if (is_numeric($role) || is_string($role)) {
                 $role = Role::findOrFail($role);
             }
@@ -55,7 +54,7 @@ class RoleForm extends Component
             // Buscar usuários associados ao role
             $this->usuarios = $role->users()->orderBy('use_name')->get();
         } else {
-            $this->usuarios = collect(); // Coleção vazia para novo registro
+            $this->usuarios = collect();
         }
     }
     

@@ -11,8 +11,7 @@ class UnidadeController extends Controller
 {
     public function index()
     {
-        $tiposUnidade = TipoUnidade::withCount('unidades')->orderBy('tip_nome')->get();
-        return view('admin.unidades.index', compact('tiposUnidade'));
+        return view('admin.unidades.index');
     }
 
     public function create()
@@ -25,37 +24,24 @@ class UnidadeController extends Controller
         return view('admin.unidades.edit', ['unidadeId' => $id]);
     }
 
-    public function show($id)
+    public function porTipo($codigo)
     {
-        $unidade = Unidade::findOrFail($id);
-        return view('admin.unidades.show', compact('unidade'));
+        return view('admin.tipo-unidade.index', ['tipoCodigo' => $codigo]);
     }
 
-    public function search(Request $request)
+    public function createPorTipo($codigo)
     {
-        $query = Unidade::query();
-
-        if ($request->has('codigo') && !empty($request->codigo)) {
-            $query->where('uni_codigo', 'like', '%' . $request->codigo . '%');
-        }
-
-        if ($request->has('descricao') && !empty($request->descricao)) {
-            $query->where('uni_descricao', 'like', '%' . $request->descricao . '%');
-        }
-
-        if ($request->has('cidade') && !empty($request->cidade)) {
-            $query->where('uni_cidade', 'like', '%' . $request->cidade . '%');
-        }
-
-        if ($request->has('uf') && !empty($request->uf)) {
-            $query->where('uni_uf', $request->uf);
-        }
-
-        $unidades = $query->get();
-
-        return view('admin.unidades.index', compact('unidades'));
+        return view('admin.tipo-unidade.create', ['tipoCodigo' => $codigo]);
     }
 
+    public function editPorTipo($codigo, $unidade)
+    {
+        return view('admin.tipo-unidade.edit', [
+            'tipoCodigo' => $codigo,
+            'unidadeId' => $unidade
+        ]);
+    }
+    
     public function usuarios($id)
     {
         $unidade = Unidade::findOrFail($id);

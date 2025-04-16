@@ -64,7 +64,6 @@
             input.addClass('is-invalid');
             input.after(`<span class="invalid-feedback ${errorClass}" role="alert"><strong>` + message +
                 '</strong></span>');
-            // $('#buttonResetPassword').prop('disabled', true)
         }
 
         $('#buttonResetPassword').prop('disabled', true)

@@ -1,5 +1,5 @@
 @extends('adminlte::page')
 
 @section('content')
-    @livewire('unidades.unidade-form-por-tipo', ['tipoCodigo' => $codigo])
+    @livewire('unidades.unidade-form-por-tipo', ['tipoCodigo' => $tipoCodigo])
 @endsection

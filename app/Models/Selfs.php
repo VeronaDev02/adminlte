@@ -89,7 +89,8 @@ class Selfs extends Model
 
     public function setSelRtspPathAttribute($value)
     {
-        $this->attributes['sel_rtsp_path'] = Crypt::encryptString($value);
+        $truncatedValue = mb_substr($value, 0, 250);
+        $this->attributes['sel_rtsp_path'] = Crypt::encryptString($truncatedValue);
     }
 
     public function getSelRtspPathAttribute($value)

@@ -20,7 +20,6 @@ class SelfCheckoutForm extends Component
     public $sel_camera_canal;
     public $sel_dvr_porta;
     public $sel_rtsp_path;
-    public $sel_rtsp_url = null;
     public $sel_uni_id;
     public $sel_status = false;
     
@@ -29,22 +28,25 @@ class SelfCheckoutForm extends Component
     
     protected $listeners = [
         'load' => '$refresh',
+        'set:sel_rtsp_path' => 'setRtspPath'
     ];
+    
+    public function setRtspPath($value)
+    {
+        $this->sel_rtsp_path = $value;
+    }
     
     protected function rules()
     {
-        $uniqueRuleIp = 'required|ip';
-        
         return [
             'sel_name' => 'required|string|max:255',
-            'sel_pdv_ip' => $uniqueRuleIp,
-            'sel_dvr_ip' => $uniqueRuleIp,
+            'sel_pdv_ip' => 'required|ipv4',
+            'sel_dvr_ip' => 'required|ipv4',
             'sel_dvr_username' => 'required|string|max:255',
             'sel_dvr_password' => 'required|string|max:255',
             'sel_camera_canal' => 'required|string|max:255',
             'sel_dvr_porta' => 'required|numeric|max:65535',
-            'sel_rtsp_path' => 'required|string|max:255',
-            'sel_rtsp_url' => 'nullable|url',
+            'sel_rtsp_path' => 'required|string|max:250',
             'sel_uni_id' => 'required|exists:unidade,uni_id',
             'sel_status' => 'boolean'
         ];
@@ -56,18 +58,16 @@ class SelfCheckoutForm extends Component
         'sel_name.max' => 'O nome do SelfCheckout não pode ter mais de 255 caracteres.',
         
         'sel_pdv_ip.required' => 'O endereço IP do PDV é obrigatório.',
-        'sel_pdv_ip.ip' => 'O endereço IP do PDV informado não é válido.',
+        'sel_pdv_ip.ipv4' => 'O endereço IP do PDV informado não é válido.',
         
         'sel_dvr_ip.required' => 'O endereço IP do DVR é obrigatório.',
-        'sel_dvr_ip.ip' => 'O endereço IP do DVR informado não é válido.',
+        'sel_dvr_ip.ipv4' => 'O endereço IP do DVR informado não é válido.',
         
         'sel_dvr_username.required' => 'O nome de usuário do DVR é obrigatório.',
         'sel_dvr_password.required' => 'A senha do DVR é obrigatória.',
         'sel_camera_canal.required' => 'O canal da câmera é obrigatório.',
         'sel_dvr_porta.required' => 'A porta do DVR é obrigatória.',
         'sel_rtsp_path.required' => 'O caminho RTSP é obrigatório.',
-        
-        'sel_rtsp_url.url' => 'A URL RTSP informada não é válida.',
         
         'sel_uni_id.required' => 'A unidade é obrigatória.',
         'sel_uni_id.exists' => 'A unidade selecionada não é válida.'
@@ -94,80 +94,20 @@ class SelfCheckoutForm extends Component
             $this->sel_uni_id = $self->sel_uni_id;
             $this->sel_status = (bool) $self->sel_status;
             $this->isEdit = true;
-            
-            // Tentar descriptografar a URL RTSP
-            try {
-                $this->sel_rtsp_url = $self->rtsp_url 
-                    ? Crypt::decryptString($self->rtsp_url) 
-                    : null;
-            } catch (\Exception $e) {
-                $this->sel_rtsp_url = null;
-            }
         }
     }
     
-    public function generateRtspUrl()
+    public function updated($propertyName)
     {
-        // Valida os campos necessários antes de gerar
-        $requiredFields = [
-            'sel_dvr_username',
-            'sel_dvr_password',
-            'sel_dvr_ip',
-            'sel_dvr_porta',
-            'sel_rtsp_path',
-            'sel_camera_canal'
-        ];
-        
-        // Verifica se todos os campos necessários estão preenchidos
-        $allFieldsFilled = true;
-        foreach ($requiredFields as $field) {
-            if (empty($this->$field)) {
-                $allFieldsFilled = false;
-                break;
-            }
-        }
-        
-        if ($allFieldsFilled) {
-            $this->sel_rtsp_url = sprintf(
-                'rtsp://%s:%s@%s:%s/%s?channel=%s&subtype=0',
-                $this->sel_dvr_username,
-                $this->sel_dvr_password,
-                $this->sel_dvr_ip,
-                $this->sel_dvr_porta,
-                $this->sel_rtsp_path,
-                $this->sel_camera_canal
-            );
-            
-            $this->dispatchBrowserEvent('rtsp-url-generated', [
-                'url' => $this->sel_rtsp_url
-            ]);
-        } else {
-            $this->dispatchBrowserEvent('rtsp-url-generation-failed');
-        }
+        $this->validateOnly($propertyName);
     }
-    
     public function save()
     {
-        // Validação adicional para garantir que não fique tudo em branco
-        if (empty($this->sel_rtsp_url) && empty($this->generateRtspUrl())) {
-            session()->flash('error', 'É necessário fornecer uma URL RTSP válida.');
-            return;
-        }
-        
-        $validatedData = $this->validate();
-        $validatedData['sel_status'] = $this->sel_status ? 1 : 0;
-        
-        // Se o usuário não informou uma URL RTSP personalizada, usa a gerada
-        if (empty($validatedData['sel_rtsp_url'])) {
-            $validatedData['sel_rtsp_url'] = $this->sel_rtsp_url 
-                ? Crypt::encryptString($this->sel_rtsp_url) 
-                : null;
-        } else {
-            // Se informou, criptografa a URL personalizada
-            $validatedData['sel_rtsp_url'] = Crypt::encryptString($validatedData['sel_rtsp_url']);
-        }
-        
         try {
+            $validatedData = $this->validate();
+            
+            $validatedData['sel_status'] = $this->sel_status ? 1 : 0;
+            
             if ($this->isEdit) {
                 $self = Selfs::findOrFail($this->selfId);
                 $self->update($validatedData);
@@ -178,14 +118,26 @@ class SelfCheckoutForm extends Component
             } else {
                 $self = Selfs::create($validatedData);
                 
+                if (!$self || !$self->sel_id) {
+                    throw new \Exception('Falha ao criar SelfCheckout - ID não gerado');
+                }
+                
                 event(new CreateEvent($self->sel_id, request()->ip()));
                 
                 session()->flash('success', 'SelfCheckout criado com sucesso.');
             }
             
             return redirect()->route('selfs.index');
+            
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Dispara evento de erros de validação para o frontend
+            $this->dispatchBrowserEvent('validation-errors', [
+                'errors' => $e->validator->errors()->all()
+            ]);
+            return back()->withErrors($e->validator);
         } catch (\Exception $e) {
-            session()->flash('error', 'Ocorreu um erro: ' . $e->getMessage());
+            session()->flash('error', 'Erro ao salvar SelfCheckout: ' . $e->getMessage());
+            return back();
         }
     }
     

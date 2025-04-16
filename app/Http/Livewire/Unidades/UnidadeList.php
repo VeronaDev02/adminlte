@@ -8,7 +8,7 @@ use Livewire\WithPagination;
 use Livewire\Component;
 use App\Events\Admin\Unidade\Delete as DeleteEvent;
 
-class UnidadePorTipoList extends Component
+class UnidadeList extends Component
 {
     use WithPagination;
     
@@ -19,38 +19,18 @@ class UnidadePorTipoList extends Component
     public $sortDirection = 'asc';
     public $confirmingDelete = false;
     public $unidadeToDelete = null;
-    public $tipoUnidadeCodigo;
-    public $tipoUnidade;
     
     protected $listeners = [
         'unidadeSaved' => '$refresh',
         'confirmDelete' => 'confirmDelete',
         'deleteConfirmed' => 'destroy',
         'refresh' => '$refresh',
-        'searchUpdated' => 'updateSearch' 
+        'searchUpdated' => 'updateSearch'
     ];
     
-    public function mount($tipoCodigo)
+    public function mount()
     {
-        $this->tipoUnidadeCodigo = $tipoCodigo;
-        $this->tipoUnidade = TipoUnidade::where('tip_codigo', $tipoCodigo)->first();
-        
-        if (!$this->tipoUnidade) {
-            session()->flash('error', 'Tipo de unidade não encontrado');
-            return redirect()->route('unidades.index');
-        }
-        
-        if (session()->has('success')) {
-            $this->dispatchBrowserEvent('toastr:success', [
-                'message' => session('success')
-            ]);
-        }
-        
-        if (session()->has('error')) {
-            $this->dispatchBrowserEvent('toastr:error', [
-                'message' => session('error')
-            ]);
-        }
+        // Usando apenas as mensagens flash padrão do Laravel
     }
     
     public function updateSearch($value)
@@ -87,10 +67,6 @@ class UnidadePorTipoList extends Component
                 $errorMessage .= 'Existem SelfCheckouts associados a esta unidade.';
             }
             
-            $this->dispatchBrowserEvent('toastr:error', [
-                'message' => $errorMessage
-            ]);
-            
             $this->dispatchBrowserEvent('show-error-modal', [
                 'message' => $errorMessage
             ]);
@@ -116,28 +92,29 @@ class UnidadePorTipoList extends Component
                 $this->dispatchBrowserEvent('hide-delete-modal');
                 
                 session()->flash('success', 'Unidade excluída com sucesso.');
-                return redirect()->route('tipo-unidade.unidades', ['codigo' => $this->tipoUnidadeCodigo]);
+                return redirect()->route('unidades.index');
             }
         } catch (\Exception $e) {
             session()->flash('error', 'Não foi possível excluir a unidade: ' . $e->getMessage());
-            return redirect()->route('tipo-unidade.unidades', ['codigo' => $this->tipoUnidadeCodigo]);
+            return redirect()->route('unidades.index');
         }
     }
     
     public function render()
     {
         $unidades = Unidade::with('tipoUnidade')
-            ->where('uni_tip_id', $this->tipoUnidade->tip_id)
             ->when($this->search, function ($query) {
                 $search = '%' . $this->search . '%';
-                return $query->where('uni_codigo', 'like', $search);
+                return $query->where('uni_codigo', 'like', $search)
+                    ->orWhereHas('tipoUnidade', function($q) use ($search) {
+                        $q->where('tip_nome', 'like', $search);
+                    });
             })
             ->orderBy($this->sortField, $this->sortDirection)
             ->paginate(10);
         
-        return view('livewire.admin.unidades.tipo-list', [
-            'unidades' => $unidades,
-            'tipoUnidade' => $this->tipoUnidade
+        return view('livewire.admin.unidades.list', [
+            'unidades' => $unidades
         ]);
     }
 }

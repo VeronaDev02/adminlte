@@ -1,34 +1,47 @@
+@section('title', $title)
+    
+@section('content_header')
+    <div class="d-flex justify-content-between align-items-center">
+        <h1>{{ $title }}</h1>
+    </div>
+    <div class="d-flex justify-content-between align-items-center">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0 bg-transparent p-0">
+                <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{{ route('unidades.index') }}">Unidades</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ $isEdit ? 'Editar' : 'Criar' }}</li>
+            </ol>
+        </nav>
+    </div>
+@stop
+
 <div>
-    @section('title', $title)
-    
-    @section('content_header')
-        <div class="d-flex justify-content-between align-items-center">
-            <h1>{{ $title }}</h1>
-        </div>
-        <div class="d-flex justify-content-between align-items-center">
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb mb-0 bg-transparent p-0">
-                    <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
-                    <li class="breadcrumb-item"><a href="{{ route('unidades.index') }}">Unidades</a></li>
-                    <li class="breadcrumb-item"><a href="{{ route('tipo-unidade.unidades', ['codigo' => $tipoUnidadeCodigo]) }}">{{ $tipoUnidade->tip_nome }}</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">{{ $isEdit ? 'Editar' : 'Criar' }}</li>
-                </ol>
-            </nav>
-        </div>
-        <h5 class="text-muted">{{ $subtitle }}</h5>
-    @stop
-    
     <div class="card">
         <div class="card-body">
             <form wire:submit.prevent="save">
                 <div class="row">
-                    <div class="col-md-12">
+                    <div class="col-md-6">
                         <div class="form-group">
                             <label for="uni_codigo">Código</label>
                             <input type="text" class="form-control @error('uni_codigo') is-invalid @enderror" 
                                    id="uni_codigo" wire:model.lazy="uni_codigo" 
                                    placeholder="Digite o código da unidade" required>
                             @error('uni_codigo')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="uni_tip_id">Tipo de Unidade</label>
+                            <select class="form-control @error('uni_tip_id') is-invalid @enderror" 
+                                    id="uni_tip_id" wire:model="uni_tip_id" required>
+                                <option value="">Selecione um tipo</option>
+                                @foreach($tiposUnidade as $tipo)
+                                    <option value="{{ $tipo->tip_id }}">{{ $tipo->tip_nome }}</option>
+                                @endforeach
+                            </select>
+                            @error('uni_tip_id')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
@@ -73,7 +86,7 @@
                                 </table>
                             </div>
                             <div class="card-footer text-center">
-                                <button type="button" class="btn btn-sm btn-primary" id="addAllUsers">
+                                <button type="button" class="btn btn-sm btn-primary" wire:click="adicionarTodosUsuarios">
                                     <i class="fas fa-angle-double-right"></i> Adicionar Todos
                                 </button>
                             </div>
@@ -122,7 +135,7 @@
                                 </table>
                             </div>
                             <div class="card-footer text-center">
-                                <button type="button" class="btn btn-sm btn-danger" id="removeAllUsers">
+                                <button type="button" class="btn btn-sm btn-danger" wire:click="removerTodosUsuarios">
                                     <i class="fas fa-angle-double-left"></i> Remover Todos
                                 </button>
                             </div>
@@ -160,23 +173,21 @@
                                         </tr>
                                     </thead>
                                     <tbody id="selfsAssociadosTable">
-                                        @if($isEdit)
-                                            @foreach($selfsAssociados as $self)
-                                            <tr>
-                                                <td>{{ $self->sel_id }}</td>
-                                                <td>{{ $self->sel_name }}</td>
-                                                <td>{{ $self->sel_pdv_ip }}</td>
-                                                <td>{{ $self->sel_rtsp_url }}</td>
-                                                <td>
-                                                    @if($self->sel_status)
-                                                        <span class="badge badge-success">Ativo</span>
-                                                    @else
-                                                        <span class="badge badge-danger">Inativo</span>
-                                                    @endif
-                                                </td>
-                                            </tr>
-                                            @endforeach
-                                        @endif
+                                        @foreach($selfsAssociados as $self)
+                                        <tr>
+                                            <td>{{ $self->sel_id }}</td>
+                                            <td>{{ $self->sel_name }}</td>
+                                            <td>{{ $self->sel_pdv_ip }}</td>
+                                            <td>{{ $self->sel_rtsp_url }}</td>
+                                            <td>
+                                                @if($self->sel_status)
+                                                    <span class="badge badge-success">Ativo</span>
+                                                @else
+                                                    <span class="badge badge-danger">Inativo</span>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                        @endforeach
                                     </tbody>
                                 </table>
                             </div>
@@ -198,7 +209,7 @@
                                 <i class="fas fa-spinner fa-spin"></i> Salvando...
                             </span>
                         </button>
-                        <a href="{{ route('tipo-unidade.unidades', ['codigo' => $tipoUnidadeCodigo]) }}" class="btn btn-secondary ml-2">
+                        <a href="{{ route('unidades.index') }}" class="btn btn-secondary ml-2">
                             <i class="fas fa-arrow-left"></i> Voltar
                         </a>
                     </div>
@@ -238,22 +249,6 @@
                     isProcessing = false;
                 });
             }
-
-            document.getElementById('addAllUsers').addEventListener('click', function() {
-                const rows = document.querySelectorAll('#usersDisponiveisTable tr');
-                rows.forEach(row => {
-                    const userId = row.getAttribute('data-user-id');
-                    @this.adicionarUsuario(userId);
-                });
-            });
-
-            document.getElementById('removeAllUsers').addEventListener('click', function() {
-                const rows = document.querySelectorAll('#usersSelecionadosTable tr');
-                rows.forEach(row => {
-                    const userId = row.getAttribute('data-user-id');
-                    @this.removerUsuario(userId);
-                });
-            });
 
             function filterTable(inputId, tableId) {
                 const input = document.getElementById(inputId);

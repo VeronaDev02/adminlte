@@ -131,6 +131,26 @@
     {{-- Custom Scripts --}}
     @yield('adminlte_js')
 @livewireScripts
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var sidebarState = localStorage.getItem('adminlte-sidebar-state');
+
+        if (sidebarState === 'collapsed') {
+            document.body.classList.add('sidebar-collapse');
+        }
+        
+        var toggleButton = document.querySelector('[data-widget="pushmenu"]');
+        if (toggleButton) {
+            toggleButton.addEventListener('click', function() {
+                if (document.body.classList.contains('sidebar-collapse')) {
+                    localStorage.setItem('adminlte-sidebar-state', 'expanded');
+                } else {
+                    localStorage.setItem('adminlte-sidebar-state', 'collapsed');
+                }
+            });
+        }
+    });
+</script>
 </body>
 
 </html>

@@ -32,21 +32,33 @@ Route::post('/logout', [LoginController::class, 'logout'])
 Route::middleware(['auth:web', 'verifica.permissions.users'])->group(function () {
 
     // ------------------------- Unidades ------------------------------------
+    Route::prefix('unidades')->group(function () {
+        // Rota para listar todas as unidades
+        Route::get('/', [App\Http\Controllers\Admin\UnidadeController::class, 'index'])
+            ->name('unidades.index');
+        
+        // Rotas para criar, editar e visualizar unidades individuais
+        Route::get('/create', [App\Http\Controllers\Admin\UnidadeController::class, 'create'])
+            ->name('unidades.create');
+        Route::get('/{id}/edit', [App\Http\Controllers\Admin\UnidadeController::class, 'edit'])
+            ->name('unidades.edit');
+        Route::get('/{id}/usuarios', [App\Http\Controllers\Admin\UnidadeController::class, 'usuarios'])
+            ->name('unidades.usuarios');
+    });
+
+    // ------------------------- Tipo de Unidades ------------------------------------
     Route::prefix('tipo-unidade')->group(function () {
         // Listar unidades por tipo
-        Route::get('/{codigo}', [App\Http\Controllers\Admin\TipoUnidadeController::class, 'unidadesPorTipo'])
+        Route::get('/{codigo}', [App\Http\Controllers\Admin\UnidadeController::class, 'porTipo'])
             ->name('tipo-unidade.unidades');
         
-        // Criar nova unidade para o tipo
-        Route::get('/{codigo}/create', [App\Http\Controllers\Admin\TipoUnidadeController::class, 'createUnidade'])
+        // Criar unidade para um tipo específico
+        Route::get('/{codigo}/create', [App\Http\Controllers\Admin\UnidadeController::class, 'createPorTipo'])
             ->name('tipo-unidade.create');
         
-        // Editar unidade do tipo
-        Route::get('/{codigo}/edit/{unidade}', [App\Http\Controllers\Admin\TipoUnidadeController::class, 'editUnidade'])
+        // Editar unidade para um tipo específico
+        Route::get('/{codigo}/edit/{unidade}', [App\Http\Controllers\Admin\UnidadeController::class, 'editPorTipo'])
             ->name('tipo-unidade.edit');
-
-            Route::get('/unidades', [App\Http\Controllers\Admin\UnidadeController::class, 'index'])->name('unidades.index');
-
     });
 
     // ------------------------- Selfs ------------------------------------

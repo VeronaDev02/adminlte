@@ -9,13 +9,12 @@ use Livewire\Component;
 use App\Events\Admin\Unidade\Create as CreateEvent;
 use App\Events\Admin\Unidade\Edit as EditEvent;
 
-class UnidadeFormPorTipo extends Component
+class UnidadeForm extends Component
 {
     public $unidadeId;
     public $uni_codigo;
     public $uni_tip_id;
-    public $tipoUnidadeCodigo;
-    public $tipoUnidade; 
+    public $tiposUnidade = [];
     
     public $isEdit = false;
     public $usuarios = [];
@@ -28,7 +27,7 @@ class UnidadeFormPorTipo extends Component
     
     protected function rules()
     {
-        $uniqueRuleCodigo = 'required|regex:"^\d+$"|max:3|unique:unidade,uni_codigo';
+        $uniqueRuleCodigo = 'required|regex:/^\d+$/|max:3|unique:unidade,uni_codigo';
         
         if ($this->isEdit) {
             $uniqueRuleCodigo .= ',' . $this->unidadeId . ',uni_id';
@@ -36,6 +35,7 @@ class UnidadeFormPorTipo extends Component
         
         return [
             'uni_codigo' => $uniqueRuleCodigo,
+            'uni_tip_id' => 'required|exists:tipo_unidade,tip_id',
         ];
     }
     
@@ -44,25 +44,23 @@ class UnidadeFormPorTipo extends Component
         'uni_codigo.required' => 'O código da unidade é obrigatório.',
         'uni_codigo.max' => 'O código da unidade deve ter no máximo 3 dígitos.',
         'uni_codigo.regex' => 'O código da unidade deve conter apenas números.',
+        'uni_tip_id.required' => 'O tipo de unidade é obrigatório.',
+        'uni_tip_id.exists' => 'O tipo de unidade selecionado não existe.',
     ];
     
-    public function mount($tipoCodigo, $unidade = null)
+    public function mount($unidade = null)
     {
-        $this->tipoUnidadeCodigo = $tipoCodigo;
-        $this->tipoUnidade = TipoUnidade::where('tip_codigo', $tipoCodigo)->firstOrFail();
-        $this->uni_tip_id = $this->tipoUnidade->tip_id;
-        
+        $this->tiposUnidade = TipoUnidade::orderBy('tip_nome')->get();
         $this->usuarios = User::orderBy('use_name')->get();
         
         if ($unidade) {
             if (is_numeric($unidade) || is_string($unidade)) {
-                $unidade = Unidade::where('uni_id', $unidade)
-                    ->where('uni_tip_id', $this->tipoUnidade->tip_id)
-                    ->firstOrFail();
+                $unidade = Unidade::where('uni_id', $unidade)->firstOrFail();
             }
             
             $this->unidadeId = $unidade->uni_id;
             $this->uni_codigo = $unidade->uni_codigo;
+            $this->uni_tip_id = $unidade->uni_tip_id;
             
             $this->usuariosSelecionados = $unidade->users()->pluck('use_id')->toArray() ?? [];
             
@@ -91,10 +89,19 @@ class UnidadeFormPorTipo extends Component
         });
     }
     
+    public function adicionarTodosUsuarios()
+    {
+        $this->usuariosSelecionados = $this->usuarios->pluck('use_id')->toArray();
+    }
+    
+    public function removerTodosUsuarios()
+    {
+        $this->usuariosSelecionados = [];
+    }
+    
     public function save()
     {
         $validatedData = $this->validate();
-        $validatedData['uni_tip_id'] = $this->uni_tip_id;
         
         try {
             if ($this->isEdit) {
@@ -116,7 +123,7 @@ class UnidadeFormPorTipo extends Component
                 session()->flash('success', 'Unidade criada com sucesso.');
             }
             
-            return redirect()->route('tipo-unidade.unidades', ['codigo' => $this->tipoUnidadeCodigo]);
+            return redirect()->route('unidades.index');
         } catch (\Exception $e) {
             session()->flash('error', 'Ocorreu um erro: ' . $e->getMessage());
             return redirect()->back();
@@ -126,11 +133,9 @@ class UnidadeFormPorTipo extends Component
     public function render()
     {
         $title = $this->isEdit ? 'Editar Unidade' : 'Criar Nova Unidade';
-        $subtitle = "Tipo: {$this->tipoUnidade->tip_nome}";
         
-        return view('livewire.admin.unidades.form-por-tipo', [
-            'title' => $title,
-            'subtitle' => $subtitle
+        return view('livewire.admin.unidades.form', [
+            'title' => $title
         ]);
     }
 }
