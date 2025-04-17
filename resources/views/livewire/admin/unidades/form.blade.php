@@ -1,31 +1,35 @@
 @section('title', $title)
     
 @section('content_header')
-    <div class="d-flex justify-content-between align-items-center">
-        <h1>{{ $title }}</h1>
-    </div>
-    <div class="d-flex justify-content-between align-items-center">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb mb-0 bg-transparent p-0">
-                <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
-                <li class="breadcrumb-item"><a href="{{ route('unidades.index') }}">Unidades</a></li>
-                <li class="breadcrumb-item active" aria-current="page">{{ $isEdit ? 'Editar' : 'Criar' }}</li>
+    <div class="row mb-2">
+        <div class="col-sm-6"></div>
+        <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+                <li class="breadcrumb-item" style="font-weight: normal;"><a href="{{ route('home') }}">Home</a></li>
+                <li class="breadcrumb-item" style="font-weight: normal;"><a href="{{ route('unidades.index') }}">Unidades</a></li>
+                <li class="breadcrumb-item active" style="font-weight: normal;">{{ $isEdit ? 'Editar' : 'Criar' }} Unidade</li>
             </ol>
-        </nav>
+        </div>
     </div>
 @stop
 
 <div>
-    <div class="card">
+    <div class="card card-primary card-outline">
+        <div class="card-header">
+            <h3 class="card-title">{{ $title }}</h3>
+        </div>
         <div class="card-body">
             <form wire:submit.prevent="save">
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="uni_codigo">Código</label>
-                            <input type="text" class="form-control @error('uni_codigo') is-invalid @enderror" 
-                                   id="uni_codigo" wire:model.lazy="uni_codigo" 
-                                   placeholder="Digite o código da unidade" required>
+                            <input type="text" 
+                                   class="form-control @error('uni_codigo') is-invalid @enderror" 
+                                   id="uni_codigo" 
+                                   wire:model.lazy="uni_codigo" 
+                                   placeholder="Digite o código da unidade" 
+                                   required>
                             @error('uni_codigo')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -35,11 +39,13 @@
                         <div class="form-group">
                             <label for="uni_tip_id">Tipo de Unidade</label>
                             <div wire:ignore>
-                                <select class="form-control @error('uni_tip_id') is-invalid @enderror" 
-                                        id="uni_tip_id" required>
+                                <select class="form-control select2 @error('uni_tip_id') is-invalid @enderror" 
+                                        id="uni_tip_id" 
+                                        required>
                                     <option value="">Selecione um tipo</option>
                                     @foreach($tiposUnidade as $tipo)
-                                        <option value="{{ $tipo->tip_id }}" {{ $uni_tip_id == $tipo->tip_id ? 'selected' : '' }}>
+                                        <option value="{{ $tipo->tip_id }}" 
+                                                {{ $uni_tip_id == $tipo->tip_id ? 'selected' : '' }}>
                                             {{ $tipo->tip_nome }}
                                         </option>
                                     @endforeach
@@ -60,7 +66,10 @@
                                 <h3 class="card-title">Usuários Disponíveis</h3>
                                 <div class="card-tools">
                                     <div class="input-group input-group-sm" style="width: 150px;">
-                                        <input type="text" id="searchUsersDisponiveis" class="form-control float-right" placeholder="Pesquisar">
+                                        <input type="text" 
+                                            id="searchUsersDisponiveis" 
+                                            class="form-control float-right" 
+                                            placeholder="Pesquisar">
                                         <div class="input-group-append">
                                             <button type="button" class="btn btn-default">
                                                 <i class="fas fa-search"></i>
@@ -77,11 +86,11 @@
                                             <tr data-user-id="{{ $usuario->use_id }}">
                                                 <td>{{ $usuario->use_name }}</td>
                                                 <td class="text-right" style="width: 80px;">
-                                                    <button type="button" 
-                                                            wire:click="adicionarUsuario({{ $usuario->use_id }})" 
-                                                            class="btn btn-xs btn-success btn-add-user">
-                                                        <i class="fas fa-plus"></i>
-                                                    </button>
+                                                <button type="button" 
+                                                        wire:click="adicionarUsuario({{ $usuario->use_id }})" 
+                                                        class="btn btn-xs btn-default text-primary mx-1 shadow">
+                                                    <i class="fa fa-lg fa-fw fa-plus"></i>
+                                                </button>
                                                 </td>
                                             </tr>
                                             @endif
@@ -90,7 +99,11 @@
                                 </table>
                             </div>
                             <div class="card-footer text-center">
-                                <button type="button" class="btn btn-sm btn-primary" wire:click="adicionarTodosUsuarios">
+                                <button type="button" 
+                                        class="btn btn-sm btn-primary" 
+                                        wire:click="adicionarTodosUsuarios"
+                                        data-toggle="tooltip"
+                                        title="Adicionar Todos Usuários">
                                     <i class="fas fa-angle-double-right"></i> Adicionar Todos
                                 </button>
                             </div>
@@ -109,7 +122,10 @@
                                 <h3 class="card-title">Usuários Selecionados</h3>
                                 <div class="card-tools">
                                     <div class="input-group input-group-sm" style="width: 150px;">
-                                        <input type="text" id="searchUsersSelecionados" class="form-control float-right" placeholder="Pesquisar">
+                                        <input type="text" 
+                                            id="searchUsersSelecionados" 
+                                            class="form-control float-right" 
+                                            placeholder="Pesquisar">
                                         <div class="input-group-append">
                                             <button type="button" class="btn btn-default">
                                                 <i class="fas fa-search"></i>
@@ -128,8 +144,8 @@
                                                 <td class="text-right" style="width: 80px;">
                                                     <button type="button" 
                                                             wire:click="removerUsuario({{ $usuario->use_id }})" 
-                                                            class="btn btn-xs btn-danger btn-remove-user">
-                                                        <i class="fas fa-trash"></i>
+                                                            class="btn btn-xs btn-default text-danger mx-1 shadow">
+                                                        <i class="fa fa-lg fa-fw fa-trash"></i>
                                                     </button>
                                                 </td>
                                             </tr>
@@ -139,7 +155,11 @@
                                 </table>
                             </div>
                             <div class="card-footer text-center">
-                                <button type="button" class="btn btn-sm btn-danger" wire:click="removerTodosUsuarios">
+                                <button type="button" 
+                                        class="btn btn-sm btn-danger" 
+                                        wire:click="removerTodosUsuarios"
+                                        data-toggle="tooltip"
+                                        title="Remover Todos Usuários">
                                     <i class="fas fa-angle-double-left"></i> Remover Todos
                                 </button>
                             </div>
@@ -151,12 +171,15 @@
                 <h4 class="mt-4">SelfCheckouts Associados</h4>
                 <div class="row">
                     <div class="col-md-12">
-                        <div class="card card-outline card-primary">
+                        <div class="card card-outline card-info">
                             <div class="card-header">
                                 <h3 class="card-title">Lista de SelfCheckouts</h3>
                                 <div class="card-tools">
                                     <div class="input-group input-group-sm" style="width: 150px;">
-                                        <input type="text" id="searchSelfsAssociados" class="form-control float-right" placeholder="Pesquisar">
+                                        <input type="text" 
+                                               id="searchSelfsAssociados" 
+                                               class="form-control float-right" 
+                                               placeholder="Pesquisar">
                                         <div class="input-group-append">
                                             <button type="button" class="btn btn-default">
                                                 <i class="fas fa-search"></i>
@@ -205,7 +228,9 @@
                         <button type="submit" 
                                 class="btn btn-primary" 
                                 wire:loading.attr="disabled" 
-                                wire:target="save">
+                                wire:target="save"
+                                data-toggle="tooltip"
+                                title="Salvar Unidade">
                             <span wire:loading.remove wire:target="save">
                                 <i class="fas fa-save"></i> Salvar
                             </span>
@@ -213,7 +238,10 @@
                                 <i class="fas fa-spinner fa-spin"></i> Salvando...
                             </span>
                         </button>
-                        <a href="{{ route('unidades.index') }}" class="btn btn-secondary ml-2">
+                        <a href="{{ route('unidades.index') }}" 
+                           class="btn btn-secondary ml-2"
+                           data-toggle="tooltip"
+                           title="Voltar para Lista de Unidades">
                             <i class="fas fa-arrow-left"></i> Voltar
                         </a>
                     </div>
@@ -271,12 +299,16 @@
 
 @section('js')
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 <script>
     var select2Initialized = false;
     
     function initSelect2() {
-        if (select2Initialized) return;
+        if (select2Initialized) {
+            return;
+        }
         
         $('#uni_tip_id').select2({
             placeholder: 'Selecione um tipo',
@@ -290,13 +322,28 @@
         select2Initialized = true;
     }
     
+    function initTooltips() {
+        try {
+            if (!$('[data-toggle="tooltip"]').hasClass('tooltipstered')) {
+                $('[data-toggle="tooltip"]').tooltip({
+                    trigger: 'hover'
+                });
+            }
+        } catch (error) {
+            console.error('Erro ao inicializar tooltips:', error);
+        }
+    }
+    
     $(document).ready(function() {
         initSelect2();
+        initTooltips();
     });
     
     function filterTable(inputId, tableId) {
         const input = document.getElementById(inputId);
-        if (!input) return;
+        if (!input) {
+            return;
+        }
         
         const filter = input.value.toUpperCase();
         const rows = document.querySelectorAll(`#${tableId} tr`);
@@ -326,5 +373,11 @@
             searchSelfsAssociados.addEventListener('keyup', () => filterTable('searchSelfsAssociados', 'selfsAssociadosTable'));
         }
     });
+    
+    if (window.Livewire) {
+        document.addEventListener('livewire:load', function () {
+            initTooltips();
+        });
+    }
 </script>
 @stop

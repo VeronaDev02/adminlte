@@ -4,10 +4,12 @@ namespace App\Http\Livewire\Unidades;
 
 use App\Models\Unidade;
 use App\Models\User;
+use App\Models\Unit;
 use App\Models\TipoUnidade;
 use Livewire\Component;
 use App\Events\Admin\Unidade\Create as CreateEvent;
 use App\Events\Admin\Unidade\Edit as EditEvent;
+use Illuminate\Support\Facades\DB;
 
 class UnidadeForm extends Component
 {
@@ -62,7 +64,7 @@ class UnidadeForm extends Component
             $this->uni_codigo = $unidade->uni_codigo;
             $this->uni_tip_id = $unidade->uni_tip_id;
             
-            $this->usuariosSelecionados = $unidade->users()->pluck('use_id')->toArray() ?? [];
+            $this->usuariosSelecionados = $unidade->use_ids ?? [];
             
             $this->selfsAssociados = $unidade->selfs ?? collect([]);
             
@@ -110,30 +112,74 @@ class UnidadeForm extends Component
     
     public function save()
     {
+        \Log::info('DEPURAÇÃO DETALHADA', [
+            'unidade_id' => $this->unidadeId,
+            'uni_tip_id' => $this->uni_tip_id,
+            'usuarios_selecionados' => $this->usuariosSelecionados,
+            'unidade_exists' => Unidade::where('uni_id', $this->unidadeId)->exists(),
+            'tip_exists' => TipoUnidade::where('tip_id', $this->uni_tip_id)->exists()
+        ]);
+        
+        \Log::info('Iniciando salvamento de Unidade', [
+            'is_edit' => $this->isEdit,
+            'unidade_id' => $this->unidadeId ?? 'Nova',
+            'usuarios_selecionados' => $this->usuariosSelecionados
+        ]);
+
         $validatedData = $this->validate();
         
+        \Log::info('Dados validados', [
+            'validated_data' => $validatedData
+        ]);
+
         try {
+            DB::beginTransaction();
+            
+            // Primeiro, cria ou atualiza a unidade
             if ($this->isEdit) {
                 $unidade = Unidade::findOrFail($this->unidadeId);
                 $unidade->update($validatedData);
                 
                 event(new EditEvent($unidade->uni_id, request()->ip()));
-                
-                $unidade->users()->sync($this->usuariosSelecionados);
-                
-                session()->flash('success', 'Unidade atualizada com sucesso.');
             } else {
                 $unidade = Unidade::create($validatedData);
                 
-                $unidade->users()->sync($this->usuariosSelecionados);
-                
                 event(new CreateEvent($unidade->uni_id, request()->ip()));
-                
-                session()->flash('success', 'Unidade criada com sucesso.');
             }
+            
+            \Log::info('Unidade processada', [
+                'unidade_id' => $unidade->uni_id
+            ]);
+            
+            // Limpa os units existentes para esta unidade
+            Unit::where('unit_uni_id', $unidade->uni_id)->delete();
+            
+            // Cria novos units para os usuários selecionados
+            foreach ($this->usuariosSelecionados as $userId) {
+                Unit::create([
+                    'unit_uni_id' => $unidade->uni_id,
+                    'unit_use_id' => $userId
+                ]);
+            }
+            
+            DB::commit();
+            
+            session()->flash('success', $this->isEdit 
+                ? 'Unidade atualizada com sucesso.' 
+                : 'Unidade criada com sucesso.');
             
             return redirect()->route('unidades.index');
         } catch (\Exception $e) {
+            DB::rollBack();
+            
+            \Log::error('Erro ao salvar unidade', [
+                'mensagem' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'unidade_id' => $this->unidadeId ?? 'Nova Unidade',
+                'usuarios_selecionados' => $this->usuariosSelecionados,
+                'dados_validados' => $validatedData
+            ]);
+
             session()->flash('error', 'Ocorreu um erro: ' . $e->getMessage());
             return redirect()->back();
         }

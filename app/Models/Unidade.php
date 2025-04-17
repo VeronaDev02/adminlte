@@ -38,8 +38,19 @@ class Unidade extends Model
     {
         return $this->hasMany(Selfs::class, 'sel_uni_id', 'uni_id');
     }
+
     public function getNomeAttribute()
     {
         return $this->tipoUnidade->tip_nome;
+    }
+
+    public function getUnitIdsAttribute()
+    {
+        return Unit::where('unit_uni_id', $this->uni_id)->pluck('unit_id')->toArray();
+    }
+
+    public function getUseIdsAttribute()
+    {
+        return Unit::where('unit_uni_id', $this->uni_id)->pluck('unit_use_id')->toArray();
     }
 }
