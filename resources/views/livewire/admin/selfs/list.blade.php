@@ -24,7 +24,7 @@
                     </a>
                 </div>
                 <div class="col-md-1">
-                    <button wire:click="$refresh" title="Atualizar SelfCheckouts" button="" type="button"
+                    <button onclick="window.location.reload();" title="Atualizar SelfCheckouts" button="" type="button"
                         class="btn btn-info" style="width: 6rem;">
                         <em class="fa fa-sync-alt"></em>
                         <h6>
