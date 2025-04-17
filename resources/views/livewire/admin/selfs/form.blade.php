@@ -1,20 +1,17 @@
 @section('title', $title)
-
-@section('content_header')
-    <div class="d-flex justify-content-between align-items-center">
-        <h1 class="mx-auto" style="font-weight: bold;">{{ $title }}</h1>
-    </div>
-    <div class="d-flex justify-content-between align-items-center">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb mb-0 bg-transparent p-0">
-                <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
-                <li class="breadcrumb-item"><a href="{{ route('selfs.index') }}">SelfCheckouts</a></li>
-                <li class="breadcrumb-item active" aria-current="page">{{ $title }}</li>
-            </ol>
-        </nav>
-    </div>
-@stop
-
+<div>
+    @section('content_header')
+        <div class="row mb-2">
+            <div class="col-sm-6"></div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item" style="font-weight: normal;"><a href="{{ route('home') }}">Home</a></li>
+                    <li class="breadcrumb-item active" style="font-weight: normal;">SelfCheckouts</li>
+                </ol>
+            </div>
+        </div>
+    @stop
+</div>
 <div class="card">
     <div class="card-body">
         <form wire:submit.prevent="save" id="selfForm">

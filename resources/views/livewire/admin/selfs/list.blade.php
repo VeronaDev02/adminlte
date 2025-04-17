@@ -1,121 +1,100 @@
 <div>
-    @section('title', '- SelfCheckouts')
-    
     @section('content_header')
-        <div class="d-flex justify-content-between align-items-center">
-            <h1 class="mx-auto" style="font-weight: bold;">SelfCheckouts</h1>
-        </div>
-        <div class="d-flex justify-content-between align-items-center">
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb mb-0 bg-transparent p-0">
-                    <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">SelfCheckouts</li>
+        <div class="row mb-2">
+            <div class="col-sm-6"></div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item" style="font-weight: normal;"><a href="{{ route('home') }}">Home</a></li>
+                    <li class="breadcrumb-item active" style="font-weight: normal;">SelfCheckouts</li>
                 </ol>
-            </nav>
+            </div>
         </div>
     @stop
-    
-    <div class="row mb-3">
-        <div class="col-12 text-right">
-            <a href="{{ route('selfs.create') }}" class="btn btn-success">
-                <i class="fas fa-plus"></i> Adicionar
-            </a>
-            <button wire:click="$refresh" class="btn btn-primary">
-                <i class="fas fa-sync-alt"></i> Atualizar
-            </button>
-        </div>
-    </div>
-
-    <div class="card">
+    <div class="card m-0">
         <div class="card-header">
             <div class="row">
-                <div class="col-12 text-right">
-                    <div class="input-group" style="max-width: 300px; float: right;">
-                        <input type="text" wire:model.debounce.300ms="search" class="form-control" placeholder="Pesquisar">
-                        <div class="input-group-append">
-                            <button class="btn btn-default" type="button">
-                                <i class="fas fa-search"></i>
-                            </button>
-                        </div>
-                    </div>
+                <h3 class="col-md-10">SelfCheckouts</h3>
+                <div class="col-md-1">
+                    <a href="{{ route('selfs.create') }}" title="Adicionar SelfCheckout" button="" type="button"
+                        class="btn btn-success" style="width: 6rem;">
+                        <em class="fa fa-plus"></em>
+                        <h6>
+                            Adicionar
+                        </h6>
+                    </a>
+                </div>
+                <div class="col-md-1">
+                    <button wire:click="$refresh" title="Atualizar SelfCheckouts" button="" type="button"
+                        class="btn btn-info" style="width: 6rem;">
+                        <em class="fa fa-sync-alt"></em>
+                        <h6>
+                            Atualizar
+                        </h6>
+                    </button>
                 </div>
             </div>
         </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-striped table-bordered table-hover" id="dataTable">
-                    <thead>
-                        <tr>
-                            <th wire:click="sortBy('sel_id')" class="sortable" width="5%">
-                                ID 
-                                @if ($sortField === 'sel_id')
-                                    <i class="fas fa-sort-{{ $sortDirection === 'asc' ? 'up' : 'down' }}"></i>
-                                @else
-                                    <i class="fas fa-sort"></i>
-                                @endif
-                            </th>
-                            <th wire:click="sortBy('sel_name')" class="sortable" width="25%">
-                                Nome
-                                @if ($sortField === 'sel_name')
-                                    <i class="fas fa-sort-{{ $sortDirection === 'asc' ? 'up' : 'down' }}"></i>
-                                @else
-                                    <i class="fas fa-sort"></i>
-                                @endif
-                            </th>
-                            <th wire:click="sortBy('sel_uni_id')" class="sortable" width="25%">
-                                Unidade
-                                @if ($sortField === 'sel_uni_id')
-                                    <i class="fas fa-sort-{{ $sortDirection === 'asc' ? 'up' : 'down' }}"></i>
-                                @else
-                                    <i class="fas fa-sort"></i>
-                                @endif
-                            </th>
-                            <th class="text-center" width="15%">Status</th>
-                            <th class="text-center" width="15%">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($selfs as $self)
-                        <tr>
-                            <td>{{ $self->sel_id }}</td>
-                            <td>{{ $self->sel_name }}</td>
-                            <td>{{ $self->unidade ? $self->unidade->uni_codigo . ' - ' . $self->unidade->nome : 'Sem Unidade' }}</td>
-                            <td class="text-center">
+        <div class="card-body">
+            <div wire:ignore>
+                @php
+                    $heads = [
+                        ['label' => 'ID', 'width' => 5],
+                        ['label' => 'Nome', 'width' => 25],
+                        ['label' => 'Unidade', 'width' => 25],
+                        ['label' => 'Status', 'width' => 15],
+                        ['label' => 'Ações', 'no-export' => true, 'width' => 15],
+                    ];
+                    $config = [
+                        'order' => [['0', 'asc']],
+                        'columns' => [
+                            ['data' => 'sel_id', 'type' => 'num'], 
+                            null, 
+                            null, 
+                            null, 
+                            ['orderable' => false]
+                        ],
+                        'language' => ['url' => '/vendor/datatables/pt-br.json'],
+                    ];
+                @endphp
+                <x-adminlte-datatable id="selfs_table" :heads="$heads" :config="$config" striped hoverable bordered
+                    with-buttons>
+                    @foreach ($selfs as $self)
+                        <tr style="font-weight: normal;">
+                            <td style="font-weight: normal;">{{ $self->sel_id }}</td>
+                            <td style="font-weight: normal;">{{ $self->sel_name }}</td>
+                            <td style="font-weight: normal;">{{ $self->unidade ? $self->unidade->uni_codigo . ' - ' . $self->unidade->nome : 'Sem Unidade' }}</td>
+                            <td style="font-weight: normal;" class="text-center">
                                 <span class="badge {{ $self->sel_status ? 'bg-success' : 'bg-secondary' }}">
                                     {{ $self->sel_status ? 'Ativo' : 'Inativo' }}
                                 </span>
                             </td>
-                            <td class="text-center">
-                                <a href="{{ route('selfs.edit', $self->sel_id) }}" class="btn btn-xs btn-default text-primary" title="Editar">
-                                    <i class="fas fa-pencil-alt"></i>
-                                </a>
-                                <button wire:click="confirmDelete({{ $self->sel_id }})" class="btn btn-xs btn-default text-danger" title="Excluir">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                                <button type="button" wire:click="toggleStatus({{ $self->sel_id }})" class="btn btn-xs btn-default {{ $self->sel_status ? 'text-success' : 'text-secondary' }}" title="{{ $self->sel_status ? 'Desativar' : 'Ativar' }}">
-                                    <i class="fas fa-toggle-{{ $self->sel_status ? 'on' : 'off' }}"></i>
-                                </button>
+                            <td style="font-weight: normal;" class="text-center">
+                                <div class="btn-group">
+                                    <a href="{{ route('selfs.edit', $self->sel_id) }}" title="Editar">
+                                        <button class="btn btn-xs btn-default text-primary mx-1 shadow">
+                                            <i class="fa fa-lg fa-fw fa-pen"></i>
+                                        </button>
+                                    </a>
+                                    <button wire:click="confirmDelete({{ $self->sel_id }})" title="Excluir" class="btn btn-xs btn-default text-danger mx-1 shadow">
+                                        <i class="fa fa-lg fa-fw fa-trash"></i>
+                                    </button>
+                                    <button wire:click="toggleStatus({{ $self->sel_id }})" title="{{ $self->sel_status ? 'Desativar' : 'Ativar' }}" class="btn btn-xs btn-default text-primary mx-1 shadow">
+                                        @if ($self->sel_status)
+                                            <i class="fas fa-lg fa-fw fa-toggle-on" style="color: #00ff33;"></i>
+                                        @else
+                                            <i class="fas fa-lg fa-fw fa-toggle-off" style="color: #ff0000;"></i>
+                                        @endif
+                                    </button>
+                                </div>
                             </td>
                         </tr>
-                        @empty
-                        <tr>
-                            <td colspan="5" class="text-center">Nenhum SelfCheckout encontrado</td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        <div class="card-footer clearfix">
-            <div class="float-left">
-                Mostrando de {{ $selfs->firstItem() ?? 0 }} até {{ $selfs->lastItem() ?? 0 }} de {{ $selfs->total() ?? 0 }} registros
-            </div>
-            <div class="float-right">
-                {{ $selfs->links() }}
+                    @endforeach
+                </x-adminlte-datatable>
             </div>
         </div>
     </div>
-    
+
+    <!-- Modal de Confirmação de Exclusão -->
     <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true" wire:ignore.self>
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -135,87 +114,52 @@
             </div>
         </div>
     </div>
-    
-    @section('css')
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+
     <style>
-        .sortable {
-            cursor: pointer;
-            white-space: nowrap;
+        /* Remove negrito de todos os elementos de paginação */
+        .dataTables_info,
+        .dataTables_paginate,
+        .paginate_button,
+        .page-item,
+        .page-link,
+        .pagination-footer span,
+        .pagination,
+        .dataTables_length,
+        .dataTables_filter {
+            font-weight: normal !important;
         }
-        .sortable i {
-            margin-left: 5px;
-            font-size: 0.8rem;
+        
+        /* Especificamente para o texto "Mostrando de X até Y..." */
+        div.dataTables_wrapper div.dataTables_info {
+            font-weight: normal !important;
         }
-        .card-footer {
-            padding: 0.75rem 1.25rem;
+        
+        /* Para atingir elementos gerados pelo Livewire */
+        nav[aria-label="Pagination Navigation"] span,
+        nav[aria-label="Pagination Navigation"] a {
+            font-weight: normal !important;
         }
-        .page-item.active .page-link {
-            background-color: #007bff;
-            border-color: #007bff;
-        }
-        .table {
-            table-layout: fixed;
-            width: 100%;
-        }
-        .table th, .table td {
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        .pagination {
-            margin-bottom: 0;
-        }
-        .btn-xs {
-            padding: .125rem .25rem;
-            font-size: 1.3em;
-            line-height: 1.5;
-            border-radius: .15rem;
-        }
-        .btn-success, .btn-primary {
-            padding: 20px 31px;
-            font-size: 19px;
-            border-radius: 8px;
+        
+        /* Alinhar botões na mesma linha */
+        .btn-group {
+            display: inline-flex;
+            align-items: center;
         }
     </style>
-    @stop
-    
-    @section('js')
+
     <script>
-        window.addEventListener('admin-toastr', event => {
-            if (event.detail.type === 'success') {
-                toastr.success(event.detail.message);
-            } else if (event.detail.type === 'error') {
-                toastr.error(event.detail.message);
-            }
-        });
-        document.addEventListener('DOMContentLoaded', function() {
-            toastr.options = {
-                "closeButton": true,
-                "debug": false,
-                "newestOnTop": false,
-                "progressBar": true,
-                "positionClass": "toast-top-right",
-                "preventDuplicates": false,
-                "onclick": null,
-                "showDuration": "300",
-                "hideDuration": "1000",
-                "timeOut": "5000",
-                "extendedTimeOut": "1000",
-                "showEasing": "swing",
-                "hideEasing": "linear",
-                "showMethod": "fadeIn",
-                "hideMethod": "fadeOut"
-            };
-        });
-        
-        window.addEventListener('show-delete-modal', () => {
-            $('#deleteModal').modal('show');
-        });
-        
-        window.addEventListener('hide-delete-modal', () => {
-            $('#deleteModal').modal('hide');
+        document.addEventListener('livewire:load', function () {
+            window.addEventListener('show-delete-modal', () => {
+                $('#deleteModal').modal('show');
+            });
+            
+            window.addEventListener('hide-delete-modal', () => {
+                $('#deleteModal').modal('hide');
+            });
+            
+            window.addEventListener('admin-toastr', event => {
+                toastr[event.detail.type](event.detail.message);
+            });
         });
     </script>
-    @stop
 </div>
