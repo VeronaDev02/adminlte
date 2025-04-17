@@ -18,6 +18,7 @@ class UserList extends Component
     public $sortDirection = 'asc';
     public $confirmingDelete = false;
     public $userToDelete = null;
+    public $userToReset = null;
     
     protected $listeners = [
         'userSaved' => '$refresh',
@@ -109,6 +110,41 @@ class UserList extends Component
             session()->flash('error', 'Erro ao alterar o status do usuário.');
             return redirect()->route('users.index');
         }
+    }
+    
+    public function resetPassword($userId)
+    {
+        $user = User::findOrFail($userId);
+        $this->userToReset = $user;
+        $this->dispatchBrowserEvent('show-reset-password-modal');
+    }
+    
+    public function doResetPassword()
+    {
+        try {
+            if ($this->userToReset) {
+                // Atualiza diretamente no banco para evitar a dupla criptografia
+                \DB::table('users')
+                    ->where('use_id', $this->userToReset->use_id)
+                    ->update(['use_password' => bcrypt('senha123')]);
+                
+                event(new \App\Events\Admin\User\Edit($this->userToReset->use_id, request()->ip()));
+                
+                $this->dispatchBrowserEvent('hide-reset-password-modal');
+                $this->dispatchBrowserEvent('show-password-reseted-modal');
+            }
+        } catch (\Exception $e) {
+            session()->flash('error', 'Erro ao redefinir a senha do usuário: ' . $e->getMessage());
+            $this->dispatchBrowserEvent('hide-reset-password-modal');
+            return redirect()->route('users.index');
+        }
+    }
+    
+    public function resetAnotherPassword()
+    {
+        // Este método é chamado quando o usuário clica em "Outra senha" no modal
+        $this->dispatchBrowserEvent('hide-password-reseted-modal');
+        $this->dispatchBrowserEvent('show-reset-password-modal');
     }
     
     public function render()

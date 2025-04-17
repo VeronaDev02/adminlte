@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\Unit;
+use App\Models\Unidade;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -97,5 +99,18 @@ class User extends Authenticatable
     public function adminlte_image()
     {
         return null;
+    }
+
+    public function getUnidadesCodigoAttribute()
+    {
+        $unidadesIds = Unit::where('unit_use_id', $this->use_id)
+        ->pluck('unit_uni_id')
+        ->toArray();
+
+        $unidadesCodigos = Unidade::whereIn('uni_id', $unidadesIds)
+                ->pluck('uni_codigo')
+                ->toArray();
+
+        return $unidadesCodigos;
     }
 }
