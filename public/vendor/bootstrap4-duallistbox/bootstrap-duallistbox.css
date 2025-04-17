@@ -1,0 +1,109 @@
+/*
+ *  Bootstrap Duallistbox - v3.0.9
+ *  A responsive dual listbox widget optimized for Twitter Bootstrap. It works on all modern browsers and on touch devices.
+ *  https://www.virtuosoft.eu/code/bootstrap-duallistbox/
+ *
+ *  Made by István Ujj-Mészáros
+ *  Under Apache License v2.0 License
+ */
+
+ .deuErro{border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    box-shadow: inset 0 0 0 transparent;
+    border-color: #dc3545;}
+
+.bootstrap-duallistbox-container .buttons {
+  width: 100%;
+  margin-bottom: -1px;
+}
+
+.bootstrap-duallistbox-container label {
+  display: block;
+}
+
+.bootstrap-duallistbox-container .info {
+  display: inline-block;
+  margin-bottom: 5px;
+  font-size: 11px;
+}
+
+.bootstrap-duallistbox-container .clear1,
+.bootstrap-duallistbox-container .clear2 {
+  display: none;
+  font-size: 10px;
+}
+
+.bootstrap-duallistbox-container .box1.filtered .clear1,
+.bootstrap-duallistbox-container .box2.filtered .clear2 {
+  display: inline-block;
+}
+
+.bootstrap-duallistbox-container .move,
+.bootstrap-duallistbox-container .remove {
+  width: 60%;
+}
+
+.bootstrap-duallistbox-container .btn-group .btn {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.bootstrap-duallistbox-container select {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.bootstrap-duallistbox-container .moveall,
+.bootstrap-duallistbox-container .removeall {
+  width: 40%;
+}
+
+.bootstrap-duallistbox-container.bs2compatible .btn-group > .btn + .btn {
+  margin-left: 0;
+}
+
+.bootstrap-duallistbox-container select {
+  width: 100%;
+  height: 300px;
+  padding: 0;
+}
+
+.bootstrap-duallistbox-container .filter {
+  display: inline-block;
+  width: 100%;
+  height: 31px;
+  margin: 0 0 5px 0;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+.bootstrap-duallistbox-container .filter.placeholder {
+  color: #aaa;
+}
+
+.bootstrap-duallistbox-container.moveonselect .move,
+.bootstrap-duallistbox-container.moveonselect .remove {
+  display:none;
+}
+
+.bootstrap-duallistbox-container.moveonselect .moveall,
+.bootstrap-duallistbox-container.moveonselect .removeall {
+  width: 100%;
+}
+
+@keyframes moveToRight {
+    from { opacity: 0; margin-top: -150px;}
+    to { opacity: 1;margin-top: 0px;}
+}
+
+#cad_ocorrencia #cad_solicitacao{
+    animation: moveToRight 0.5s ease-in-out;
+}
+
+#cad_ocorrencia.some{
+    display: none;
+}
+
+#cad_solicitacao.some{
+    display: none;
+}

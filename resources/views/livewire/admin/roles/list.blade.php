@@ -1,134 +1,70 @@
 <div>
-    @section('title', '- Cargos/Funções')
-    
-    @section('content_header')
-        <div class="d-flex justify-content-between align-items-center">
-            <h1 class="mx-auto" style="font-weight: bold;">Cargos/Funções</h1>
-        </div>
-        <div class="d-flex justify-content-between align-items-center">
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb mb-0 bg-transparent p-0">
-                    <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">Cargos/Funções</li>
-                </ol>
-            </nav>
-        </div>
-    @stop
-    
-    <div class="row mb-3">
-        <div class="col-12 text-right">
-            <a href="{{ route('roles.create') }}" class="btn btn-success">
-                <i class="fas fa-plus"></i> Adicionar
-            </a>
-            <button wire:click="$refresh" class="btn btn-primary">
-                <i class="fas fa-sync-alt"></i> Atualizar
-            </button>
-        </div>
-    </div>
-
-    <div class="card">
+    <div class="card m-0">
         <div class="card-header">
             <div class="row">
-                <div class="col-12 text-right">
-                    <div class="input-group" style="max-width: 300px; float: right;">
-                        <input type="text" wire:model.debounce.300ms="search" class="form-control" placeholder="Pesquisar">
-                        <div class="input-group-append">
-                            <button class="btn btn-default" type="button">
-                                <i class="fas fa-search"></i>
-                            </button>
-                        </div>
-                    </div>
+                <h3 class="col-md-10">Funções</h3>
+                <div class="col-md-1">
+                    <a href="{{ route('roles.create') }}" title="Adicionar função" button="" type="button"
+                        class="btn btn-success" style="width: 6rem;">
+                        <em class="fa fa-plus"></em>
+                        <h6>
+                            Adicionar
+                        </h6>
+                    </a>
+                </div>
+                <div class="col-md-1">
+                    <button onclick="window.location.reload();" title="Atualizar função" button="" type="button"
+                        class="btn btn-info" style="width: 6rem;">
+                        <em class="fa fa-sync-alt"></em>
+                        <h6>
+                            Atualizar
+                        </h6>
+                    </button>
                 </div>
             </div>
         </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-striped table-bordered table-hover" id="dataTable">
-                    <thead>
-                        <tr>
-                            <th wire:click="sortBy('rol_id')" class="sortable" width="10%">
-                                ID 
-                                @if ($sortField === 'rol_id')
-                                    <i class="fas fa-sort-{{ $sortDirection === 'asc' ? 'up' : 'down' }}"></i>
-                                @else
-                                    <i class="fas fa-sort"></i>
-                                @endif
-                            </th>
-                            <th wire:click="sortBy('rol_name')" class="sortable" width="40%">
-                                Nome
-                                @if ($sortField === 'rol_name')
-                                    <i class="fas fa-sort-{{ $sortDirection === 'asc' ? 'up' : 'down' }}"></i>
-                                @else
-                                    <i class="fas fa-sort"></i>
-                                @endif
-                            </th>
-                            <th width="25%">Quantidade de Usuários</th>
-                            <th wire:click="sortBy('created_at')" class="sortable" width="15%">
-                                Data Criação
-                                @if ($sortField === 'created_at')
-                                    <i class="fas fa-sort-{{ $sortDirection === 'asc' ? 'up' : 'down' }}"></i>
-                                @else
-                                    <i class="fas fa-sort"></i>
-                                @endif
-                            </th>
-                            <th class="text-center" width="10%">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($roles as $role)
-                        <tr>
-                            <td>{{ $role->rol_id }}</td>
-                            <td>{{ $role->rol_name }}</td>
-                            <td>{{ $role->users->count() }}</td>
-                            <td>{{ $role->created_at ? $role->created_at->format('d/m/Y') : '' }}</td>
-                            <td class="text-center">
-                                <a href="{{ route('roles.edit', $role->rol_id) }}" class="btn btn-xs btn-default text-primary" title="Editar">
-                                    <i class="fas fa-pencil-alt"></i>
+        <div class="card-body">
+            <div wire:ignore>
+                @php
+                    $heads = [
+                        'ID',
+                        'Nome',
+                        'Quantidade de Usuários',
+                        'Data Criação',
+                        ['label' => 'Ações', 'no-export' => true, 'width' => 8],
+                    ];
+                    $config = [
+                        'order' => [['0', 'asc']],
+                        'columns' => [['data' => 'rol_id', 'type' => 'num'], null, null, null, ['orderData' => [6, 4]]],
+                        'language' => ['url' => '/vendor/datatables/pt-br.json'],
+                    ];
+                @endphp
+                <x-adminlte-datatable id="role_table" :heads="$heads" :config="$config" striped hoverable bordered
+                    with-buttons>
+                    @foreach ($roles as $role)
+                        <tr style="font-weight: normal;">
+                            <td style="font-weight: normal;">{{ $role->rol_id }}</td>
+                            <td style="font-weight: normal;">{{ $role->rol_name }}</td>
+                            <td style="font-weight: normal;">{{ $role->users->count() }}</td>
+                            <td style="font-weight: normal;">{{ $role->created_at ? $role->created_at->format('d/m/Y') : '' }}</td>
+                            <td class="row mr-0">
+                                <a href="{{ route('roles.edit', $role->rol_id) }}">
+                                    <button class="btn btn-xs btn-default text-primary mx-1 shadow" title="Editar">
+                                        <i class="fa fa-lg fa-fw fa-pen"></i>
+                                    </button>
                                 </a>
-                                <button wire:click="confirmDelete({{ $role->rol_id }})" class="btn btn-xs btn-default text-danger" title="Excluir">
-                                    <i class="fas fa-trash"></i>
+                                <button wire:click="confirmDelete({{ $role->rol_id }})" class="btn btn-xs btn-default text-danger mx-1 shadow" title="Excluir">
+                                    <i class="fa fa-lg fa-fw fa-trash"></i>
                                 </button>
                             </td>
                         </tr>
-                        @empty
-                        <tr>
-                            <td colspan="5" class="text-center">Nenhum cargo/função encontrado</td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        <div class="card-footer clearfix">
-            <div class="float-left">
-                Mostrando de {{ $roles->firstItem() ?? 0 }} até {{ $roles->lastItem() ?? 0 }} de {{ $roles->total() ?? 0 }} registros
-            </div>
-            <div class="float-right">
-                {{ $roles->links() }}
+                    @endforeach
+                </x-adminlte-datatable>
             </div>
         </div>
     </div>
-    
-    <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="errorModalLabel" aria-hidden="true" wire:ignore.self>
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title" id="errorModalLabel">
-                        <i class="fas fa-exclamation-triangle"></i> Erro ao Excluir
-                    </h5>
-                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body" id="errorModalBody">
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    
+
+    <!-- Modal de Confirmação de Exclusão -->
     <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true" wire:ignore.self>
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -148,89 +84,76 @@
             </div>
         </div>
     </div>
-    
-    @section('css')
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
-    <style>
-        .sortable {
-            cursor: pointer;
-            white-space: nowrap;
-        }
-        .sortable i {
-            margin-left: 5px;
-            font-size: 0.8rem;
-        }
-        .card-footer {
-            padding: 0.75rem 1.25rem;
-        }
-        .page-item.active .page-link {
-            background-color: #007bff;
-            border-color: #007bff;
-        }
-        .table {
-            table-layout: fixed;
-            width: 100%;
-        }
-        .table th, .table td {
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        .pagination {
-            margin-bottom: 0;
-        }
-        
-        /* Solução agressiva para sobrescrever estilos */
-        .table td .btn.btn-xs,
-        .table td .btn-group .btn,
-        .btn.btn-xs {
-            padding: 0.5rem 0.75rem !important;
-            font-size: 1rem !important;
-            line-height: 1.5 !important;
-            border-radius: 0.25rem !important;
-            min-width: 40px;
-            min-height: 40px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .table td .btn.btn-xs i,
-        .table td .btn-group .btn i,
-        .btn.btn-xs i {
-            font-size: 1rem !important;
-        }
 
-        .btn-success, .btn-primary {
-            padding: 20px 31px;
-            font-size: 19px;
-            border-radius: 8px;
+    <!-- Modal de Erro -->
+    <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="errorModalLabel" aria-hidden="true" wire:ignore.self>
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-danger">
+                    <h5 class="modal-title text-white" id="errorModalLabel">
+                        <i class="fas fa-exclamation-triangle"></i> Erro ao Excluir
+                    </h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="errorModalBody">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* Remove negrito de todos os elementos de paginação */
+        .dataTables_info,
+        .dataTables_paginate,
+        .paginate_button,
+        .page-item,
+        .page-link,
+        .pagination-footer span,
+        .pagination,
+        .dataTables_length,
+        .dataTables_filter {
+            font-weight: normal !important;
+        }
+        
+        /* Especificamente para o texto "Mostrando de X até Y..." */
+        div.dataTables_wrapper div.dataTables_info {
+            font-weight: normal !important;
+        }
+        
+        /* Para atingir elementos gerados pelo Livewire */
+        nav[aria-label="Pagination Navigation"] span,
+        nav[aria-label="Pagination Navigation"] a {
+            font-weight: normal !important;
         }
     </style>
-    @stop
-    
-    @section('js')
+
     <script>
-        window.addEventListener('show-error-modal', (event) => {
-            $('#errorModalBody').text(event.detail.message);
-            $('#errorModal').modal('show');
-        });
-        
-        window.addEventListener('show-delete-modal', () => {
-            $('#deleteModal').modal('show');
-        });
-        
-        window.addEventListener('hide-delete-modal', () => {
-            $('#deleteModal').modal('hide');
-        });
-        
-        window.addEventListener('toastr:success', event => {
-            toastr.success(event.detail.message);
-        });
-        
-        window.addEventListener('toastr:error', event => {
-            toastr.error(event.detail.message);
+        document.addEventListener('livewire:load', function () {
+            window.addEventListener('show-error-modal', (event) => {
+                $('#errorModalBody').text(event.detail.message);
+                $('#errorModal').modal('show');
+            });
+            
+            window.addEventListener('show-delete-modal', () => {
+                $('#deleteModal').modal('show');
+            });
+            
+            window.addEventListener('hide-delete-modal', () => {
+                $('#deleteModal').modal('hide');
+            });
+            
+            window.addEventListener('toastr:success', event => {
+                toastr.success(event.detail.message);
+            });
+            
+            window.addEventListener('toastr:error', event => {
+                toastr.error(event.detail.message);
+            });
         });
     </script>
-    @stop
 </div>
