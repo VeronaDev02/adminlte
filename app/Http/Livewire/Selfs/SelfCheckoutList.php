@@ -28,15 +28,13 @@ class SelfCheckoutList extends Component
     public function mount()
     {
         if (session()->has('success')) {
-            $this->dispatchBrowserEvent('admin-toastr', [
-                'type' => 'success',
+            $this->dispatchBrowserEvent('toastr:success', [
                 'message' => session('success')
             ]);
         }
         
         if (session()->has('error')) {
-            $this->dispatchBrowserEvent('admin-toastr', [
-                'type' => 'error',
+            $this->dispatchBrowserEvent('toastr:error', [
                 'message' => session('error')
             ]);
         }
@@ -53,12 +51,11 @@ class SelfCheckoutList extends Component
         $this->sortField = $field;
     }
     
-    public function confirmDelete($selfId)
+    public function confirmDelete(Selfs $self)
     {
-        $self = Selfs::findOrFail($selfId);
-        
-        $this->selfToDelete = $self;
         $this->confirmingDelete = true;
+        $this->selfToDelete = $self;
+        
         $this->dispatchBrowserEvent('show-delete-modal');
     }
     
@@ -68,10 +65,9 @@ class SelfCheckoutList extends Component
         $this->selfToDelete = null;
     }
     
-    public function toggleStatus($selfId)
+    public function toggleStatus(Selfs $self)
     {
         try {
-            $self = Selfs::findOrFail($selfId);
             $self->sel_status = !$self->sel_status;
             $self->save();
             

@@ -1,9 +1,9 @@
 @extends('adminlte::page')
 
 @section('plugins.Datatables', true)
+@section('title', 'SelfCheckouts')
 @section('plugins.Sweetalert2', true)
 @section('plugins.Toastr', true)
-@section('title', 'SelfCheckouts')
 
 @section('content_header')
     <div class="row mb-2">
