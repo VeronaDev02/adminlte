@@ -152,7 +152,6 @@ class SelfCheckoutForm extends Component
             return redirect()->route('selfs.index');
             
         } catch (\Illuminate\Validation\ValidationException $e) {
-            // Dispara evento de erros de validação para o frontend
             $this->dispatchBrowserEvent('validation-errors', [
                 'errors' => $e->validator->errors()->all()
             ]);
