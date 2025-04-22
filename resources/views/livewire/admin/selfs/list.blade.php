@@ -1,15 +1,4 @@
 <div>
-    @section('content_header')
-        <div class="row mb-2">
-            <div class="col-sm-6"></div>
-            <div class="col-sm-6">
-                <ol class="breadcrumb float-sm-right">
-                    <li class="breadcrumb-item" style="font-weight: normal;"><a href="{{ route('home') }}">Home</a></li>
-                    <li class="breadcrumb-item active" style="font-weight: normal;">SelfCheckouts</li>
-                </ol>
-            </div>
-        </div>
-    @stop
     <div class="card m-0">
         <div class="card-header">
             <div class="row">
@@ -94,7 +83,6 @@
         </div>
     </div>
 
-    <!-- Modal de Confirmação de Exclusão -->
     <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true" wire:ignore.self>
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -116,7 +104,6 @@
     </div>
 
     <style>
-        /* Remove negrito de todos os elementos de paginação */
         .dataTables_info,
         .dataTables_paginate,
         .paginate_button,
@@ -129,18 +116,15 @@
             font-weight: normal !important;
         }
         
-        /* Especificamente para o texto "Mostrando de X até Y..." */
         div.dataTables_wrapper div.dataTables_info {
             font-weight: normal !important;
         }
         
-        /* Para atingir elementos gerados pelo Livewire */
         nav[aria-label="Pagination Navigation"] span,
         nav[aria-label="Pagination Navigation"] a {
             font-weight: normal !important;
         }
         
-        /* Alinhar botões na mesma linha */
         .btn-group {
             display: inline-flex;
             align-items: center;

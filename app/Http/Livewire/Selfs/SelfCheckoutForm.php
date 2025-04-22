@@ -102,7 +102,6 @@ class SelfCheckoutForm extends Component
                 $self = Selfs::findOrFail($self);
             }
             
-            $this->sel_pdv_codigo = $self->sel_pdv_codigo;
             $this->selfId = $self->sel_id;
             $this->sel_name = $self->sel_name;
             $this->sel_pdv_ip = $self->sel_pdv_ip;
@@ -114,6 +113,7 @@ class SelfCheckoutForm extends Component
             $this->sel_rtsp_path = $self->sel_rtsp_path;
             $this->sel_uni_id = $self->sel_uni_id;
             $this->sel_status = (bool) $self->sel_status;
+            $this->sel_pdv_codigo = $self->sel_pdv_codigo;
             $this->isEdit = true;
         }
     }
@@ -122,13 +122,13 @@ class SelfCheckoutForm extends Component
     {
         $this->validateOnly($propertyName);
     }
+    
     public function save()
     {
         try {
             $validatedData = $this->validate();
             
             $validatedData['sel_status'] = $this->sel_status ? 1 : 0;
-            $validatedData['sel_pdv_codigo'] = $this->sel_pdv_codigo;
 
             if ($this->isEdit) {
                 $self = Selfs::findOrFail($this->selfId);

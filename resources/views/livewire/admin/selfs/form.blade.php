@@ -1,22 +1,40 @@
 @section('title', $title)
-<div>
-    @section('content_header')
-        <div class="row mb-2">
-            <div class="col-sm-6"></div>
-            <div class="col-sm-6">
-                <ol class="breadcrumb float-sm-right">
-                    <li class="breadcrumb-item" style="font-weight: normal;"><a href="{{ route('home') }}">Home</a></li>
-                    <li class="breadcrumb-item active" style="font-weight: normal;">SelfCheckouts</li>
-                </ol>
-            </div>
+
+@section('content_header')
+    <div class="row mb-2">
+        <div class="col-sm-6"></div>
+        <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+                <li class="breadcrumb-item" style="font-weight: normal;"><a href="{{ route('home') }}">Home</a></li>
+                <li class="breadcrumb-item" style="font-weight: normal;"><a href="{{ route('selfs.index') }}">SelfCheckouts</a></li>
+                <li class="breadcrumb-item active" style="font-weight: normal;">{{ $title }}</li>
+            </ol>
         </div>
-    @stop
-</div>
+    </div>
+@stop
+
 <div class="card">
+    <div class="card-header">
+        <div class="row">
+            <h3 class="col-md-10">{{ $title }}</h3>
+        </div>
+    </div>
     <div class="card-body">
         <form wire:submit.prevent="save" id="selfForm">
             <div class="row">
-                <div class="col-md-6">
+                <div class="col-md-1">
+                    <div class="form-group">
+                        <label for="sel_status">Status</label>
+                        <div class="custom-control custom-switch mt-2">
+                            <input type="checkbox" class="custom-control-input" 
+                                   id="sel_status" wire:model="sel_status">
+                            <label class="custom-control-label" for="sel_status">
+                                {{ $sel_status ? 'Ativo' : 'Inativo' }}
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-5">
                     <div class="form-group">
                         <label for="sel_name">Nome do SelfCheckout</label>
                         <input type="text" 
@@ -30,72 +48,35 @@
                         @enderror
                     </div>
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-1">
                     <div class="form-group">
-                        <label for="sel_pdv_codigo">Código do PDV</label>
+                        <label for="sel_pdv_codigo">Código PDV</label>
                         <input type="text" 
                             class="form-control @error('sel_pdv_codigo') is-invalid @enderror" 
                             id="sel_pdv_codigo" 
                             wire:model.lazy="sel_pdv_codigo" 
-                            placeholder="Código (máx 3 caracteres)" 
+                            placeholder="Máx 3" 
                             maxlength="3">
                         @error('sel_pdv_codigo')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-2">
                     <div class="form-group">
-                        <label for="sel_pdv_ip">Endereço IP do PDV</label>
+                        <label for="sel_pdv_ip">IP do PDV</label>
                         <input type="text" 
                                class="form-control @error('sel_pdv_ip') is-invalid @enderror" 
                                id="sel_pdv_ip" 
                                wire:model.lazy="sel_pdv_ip" 
-                               placeholder="Digite o endereço IP do PDV" 
+                               placeholder="Digite o IP do PDV" 
                                required>
                         @error('sel_pdv_ip')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
                 </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-5">
-                    <div class="form-group">
-                        <label for="sel_dvr_ip">
-                            Endereço IP do DVR 
-                            <span class="badge badge-info">Variável: {ip_dvr}</span>
-                        </label>
-                        <input type="text" 
-                               class="form-control @error('sel_dvr_ip') is-invalid @enderror" 
-                               id="sel_dvr_ip" 
-                               wire:model.lazy="sel_dvr_ip" 
-                               placeholder="Digite o endereço IP do DVR" 
-                               required>
-                        @error('sel_dvr_ip')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-                </div>
                 <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="sel_dvr_porta">
-                            Porta do DVR
-                            <span class="badge badge-info">Variável: {porta_dvr}</span>
-                        </label>
-                        <input type="text" 
-                               class="form-control @error('sel_dvr_porta') is-invalid @enderror" 
-                               id="sel_dvr_porta" 
-                               wire:model.lazy="sel_dvr_porta" 
-                               placeholder="Digite a porta do DVR" 
-                               required>
-                        @error('sel_dvr_porta')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-                </div>
-                <div class="col-md-4">
                     <div class="form-group">
                         <label for="sel_uni_id">Unidade</label>
                         <div wire:ignore>
@@ -116,163 +97,175 @@
                 </div>
             </div>
 
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="sel_dvr_username">
-                            Usuário do DVR
-                            <span class="badge badge-info">Variável: {login_dvr}</span>
-                        </label>
-                        <input type="text" 
-                               class="form-control @error('sel_dvr_username') is-invalid @enderror" 
-                               id="sel_dvr_username" 
-                               wire:model.lazy="sel_dvr_username" 
-                               placeholder="Digite o usuário do DVR" 
-                               required>
-                        @error('sel_dvr_username')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
+            <div class="card mt-4 mb-4 border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Configurações da Câmera/DVR</h5>
                 </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="sel_dvr_password">
-                            Senha do DVR
-                            <span class="badge badge-info">Variável: {senha_dvr}</span>
-                        </label>
-                        <input type="password" 
-                               class="form-control @error('sel_dvr_password') is-invalid @enderror" 
-                               id="sel_dvr_password" 
-                               wire:model.lazy="sel_dvr_password" 
-                               placeholder="Digite a senha do DVR" 
-                               required>
-                        @error('sel_dvr_password')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="sel_camera_canal">
-                            Canal da Câmera
-                            <span class="badge badge-info">Variável: {canal_rtsp}</span>
-                        </label>
-                        <input type="text" 
-                               class="form-control @error('sel_camera_canal') is-invalid @enderror" 
-                               id="sel_camera_canal" 
-                               wire:model.lazy="sel_camera_canal" 
-                               placeholder="Digite o canal da câmera" 
-                               required>
-                        @error('sel_camera_canal')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="path_rtsp">
-                            Caminho RTSP (ex: cam/realmonitor)
-                            <span class="badge badge-info">Variável: {path_rtsp}</span>
-                        </label>
-                        <input type="text" 
-                               class="form-control" 
-                               id="path_rtsp" 
-                               placeholder="Ex: cam/realmonitor">
-                        <small class="form-text text-muted">
-                            Campo auxiliar, usado apenas na geração do template abaixo.
-                        </small>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row mb-4">
-                <div class="col-md-12">
-                    <div class="form-group">
-                        <label for="sel_rtsp_path">
-                            URL RTSP Completa
-                            <small class="text-muted">(Este campo será salvo no banco de dados)</small>
-                        </label>
-                        <div class="input-group">
-                            <input type="text" 
-                                   class="form-control @error('sel_rtsp_path') is-invalid @enderror" 
-                                   id="sel_rtsp_path" 
-                                   wire:model.lazy="sel_rtsp_path"
-                                   placeholder="rtsp://usuario:senha@ip:porta/caminho?channel=canal&subtype=0">
-                            <div class="input-group-append">
-                                <button class="btn btn-outline-secondary" type="button" 
-                                        onclick="copyToClipboard(this)">
-                                    <i class="fas fa-copy"></i>
-                                </button>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-5">
+                            <div class="form-group">
+                                <label for="sel_dvr_ip">
+                                    Endereço IP do DVR 
+                                    <span class="badge badge-info">Variável: {ip_dvr}</span>
+                                </label>
+                                <input type="text" 
+                                    class="form-control @error('sel_dvr_ip') is-invalid @enderror" 
+                                    id="sel_dvr_ip" 
+                                    wire:model.lazy="sel_dvr_ip" 
+                                    placeholder="Digite o endereço IP do DVR" 
+                                    required>
+                                @error('sel_dvr_ip')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                         </div>
-                        @error('sel_rtsp_path')
-                            <div class="invalid-feedback d-block">{{ $message }}</div>
-                        @enderror
-                        <small class="form-text text-muted">
-                            Você pode usar o gerador abaixo para criar a URL ou inserir manualmente neste campo.
-                        </small>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="sel_dvr_porta">
+                                    Porta do DVR
+                                    <span class="badge badge-info">Variável: {porta_dvr}</span>
+                                </label>
+                                <input type="text" 
+                                    class="form-control @error('sel_dvr_porta') is-invalid @enderror" 
+                                    id="sel_dvr_porta" 
+                                    wire:model.lazy="sel_dvr_porta" 
+                                    placeholder="Digite a porta do DVR" 
+                                    required>
+                                @error('sel_dvr_porta')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="sel_camera_canal">
+                                    Canal da Câmera
+                                    <span class="badge badge-info">Variável: {canal_rtsp}</span>
+                                </label>
+                                <input type="text" 
+                                    class="form-control @error('sel_camera_canal') is-invalid @enderror" 
+                                    id="sel_camera_canal" 
+                                    wire:model.lazy="sel_camera_canal" 
+                                    placeholder="Digite o canal da câmera" 
+                                    required>
+                                @error('sel_camera_canal')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="sel_dvr_username">
+                                    Usuário do DVR
+                                    <span class="badge badge-info">Variável: {login_dvr}</span>
+                                </label>
+                                <input type="text" 
+                                    class="form-control @error('sel_dvr_username') is-invalid @enderror" 
+                                    id="sel_dvr_username" 
+                                    wire:model.lazy="sel_dvr_username" 
+                                    placeholder="Digite o usuário do DVR" 
+                                    required>
+                                @error('sel_dvr_username')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="sel_dvr_password">
+                                    Senha do DVR
+                                    <span class="badge badge-info">Variável: {senha_dvr}</span>
+                                </label>
+                                <input type="password" 
+                                    class="form-control @error('sel_dvr_password') is-invalid @enderror" 
+                                    id="sel_dvr_password" 
+                                    wire:model.lazy="sel_dvr_password" 
+                                    placeholder="Digite a senha do DVR" 
+                                    required>
+                                @error('sel_dvr_password')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="path_rtsp">
+                                    Caminho RTSP
+                                    <span class="badge badge-info">Variável: {path_rtsp}</span>
+                                </label>
+                                <input type="text" 
+                                    class="form-control" 
+                                    id="path_rtsp" 
+                                    placeholder="Ex: cam/realmonitor">
+                                <small class="form-text text-muted">
+                                    Campo auxiliar para template
+                                </small>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="card mt-4 mb-4 border-secondary">
-                <div class="card-header bg-secondary text-white">
-                    <h5 class="mb-0">Gerador de URL RTSP</h5>
+            <div class="card mt-4 mb-4 border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">URL RTSP</h5>
                 </div>
                 <div class="card-body">
                     <p class="mb-3">
-                        Variáveis disponíveis: {login_dvr}, {senha_dvr}, {ip_dvr}, {porta_dvr}, {path_rtsp}, {canal_rtsp}
+                        <strong>Template RTSP:</strong> Configure o formato da URL utilizando as variáveis disponíveis:
                     </p>
                     
                     <div class="form-group">
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text">rtsp://</span>
-                            </div>
-                            <textarea id="rtsp-template-editor" class="form-control" rows="3" style="font-family: monospace;">{login_dvr}:{senha_dvr}@{ip_dvr}:{porta_dvr}/{path_rtsp}?channel={canal_rtsp}&subtype=0</textarea>
-                        </div>
+                        <textarea id="rtsp-template-editor" class="form-control" rows="3" style="font-family: monospace;">rtsp://{login_dvr}:{senha_dvr}@{ip_dvr}:{porta_dvr}/{path_rtsp}?channel={canal_rtsp}&subtype=0</textarea>
                         <small class="form-text text-muted mt-2">
-                            Você pode modificar o template acima como desejar, alterando a ordem ou inserindo texto personalizado.
+                            Variáveis disponíveis: {login_dvr}, {senha_dvr}, {ip_dvr}, {porta_dvr}, {path_rtsp}, {canal_rtsp}
                         </small>
                     </div>
                     
-                    <div class="mt-3 d-flex">
+                    <div class="mb-4 d-flex">
                         <button type="button" class="btn btn-primary" id="btn-apply-template">
-                            <i class="fas fa-magic"></i> Gerar URL
+                            <i class="fas fa-magic"></i> Gerar URL RTSP
                         </button>
                         <button type="button" class="btn btn-outline-secondary ml-2" id="btn-reset-template">
-                            <i class="fas fa-undo"></i> Restaurar Padrão
-                        </button>
-                        <button type="button" class="btn btn-outline-success ml-auto" id="btn-copy-to-url">
-                            <i class="fas fa-arrow-up"></i> Copiar para URL RTSP
+                            <i class="fas fa-undo"></i> Restaurar Template Padrão
                         </button>
                     </div>
                     
-                    <div class="mt-3">
-                        <label>URL Gerada:</label>
-                        <input type="text" class="form-control" id="generated-url" readonly>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label for="sel_rtsp_path">URL Gerada</label>
+                                <div class="input-group">
+                                    <input type="text" 
+                                        class="form-control @error('sel_rtsp_path') is-invalid @enderror" 
+                                        id="generated-url" 
+                                        wire:model.lazy="sel_rtsp_path"
+                                        placeholder="rtsp://usuario:senha@ip:porta/caminho?channel=canal&subtype=0"
+                                        readonly>
+                                    <div class="input-group-append">
+                                        <button class="btn btn-outline-secondary" type="button" 
+                                                onclick="copyToClipboard(this)">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                @error('sel_rtsp_path')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                @enderror
+                                <small class="form-text text-muted">
+                                    Esta URL será salva no banco de dados.
+                                </small>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="sel_status">Status</label>
-                        <div class="custom-control custom-switch">
-                            <input type="checkbox" class="custom-control-input" 
-                                   id="sel_status" wire:model="sel_status">
-                            <label class="custom-control-label" for="sel_status">
-                                {{ $sel_status ? 'Ativo' : 'Inativo' }}
-                            </label>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row mt-3">
+            <div class="row mt-4">
                 <div class="col-12">
                     <button type="submit" 
                             class="btn btn-primary" 
@@ -280,7 +273,11 @@
                             wire:loading.attr="disabled" 
                             wire:target="save">
                         <span wire:loading.remove wire:target="save">
-                            <i class="fas fa-save"></i> Salvar
+                            @if($isEdit)
+                                <i class="fas fa-pen mr-1"></i> Atualizar
+                            @else
+                                <i class="fas fa-save mr-1"></i> Salvar
+                            @endif
                         </span>
                         <span wire:loading wire:target="save">
                             <i class="fas fa-spinner fa-spin"></i> Salvando...
@@ -382,11 +379,14 @@
     }
     
     function initTemplateEditor() {
-        const DEFAULT_TEMPLATE = '{login_dvr}:{senha_dvr}@{ip_dvr}:{porta_dvr}/{path_rtsp}?channel={canal_rtsp}&subtype=0';
+        const DEFAULT_TEMPLATE = 'rtsp://{login_dvr}:{senha_dvr}@{ip_dvr}:{porta_dvr}/{path_rtsp}?channel={canal_rtsp}&subtype=0';
         const templateEditor = document.getElementById('rtsp-template-editor');
         const generatedUrl = document.getElementById('generated-url');
-        const rtspUrlField = document.getElementById('sel_rtsp_path');
         const pathRtspField = document.getElementById('path_rtsp');
+        
+        if (generatedUrl.value) {
+            document.getElementById('generated-url').readOnly = false;
+        }
         
         document.getElementById('btn-apply-template').addEventListener('click', function() {
             generateUrlFromTemplate(templateEditor.value);
@@ -394,13 +394,6 @@
         
         document.getElementById('btn-reset-template').addEventListener('click', function() {
             templateEditor.value = DEFAULT_TEMPLATE;
-        });
-        
-        document.getElementById('btn-copy-to-url').addEventListener('click', function() {
-            if (generatedUrl.value) {
-                @this.set('sel_rtsp_path', generatedUrl.value);
-                rtspUrlField.value = generatedUrl.value;
-            }
         });
         
         function generateUrlFromTemplate(template) {
@@ -424,10 +417,11 @@
             });
             
             if (!allFieldsFilled) {
+                toastr.warning('Preencha todos os campos obrigatórios para gerar a URL RTSP.');
                 return;
             }
             
-            let url = 'rtsp://' + template;
+            let url = template;
             
             const variables = {
                 '{login_dvr}': document.querySelector('#sel_dvr_username').value,
@@ -442,7 +436,12 @@
                 url = url.split(variable).join(variables[variable]);
             });
             
-            generatedUrl.value = url;
+            document.getElementById('generated-url').readOnly = false;
+            document.getElementById('generated-url').value = url;
+            @this.set('sel_rtsp_path', url);
+            document.getElementById('generated-url').readOnly = true;
+            
+            toastr.success('URL RTSP gerada com sucesso!');
         }
     }
     
@@ -455,5 +454,20 @@
             }, 2000);
         });
     }
+    
+    document.addEventListener('livewire:load', function () {
+        window.addEventListener('toastr:success', event => {
+            toastr.success(event.detail.message);
+        });
+        
+        window.addEventListener('toastr:error', event => {
+            toastr.error(event.detail.message);
+        });
+        
+        window.addEventListener('contentChanged', function() {
+            aplicarMascaras();
+            $('#sel_uni_id').trigger('change');
+        });
+    });
 </script>
 @stop
