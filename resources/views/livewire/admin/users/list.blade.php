@@ -96,7 +96,6 @@
         </div>
     </div>
 
-    <!-- Modal de Confirmação de Exclusão -->
     <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true" wire:ignore.self>
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -117,7 +116,6 @@
         </div>
     </div>
     
-    <!-- Modal de Confirmação de Reset de Senha -->
     <div class="modal fade" id="resetPasswordModal" tabindex="-1" role="dialog" aria-labelledby="resetPasswordModalLabel" aria-hidden="true" wire:ignore.self>
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
@@ -139,7 +137,6 @@
         </div>
     </div>
     
-    <!-- Modal de Senha Redefinida -->
     <div class="modal fade" id="passwordResetedModal" tabindex="-1" role="dialog" aria-labelledby="passwordResetedModalLabel" aria-hidden="true" wire:ignore.self>
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
@@ -162,7 +159,6 @@
     </div>
 
     <style>
-        /* Remove negrito de todos os elementos de paginação */
         .dataTables_info,
         .dataTables_paginate,
         .paginate_button,
@@ -175,25 +171,21 @@
             font-weight: normal !important;
         }
         
-        /* Especificamente para o texto "Mostrando de X até Y..." */
         div.dataTables_wrapper div.dataTables_info {
             font-weight: normal !important;
         }
         
-        /* Para atingir elementos gerados pelo Livewire */
         nav[aria-label="Pagination Navigation"] span,
         nav[aria-label="Pagination Navigation"] a {
             font-weight: normal !important;
         }
         
-        /* Ajustar tamanho do botão de redefinir senha */
         .btn-sm {
             padding: 0.25rem 0.5rem;
             font-size: 0.875rem;
             line-height: 1.5;
         }
         
-        /* Alinhar botões na mesma linha */
         .btn-group {
             display: inline-flex;
             align-items: center;

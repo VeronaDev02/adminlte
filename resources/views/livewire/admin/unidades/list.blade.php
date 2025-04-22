@@ -73,7 +73,6 @@
         </div>
     </div>
 
-    <!-- Modal de Confirmação de Exclusão -->
     <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true" wire:ignore.self>
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -94,7 +93,6 @@
         </div>
     </div>
 
-    <!-- Modal de Erro -->
     <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="errorModalLabel" aria-hidden="true" wire:ignore.self>
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -116,7 +114,6 @@
     </div>
 
     <style>
-        /* Remove negrito de todos os elementos de paginação */
         .dataTables_info,
         .dataTables_paginate,
         .paginate_button,
@@ -129,12 +126,10 @@
             font-weight: normal !important;
         }
         
-        /* Especificamente para o texto "Mostrando de X até Y..." */
         div.dataTables_wrapper div.dataTables_info {
             font-weight: normal !important;
         }
         
-        /* Para atingir elementos gerados pelo Livewire */
         nav[aria-label="Pagination Navigation"] span,
         nav[aria-label="Pagination Navigation"] a {
             font-weight: normal !important;

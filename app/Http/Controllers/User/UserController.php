@@ -74,7 +74,6 @@ class UserController extends Controller
                 ->with("error", "A senha atual está incorreta!");
         }
 
-        // Atualiza a senha diretamente sem o status_password
         $user->use_password = $request->new_password;
         $user->save();
         
@@ -90,13 +89,11 @@ class UserController extends Controller
         try {
             $user = Auth::user();
             
-            // Atualiza a senha diretamente sem o status_password
             $user->use_password = $request->new_password;
             $user->save();
             
             event(new EditPassword($user->use_id, request()->ip()));
             
-            // Forçar logout e redirecionar para login
             Auth::logout();
             return redirect()->route('login')->with(
                 "success",

@@ -31,6 +31,7 @@ class User extends Authenticatable
         'use_login_ativo',
         'use_allow_updates',
         'use_rol_id',
+        'img_user',
     ];
 
     protected $hidden = [

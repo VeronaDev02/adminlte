@@ -123,7 +123,6 @@ class UserList extends Component
     {
         try {
             if ($this->userToReset) {
-                // Atualiza diretamente no banco para evitar a dupla criptografia
                 \DB::table('users')
                     ->where('use_id', $this->userToReset->use_id)
                     ->update(['use_password' => bcrypt('senha123')]);
@@ -142,7 +141,6 @@ class UserList extends Component
     
     public function resetAnotherPassword()
     {
-        // Este método é chamado quando o usuário clica em "Outra senha" no modal
         $this->dispatchBrowserEvent('hide-password-reseted-modal');
         $this->dispatchBrowserEvent('show-reset-password-modal');
     }
