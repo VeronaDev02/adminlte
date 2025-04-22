@@ -99,7 +99,6 @@
         </div>
     </div>
     
-    <!-- Modal de confirmação de exclusão -->
     <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true" wire:ignore.self>
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -120,7 +119,6 @@
         </div>
     </div>
     
-    <!-- Modal de erro -->
     <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="errorModalLabel" aria-hidden="true" wire:ignore.self>
         <div class="modal-dialog" role="document">
             <div class="modal-content">
