@@ -79,7 +79,7 @@
                 <div class="col-md-3">
                     <div class="form-group">
                         <label for="sel_uni_id">Unidade</label>
-                        <div wire:ignore>
+                        <div wire:model.lazy="sel_uni_id">
                             <select class="form-control @error('sel_uni_id') is-invalid @enderror" 
                                     id="sel_uni_id" required>
                                 <option value="">Selecione uma Unidade</option>
@@ -359,9 +359,7 @@
                     return "Buscando...";
                 }
             }
-        }).on('change', function() {
-            @this.set('sel_uni_id', $(this).val());
-        });
+        })
         
         initTemplateEditor();
         

@@ -89,7 +89,6 @@ class RoleForm extends Component
             return redirect()->back();
         }
     }
-    
     public function render()
     {
         $title = $this->isEdit ? 'Editar Cargo/Função' : 'Criar Novo Cargo/Função';
