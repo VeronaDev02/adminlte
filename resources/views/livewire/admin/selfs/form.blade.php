@@ -439,7 +439,6 @@
             @this.set('sel_rtsp_path', url);
             document.getElementById('generated-url').readOnly = true;
             
-            toastr.success('URL RTSP gerada com sucesso!');
         }
     }
     

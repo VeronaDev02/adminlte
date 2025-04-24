@@ -67,7 +67,8 @@ class UnidadeForm extends Component
             $this->usuariosSelecionados = $unidade->use_ids ?? [];
             
             $this->selfsAssociados = $unidade->selfs ?? collect([]);
-            
+            $this->selfsAssociadosFiltrados = $this->selfsAssociados;
+
             $this->isEdit = true;
         }
         $this->dispatchBrowserEvent('contentChanged');
@@ -193,5 +194,50 @@ class UnidadeForm extends Component
         return view('livewire.admin.unidades.form', [
             'title' => $title
         ]);
+    }
+
+    public $termoPesquisaSelfCheckouts = '';
+    public $ordenacaoSelfCheckouts = 'sel_id';
+    public $direcaoOrdenacao = 'asc';
+    public $selfsAssociadosFiltrados = [];
+
+
+
+    public function ordenarSelfCheckouts($coluna)
+    {
+        if ($this->ordenacaoSelfCheckouts === $coluna) {
+            $this->direcaoOrdenacao = $this->direcaoOrdenacao === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->ordenacaoSelfCheckouts = $coluna;
+            $this->direcaoOrdenacao = 'asc';
+        }
+
+        $this->pesquisarSelfCheckouts();  // Refaz a pesquisa após ordenar
+    }
+
+    public function pesquisarSelfCheckouts()
+    {
+        if ($this->isEdit) {
+            $termo = $this->termoPesquisaSelfCheckouts;
+            $unidade = Unidade::where('uni_id', $this->unidadeId)->first();
+            
+            if ($unidade) {
+                $this->selfsAssociadosFiltrados = $unidade->selfs()
+                    ->where(function($query) use ($termo) {
+                        $query->where('sel_id', 'like', '%'.$termo.'%')
+                            ->orWhere('sel_name', 'like', '%'.$termo.'%')
+                            ->orWhere('sel_pdv_codigo', 'like', '%'.$termo.'%');
+                    })
+                    ->orderBy($this->ordenacaoSelfCheckouts, $this->direcaoOrdenacao)  // Ordenação direta na consulta
+                    ->get();
+            } else {
+                $this->selfsAssociadosFiltrados = collect([]);
+            }
+        }
+    }
+
+    public function updatedTermoPesquisaSelfCheckouts()
+    {
+        $this->pesquisarSelfCheckouts();
     }
 }
