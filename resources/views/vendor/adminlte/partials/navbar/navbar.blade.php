@@ -21,6 +21,9 @@
         {{-- Custom right links --}}
         @yield('content_top_nav_right')
 
+         {{-- Theme Switch Button --}}
+         @include('adminlte::partials.navbar.menu-item-theme-switch')
+
         {{-- Configured right links --}}
         @each('adminlte::partials.navbar.menu-item', $adminlte->menu('navbar-right'), 'item')
 

@@ -75,6 +75,7 @@ class UserController extends Controller
         }
 
         $user->use_password = $request->new_password;
+        $user->use_status_password = true;
         $user->save();
         
         event(new EditPassword($user->use_id, request()->ip()));
@@ -90,6 +91,7 @@ class UserController extends Controller
             $user = Auth::user();
             
             $user->use_password = $request->new_password;
+            $user->use_status_password = true;
             $user->save();
             
             event(new EditPassword($user->use_id, request()->ip()));
@@ -112,5 +114,24 @@ class UserController extends Controller
     public function destroy($id)
     {
         //
+    }
+    public function saveUIPreferences(Request $request)
+    {
+        try {
+            $user = Auth::user();
+            $preferences = $request->input('preferences');
+            
+            \Log::info('Salvando preferências de UI para usuário ID: ' . $user->use_id, [
+                'preferences' => $preferences
+            ]);
+            
+            $user->ui_preferences = $preferences;
+            $user->save();
+            
+            return response()->json(['success' => true, 'message' => 'Preferências salvas com sucesso']);
+        } catch (\Exception $e) {
+            \Log::error('Erro ao salvar preferências de UI: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
     }
 }

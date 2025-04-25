@@ -264,37 +264,57 @@
 
     @section('js')
     <script>
+
+        const codigoInput = document.getElementById('use_cod_func');
+        codigoInput.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                buscarFuncionario();
+            }
+        });
+
+        function buscarFuncionario() {
+            const codigoFuncionario = document.getElementById('use_cod_func').value;
+            
+            if (!codigoFuncionario) {
+                Swal.fire({
+                    title: 'Erro',
+                    text: 'Por favor, insira um código de funcionário',
+                    icon: 'warning'
+                });
+                return;
+            }
+            
+            $('#originalIcon').hide();
+            $('#loadingIcon').show();
+
+            @this.call('buscarFuncionario', codigoFuncionario).then(() => {
+                $('#originalIcon').show();
+                $('#loadingIcon').hide();
+            });
+        }
+
         function gerarUsernameAutomatico() {
             @this.call('gerarUsernameAutomatico');
         }
         
         document.addEventListener('livewire:load', function () {
+
             window.addEventListener('admin-toastr', event => {
                 toastr[event.detail.type](event.detail.message);
+            });
+
+            const codigoInput = document.getElementById('use_cod_func');
+            codigoInput.addEventListener('keydown', function(event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    buscarFuncionario();
+                }
             });
             
             const buscarBtn = document.getElementById('buscarFuncionario');
             if (buscarBtn) {
-                buscarBtn.addEventListener('click', function() {
-                    const codigoFuncionario = document.getElementById('use_cod_func').value;
-                    
-                    if (!codigoFuncionario) {
-                        Swal.fire({
-                            title: 'Erro',
-                            text: 'Por favor, insira um código de funcionário',
-                            icon: 'warning'
-                        });
-                        return;
-                    }
-                    
-                    $('#originalIcon').hide();
-                    $('#loadingIcon').show();
-
-                    @this.call('buscarFuncionario', codigoFuncionario).then(() => {
-                        $('#originalIcon').show();
-                        $('#loadingIcon').hide();
-                    });
-                });
+                buscarBtn.addEventListener('click', buscarFuncionario);
             }
 
             function filterTable(inputId, tableId) {

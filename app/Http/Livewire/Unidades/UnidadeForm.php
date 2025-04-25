@@ -16,8 +16,8 @@ class UnidadeForm extends Component
     public $unidadeId;
     public $uni_codigo;
     public $uni_tip_id;
+    public $uni_nome;
     public $tiposUnidade = [];
-    
     public $isEdit = false;
     public $usuarios = [];
     public $usuariosSelecionados = [];
@@ -34,10 +34,17 @@ class UnidadeForm extends Component
         if ($this->isEdit) {
             $uniqueRuleCodigo .= ',' . $this->unidadeId . ',uni_id';
         }
+
+        $uniqueRuleNome = 'required|string|max:255|unique:unidade,uni_nome';
+        
+        if ($this->isEdit) {
+            $uniqueRuleNome .= ',' . $this->unidadeId . ',uni_id';
+        }
         
         return [
             'uni_codigo' => $uniqueRuleCodigo,
             'uni_tip_id' => 'required|exists:tipo_unidade,tip_id',
+            'uni_nome' => $uniqueRuleNome,
         ];
     }
     
@@ -48,6 +55,9 @@ class UnidadeForm extends Component
         'uni_codigo.regex' => 'O código da unidade deve conter apenas números.',
         'uni_tip_id.required' => 'O tipo de unidade é obrigatório.',
         'uni_tip_id.exists' => 'O tipo de unidade selecionado não existe.',
+        'uni_nome.unique' => 'Este nome da unidade já está sendo utilizado.',
+        'uni_nome.required' => 'O nome da unidade é obrigatório.',
+        'uni_nome.max' => 'O nome da unidade não pode ter mais de 255 caracteres.',
     ];
     
     public function mount($unidade = null)
@@ -63,11 +73,11 @@ class UnidadeForm extends Component
             $this->unidadeId = $unidade->uni_id;
             $this->uni_codigo = $unidade->uni_codigo;
             $this->uni_tip_id = $unidade->uni_tip_id;
-            
+            $this->uni_nome = $unidade->uni_nome;
             $this->usuariosSelecionados = $unidade->use_ids ?? [];
-            
+
             $this->selfsAssociados = $unidade->selfs ?? collect([]);
-            
+
             $this->isEdit = true;
         }
         $this->dispatchBrowserEvent('contentChanged');
@@ -187,6 +197,7 @@ class UnidadeForm extends Component
     
     public function render()
     {
+
         $title = $this->isEdit ? 'Editar Unidade' : 'Criar Nova Unidade';
         $this->dispatchBrowserEvent('contentChanged');
         

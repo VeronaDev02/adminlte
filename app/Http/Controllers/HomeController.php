@@ -6,7 +6,6 @@ use App\Models\Role;
 use App\Models\Selfs;
 use App\Models\Unidade;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -24,7 +23,7 @@ class HomeController extends Controller
         if ($isAdmin) {
             $data = $this->getAdminDashboardData();
             return view('admin.dashboard', $data);
-        } else {
+        } else if (Auth::user()->use_active == true) {
             return view('home');
         }
     }

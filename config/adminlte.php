@@ -315,6 +315,13 @@ return [
             'url' => 'home',
         ],
         [
+            'key' => 'home',
+            'text' => 'Home',
+            'icon' => 'fas fa-fw fa-home',
+            'url' => 'home',
+            'admin' => true,
+        ],
+        [
             'key' => 'configuracoes',
             'text' => 'Configurações',
             'icon' => 'fas fa-fw fa-cogs',
@@ -398,6 +405,12 @@ return [
                 ],
             ],
         ],
+        [
+            'key' => 'selfcheckout',
+            'text' => 'SelfCheckouts',
+            'icon' => 'fas fa-fw fa-video',
+            'url' => '/selfcheckout',
+        ],
     ],
 
     /*
@@ -436,6 +449,16 @@ return [
     */
 
     'plugins' => [
+        'ThemeSwitcher' => [
+            'active' => true,
+            'files' => [
+                [
+                    'type' => 'js',
+                    'asset' => true,
+                    'location' => 'js/theme-switcher.js',
+                ],
+            ],
+        ],
         'Datatables' => [
             'active' => true,
             'files' => [

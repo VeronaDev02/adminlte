@@ -23,7 +23,7 @@ class UserList extends Component
     protected $listeners = [
         'userSaved' => '$refresh',
         'confirmDelete' => 'confirmDelete',
-        'deleteConfirmed' => 'destroy'
+        'deleteConfirmed' => 'destroy',
     ];
     
     public function mount()
@@ -125,7 +125,9 @@ class UserList extends Component
             if ($this->userToReset) {
                 \DB::table('users')
                     ->where('use_id', $this->userToReset->use_id)
-                    ->update(['use_password' => bcrypt('senha123')]);
+                    ->update(['use_password' => bcrypt('senha123'),
+                    'use_status_password' => false 
+                ]);
                 
                 event(new \App\Events\Admin\User\Edit($this->userToReset->use_id, request()->ip()));
                 
@@ -137,12 +139,6 @@ class UserList extends Component
             $this->dispatchBrowserEvent('hide-reset-password-modal');
             return redirect()->route('users.index');
         }
-    }
-    
-    public function resetAnotherPassword()
-    {
-        $this->dispatchBrowserEvent('hide-password-reseted-modal');
-        $this->dispatchBrowserEvent('show-reset-password-modal');
     }
     
     public function render()

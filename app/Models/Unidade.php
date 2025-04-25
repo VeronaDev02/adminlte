@@ -14,7 +14,8 @@ class Unidade extends Model
 
     protected $fillable = [
         'uni_codigo',
-        'uni_tip_id'
+        'uni_tip_id',
+        'uni_nome'
     ];
 
     public function tipoUnidade()
@@ -41,7 +42,9 @@ class Unidade extends Model
 
     public function getNomeAttribute()
     {
-        return $this->tipoUnidade->tip_nome;
+        return $this->
+            tipoUnidade->tip_nome . ' - ' .
+            $this->uni_nome;
     }
 
     public function getUnitIdsAttribute()

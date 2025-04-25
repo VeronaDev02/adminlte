@@ -17,7 +17,7 @@
 
     {{-- User menu toggler --}}
     <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">
-        <img src="{{ Auth::user()->img_user ?? '/images/grupowrite-pq.png' }}"
+        <img src="{{ Auth::user()->img_user ?? asset('images/profile.png') }}"
             class="user-image img-circle elevation-2"
             style="background-color:black; width: 32px; height: 32px; object-fit: cover; display: inline-block; vertical-align: middle; border-radius: 50%;"
             alt="{{ Auth::user()->name }}">

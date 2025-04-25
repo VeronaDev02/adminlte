@@ -105,6 +105,7 @@ class UnidadeList extends Component
             ->when($this->search, function ($query) {
                 $search = '%' . $this->search . '%';
                 return $query->where('uni_codigo', 'like', $search)
+                    ->orWhere('uni_nome', 'like', $search) 
                     ->orWhereHas('tipoUnidade', function($q) use ($search) {
                         $q->where('tip_nome', 'like', $search);
                     });

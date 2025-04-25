@@ -32,6 +32,8 @@ class User extends Authenticatable
         'use_allow_updates',
         'use_rol_id',
         'img_user',
+        'use_status_password',
+        'ui_preferences',
     ];
 
     protected $hidden = [
@@ -43,6 +45,8 @@ class User extends Authenticatable
         'use_active' => 'boolean',
         'use_login_ativo' => 'boolean',
         'use_allow_updates' => 'boolean',
+        'use_status_password' => 'boolean',
+        'ui_preferences' => 'array',
     ];
 
 

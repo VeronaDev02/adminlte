@@ -21,7 +21,7 @@
         <div class="card-body">
             <form wire:submit.prevent="save">
                 <div class="row">
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="form-group">
                             <label for="uni_codigo">Código</label>
                             <input type="text" 
@@ -35,7 +35,21 @@
                             @enderror
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="uni_nome">Nome da Unidade</label>
+                            <input type="text" 
+                                   class="form-control @error('uni_nome') is-invalid @enderror" 
+                                   id="uni_nome" 
+                                   wire:model.lazy="uni_nome" 
+                                   placeholder="Digite o nome da unidade" 
+                                   required>
+                            @error('uni_nome')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+                    <div class="col-md-4">
                         <div class="form-group">
                             <label for="uni_tip_id">Tipo de Unidade</label>
                             <div wire:ignore>
@@ -205,7 +219,7 @@
                                             <td>{{ $self->sel_id }}</td>
                                             <td>{{ $self->sel_name }}</td>
                                             <td>{{ $self->sel_pdv_ip }}</td>
-                                            <td>{{ $self->sel_rtsp_url }}</td>
+                                            <td>{{ $self->sel_rtsp_path }}</td>
                                             <td>
                                                 @if($self->sel_status)
                                                     <span class="badge badge-success">Ativo</span>
@@ -349,10 +363,16 @@
         const rows = document.querySelectorAll(`#${tableId} tr`);
         
         rows.forEach(row => {
-            const td = row.querySelector('td');
-            if (td) {
-                const txtValue = td.textContent || td.innerText;
-                row.style.display = txtValue.toUpperCase().includes(filter) ? '' : 'none';
+            const allCells = row.querySelectorAll('td');
+            if (allCells.length > 0) {
+                let found = false;
+                allCells.forEach(cell => {
+                    const txtValue = cell.textContent || cell.innerText;
+                    if (txtValue.toUpperCase().includes(filter)) {
+                        found = true;
+                    }
+                });
+                row.style.display = found ? '' : 'none';
             }
         });
     }

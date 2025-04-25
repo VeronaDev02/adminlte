@@ -82,11 +82,8 @@ Route::middleware(['auth:web', 'verifica.permissions.users'])->group(function ()
     Route::post('users/{user}/toggle-status', [App\Http\Controllers\Admin\UserController::class, 'toggleStatus'])->name('users.toggle-status');
     Route::post('users/{id}/processar-unidades', [App\Http\Controllers\Admin\UserController::class, 'processarUnidades'])
         ->name('users.processar-unidades');
-
-    
-
-
 });
+
 Route::middleware("auth:web")->group(function () {
     // Rota para a página de perfil
     Route::get("perfil", [
@@ -102,7 +99,7 @@ Route::middleware("auth:web")->group(function () {
     
     // Rota GET para a página de redefinir senha (quando status_password = 0)
     Route::get("redefinirSenha", [
-        App\Http\Controllers\User\UserController::class, // Corrigido aqui
+        App\Http\Controllers\User\UserController::class,
         "redefinirSenha",
     ])->name("user.redefinirSenhaPage");
     
@@ -117,4 +114,13 @@ Route::middleware("auth:web")->group(function () {
         App\Http\Controllers\User\UserController::class,
         "redefinirSenhaPerfil",
     ])->name("user.redefinirSenhaPerfil");
+
+    // ------------------------- Selfcheckout -------------------------
+    Route::prefix('selfcheckout')->name('selfcheckout.')->group(function () {
+        Route::get('/', [App\Http\Controllers\User\SelfsController::class, 'index'])->name('index');
+    });
+
+    Route::post('/save-ui-preferences', [App\Http\Controllers\User\UserController::class, 'saveUIPreferences'])
+    ->middleware('auth')
+    ->name('user.save-ui-preferences');
 });

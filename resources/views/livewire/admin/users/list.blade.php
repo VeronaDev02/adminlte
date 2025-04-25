@@ -151,7 +151,6 @@
                     <h4>Nova senha: <strong>senha123</strong></h4>
                 </div>
                 <div class="modal-footer justify-content-center">
-                    <button type="button" wire:click="resetAnotherPassword" class="btn btn-primary btn-block">Outra senha</button>
                     <button type="button" class="btn btn-secondary btn-block" data-dismiss="modal">Voltar</button>
                 </div>
             </div>
@@ -201,7 +200,10 @@
             window.addEventListener('hide-delete-modal', () => {
                 $('#deleteModal').modal('hide');
             });
-            
+
+            $('#deleteModal').on('hidden.bs.modal', function () {
+            });
+
             window.addEventListener('show-reset-password-modal', () => {
                 $('#resetPasswordModal').modal('show');
             });
@@ -209,7 +211,7 @@
             window.addEventListener('hide-reset-password-modal', () => {
                 $('#resetPasswordModal').modal('hide');
             });
-            
+
             window.addEventListener('show-password-reseted-modal', () => {
                 $('#passwordResetedModal').modal('show');
             });
@@ -217,7 +219,19 @@
             window.addEventListener('hide-password-reseted-modal', () => {
                 $('#passwordResetedModal').modal('hide');
             });
-            
+
+            $('#deleteModal .btn-secondary, #deleteModal .close').on('click', function() {
+                $('#deleteModal').modal('hide');
+            });
+
+            $('#resetPasswordModal .btn-secondary, #resetPasswordModal .close').on('click', function() {
+                $('#resetPasswordModal').modal('hide');
+            });
+
+            $('#passwordResetedModal .btn-secondary, #passwordResetedModal .close').on('click', function() {
+                $('#passwordResetedModal').modal('hide');
+            });
+
             window.addEventListener('admin-toastr', event => {
                 toastr[event.detail.type](event.detail.message);
             });

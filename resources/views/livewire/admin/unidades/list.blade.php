@@ -29,7 +29,7 @@
                     $heads = [
                         'ID',
                         'Código',
-                        'Tipo',
+                        'Nome',
                         'Data Criação',
                         'Última Atualização',
                         ['label' => 'Ações', 'no-export' => true, 'width' => 8],
@@ -53,7 +53,7 @@
                         <tr style="font-weight: normal;">
                             <td style="font-weight: normal;">{{ $unidade->uni_id }}</td>
                             <td style="font-weight: normal;">{{ $unidade->uni_codigo }}</td>
-                            <td style="font-weight: normal;">{{ $unidade->tipoUnidade->tip_nome }}</td>
+                            <td style="font-weight: normal;">{{ $unidade->tipoUnidade->tip_nome . ' - ' . $unidade->uni_nome }}</td>
                             <td style="font-weight: normal;">{{ $unidade->created_at ? $unidade->created_at->format('d/m/Y') : '' }}</td>
                             <td style="font-weight: normal;">{{ $unidade->updated_at ? $unidade->updated_at->format('d/m/Y') : '' }}</td>
                             <td class="row mr-0">

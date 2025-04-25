@@ -27,7 +27,7 @@
                 <div style="background-color: black; height:200px; width:200px; border-radius:50%"
                     class="d-flex justify-content-center">
                     <img style="width:200px; height:200px; border-radius:50%"
-                        src="@if (Auth::user()->img_user) {{ Auth::user()->img_user }} @else http://192.168.0.45:8101/vendor/adminlte/dist/img/grupowrite-pq.png @endif"
+                        src="{{ Auth::user()->img_user ? Auth::user()->img_user : asset('images/profile.png') }}"
                         alt="img-usuario">
                 </div>
                 <div class="mt-2"><a href="#" data-toggle="modal" data-target="#exampleModal" title="Alterar Imagem" button=""
