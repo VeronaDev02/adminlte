@@ -230,11 +230,6 @@ class UserForm extends Component
                 $this->use_username = $this->gerarUsername($this->use_name);
                 
                 $this->emit('load');
-                
-                $this->dispatchBrowserEvent('admin-toastr', [
-                    'type' => 'success',
-                    'message' => 'Funcionário encontrado com sucesso!'
-                ]);
             } else if (isset($data['error'])) {
                 $this->dispatchBrowserEvent('admin-toastr', [
                     'type' => 'error',

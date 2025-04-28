@@ -47,6 +47,33 @@ class SelfCheckoutForm extends Component
         ]);
     }
 
+    public function getSelRtspPathAttribute($value)
+    {
+        try {
+            if (empty($value)) {
+                return null;
+            }
+            return Crypt::decryptString($value);
+        } catch (\Exception $e) {
+            \Log::error('Erro ao descriptografar sel_rtsp_path', [
+                'error' => $e->getMessage(),
+                'value_length' => strlen($value ?? '')
+            ]);
+            return null;
+        }
+    }
+
+    public function validateRtspPath()
+    {
+        if (strlen($this->sel_rtsp_path) > 250) {
+            $this->sel_rtsp_path = substr($this->sel_rtsp_path, 0, 250);
+            $this->dispatchBrowserEvent('toastr:warning', [
+                'message' => 'O caminho RTSP foi truncado para 250 caracteres.'
+            ]);
+        }
+        return true;
+    }
+
     public function setRtspPath($value)
     {
         $this->sel_rtsp_path = $value;
@@ -118,17 +145,37 @@ class SelfCheckoutForm extends Component
         }
     }
     
-    public function updated($propertyName)
+    public function updated($field)
     {
-        $this->validateOnly($propertyName);
+        if ($field === 'sel_uni_id') {
+            $unidade = Unidade::find($this->sel_uni_id);
+            if (!$unidade) {
+                $this->sel_uni_id = null;
+            }
+        }
+        
+        $this->validateOnly($field);
+        
+        if ($field === 'sel_rtsp_path') {
+            $this->validateRtspPath();
+        }
     }
     
     public function save()
     {
         try {
+            // Adicionar log de depuração
+            \Log::info('Iniciando salvamento de SelfCheckout', [
+                'dados' => $this->only(['sel_name', 'sel_pdv_ip', 'sel_uni_id', 'sel_status']),
+                'isEdit' => $this->isEdit
+            ]);
+            
             $validatedData = $this->validate();
             
             $validatedData['sel_status'] = $this->sel_status ? 1 : 0;
+
+            // Log após validação
+            \Log::info('Dados validados com sucesso');
 
             if ($this->isEdit) {
                 $self = Selfs::findOrFail($this->selfId);
@@ -136,15 +183,31 @@ class SelfCheckoutForm extends Component
                 
                 event(new EditEvent($self->sel_id, request()->ip()));
                 
+                $this->dispatchBrowserEvent('toastr:success', [
+                    'message' => 'SelfCheckout atualizado com sucesso.'
+                ]);
+                
+                // Log sucesso na edição
+                \Log::info('SelfCheckout atualizado', ['id' => $self->sel_id]);
+                
                 session()->flash('success', 'SelfCheckout atualizado com sucesso.');
             } else {
                 $self = Selfs::create($validatedData);
                 
                 if (!$self || !$self->sel_id) {
+                    // Log erro específico
+                    \Log::error('Falha ao criar SelfCheckout - ID não gerado');
                     throw new \Exception('Falha ao criar SelfCheckout - ID não gerado');
                 }
                 
                 event(new CreateEvent($self->sel_id, request()->ip()));
+                
+                $this->dispatchBrowserEvent('toastr:success', [
+                    'message' => 'SelfCheckout criado com sucesso.'
+                ]);
+                
+                // Log sucesso na criação
+                \Log::info('SelfCheckout criado', ['id' => $self->sel_id]);
                 
                 session()->flash('success', 'SelfCheckout criado com sucesso.');
             }
@@ -152,13 +215,33 @@ class SelfCheckoutForm extends Component
             return redirect()->route('selfs.index');
             
         } catch (\Illuminate\Validation\ValidationException $e) {
+            // Log erro de validação
+            \Log::error('Erro de validação', [
+                'errors' => $e->validator->errors()->all()
+            ]);
+            
             $this->dispatchBrowserEvent('validation-errors', [
                 'errors' => $e->validator->errors()->all()
             ]);
-            return back()->withErrors($e->validator);
+            
+            $this->dispatchBrowserEvent('toastr:error', [
+                'message' => 'Verifique os campos e tente novamente.'
+            ]);
+            
+            return null;
         } catch (\Exception $e) {
+            // Log erro genérico
+            \Log::error('Erro ao salvar SelfCheckout', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            $this->dispatchBrowserEvent('toastr:error', [
+                'message' => 'Erro ao salvar SelfCheckout: ' . $e->getMessage()
+            ]);
+            
             session()->flash('error', 'Erro ao salvar SelfCheckout: ' . $e->getMessage());
-            return back();
+            return null;
         }
     }
     

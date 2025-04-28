@@ -13,7 +13,7 @@
 @stop
 
 @section('content')
-    <div class="card card-dark">
+    <div class="card">
         <div class="card-header">
             <h3 class="card-title">
                 <i class="fas fa-tv mr-2"></i>Configurações de Tela
@@ -62,7 +62,7 @@
             <div id="screen-mapping-container" style="display: none;">
                 <div class="row mt-3">
                     <div class="col-12">
-                        <div class="card card-dark">
+                        <div class="card">
                             <div class="card-header">
                                 <h3 class="card-title">Seleção de PDVs por Tela</h3>
                             </div>
@@ -84,12 +84,12 @@
     </div>
 
     <div id="grid-container" style="display: none;">
-        <div class="card card-dark">
+        <div class="card">
             <div class="card-body p-1">
                 <div id="grid-pdv-names" class="mb-3 p-2 d-flex justify-content-between align-items-center">
                     <div class="pdv-badges">
                     </div>
-                    <button id="fullscreen-btn" class="btn btn-dark btn-sm">
+                    <button id="fullscreen-btn" class="btn btn-secondary btn-sm">
                         <i class="fas fa-expand"></i> Tela Cheia
                     </button>
                 </div>
@@ -168,7 +168,7 @@ document.addEventListener('DOMContentLoaded', function() {
         fullscreenOverlay.style.padding = '10px';
         
         const exitButton = document.createElement('button');
-        exitButton.className = 'btn btn-dark btn-sm align-self-end mb-2';
+        exitButton.className = 'btn btn-secondary btn-sm align-self-end mb-2';
         exitButton.innerHTML = '<i class="fas fa-compress"></i> Sair da Tela Cheia';
         exitButton.addEventListener('click', exitFullscreen);
         
@@ -195,6 +195,12 @@ document.addEventListener('DOMContentLoaded', function() {
             mainGrid.style.width = '100%';
             mainGrid.style.minHeight = '100%';
             mainGrid.style.gap = '2px';
+            
+            // Corrigindo display de todas as células no grid
+            const streamContainers = mainGrid.querySelectorAll('.stream-container');
+            streamContainers.forEach(container => {
+                container.style.display = 'flex'; // Garantir que todas as células estejam visíveis
+            });
         }
         
         fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i> Sair da Tela Cheia';
@@ -265,16 +271,31 @@ document.addEventListener('DOMContentLoaded', function() {
     function recalculateStreamContainers() {
         setTimeout(() => {
             const mainGrid = document.getElementById('mainGrid');
+            if (!mainGrid) return;
+            
             const streamContainers = mainGrid.querySelectorAll('.stream-container');
+            const totalCells = selectedScreenCount || streamContainers.length;
             
             if (isFullscreen) {
                 mainGrid.style.height = '100%';
                 mainGrid.style.minHeight = '100%';
                 mainGrid.style.width = '100%';
                 mainGrid.style.gap = '2px';
+                
+                // Ajustar o grid para mostrar todas as células
+                // Verificar e ajustar o grid-template-columns e grid-template-rows se necessário
+                if (selectedColumns && selectedRows) {
+                    mainGrid.style.gridTemplateColumns = `repeat(${selectedColumns}, 1fr)`;
+                    mainGrid.style.gridTemplateRows = `repeat(${selectedRows}, 1fr)`;
+                }
             }
             
-            streamContainers.forEach(container => {
+            streamContainers.forEach((container, index) => {
+                // Garantir que todas as células até o número de telas selecionadas estejam visíveis
+                if (index < totalCells) {
+                    container.style.display = 'flex';
+                }
+                
                 container.style.height = '';
                 container.style.width = '';
                 container.style.maxHeight = '';
@@ -350,6 +371,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         selectedRows = selectedScreenCount / selectedColumns;
+        
+        // Only proceed if we have a valid whole number of rows
+        if (selectedRows % 1 !== 0) {
+            rowsDisplay.value = '';
+            return;
+        }
+        
         rowsDisplay.value = `${selectedRows} ${selectedRows === 1 ? 'Linha' : 'Linhas'}`;
         
         updateLayoutPreview();
@@ -362,7 +390,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         let previewHtml = `
-            <label style="color: white; margin-bottom: 8px; display: block; text-align: center;">Layout</label>
+            <label style="margin-bottom: 8px; display: block; text-align: center; color: #ecf0f1;">Layout</label>
             <div class="layout-grid" style="
             display: grid;
             grid-template-columns: repeat(${selectedColumns}, 1fr);
@@ -395,7 +423,9 @@ document.addEventListener('DOMContentLoaded', function() {
         
         updateRowsDisplay();
         
-        if (selectedScreenCount && selectedColumns && selectedRows) {
+        // Only show screen mapping if we have valid values for all three parameters
+        // and if rows is a whole number (not a decimal)
+        if (selectedScreenCount && selectedColumns && selectedRows && selectedRows % 1 === 0) {
             screenMappingContainer.style.display = 'block';
             applyConfigBtn.disabled = false;
             
@@ -405,16 +435,50 @@ document.addEventListener('DOMContentLoaded', function() {
             applyConfigBtn.disabled = true;
         }
     }
+    
+    function updateGridDisplay() {
+        // Esta função assegura que o grid está exibindo todas as células corretamente
+        const mainGrid = document.getElementById('mainGrid');
+        if (!mainGrid) return;
+        
+        // Garantir que as propriedades do grid estão definidas corretamente
+        if (selectedColumns && selectedRows) {
+            mainGrid.style.gridTemplateColumns = `repeat(${selectedColumns}, 1fr)`;
+            mainGrid.style.gridTemplateRows = `repeat(${selectedRows}, 1fr)`;
+        }
+        
+        // Garantir que todas as células necessárias estão visíveis
+        const streamContainers = mainGrid.querySelectorAll('.stream-container');
+        streamContainers.forEach((container, index) => {
+            if (index < selectedScreenCount) {
+                container.style.display = 'flex';
+            } else {
+                container.style.display = 'none';
+            }
+        });
+    }
 
     function updateScreenMapping() {
         screenSelectorContainer.innerHTML = '';
-
+        
+        // Use grid layout matching the layout preview's configuration
+        const gridContainer = document.createElement('div');
+        gridContainer.classList.add('screen-grid');
+        gridContainer.style.display = 'grid';
+        gridContainer.style.gridTemplateColumns = `repeat(${selectedColumns}, 1fr)`;
+        gridContainer.style.gap = '15px';
+        gridContainer.style.padding = '15px';
+        
         for (let i = 1; i <= selectedScreenCount; i++) {
             const screenDiv = document.createElement('div');
             screenDiv.classList.add('screen-item');
             
             const label = document.createElement('label');
             label.textContent = `Tela ${i}`;
+            label.style.color = '#333'; // Ensuring visibility in dark mode
+            label.style.display = 'block';
+            label.style.marginBottom = '5px';
+            label.style.fontWeight = 'bold';
             
             const select = document.createElement('select');
             select.classList.add('form-control');
@@ -434,12 +498,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
             screenDiv.appendChild(label);
             screenDiv.appendChild(select);
-            screenSelectorContainer.appendChild(screenDiv);
+            gridContainer.appendChild(screenDiv);
         }
+        
+        screenSelectorContainer.appendChild(gridContainer);
     }
 
     quadrantSelect.addEventListener('change', function() {
         selectedScreenCount = parseInt(this.value) || 0;
+        // Reset columns and rows when changing screen count
+        selectedColumns = 0;
+        selectedRows = 0;
+        columnsSelect.value = '';
+        rowsDisplay.value = '';
         updateUI();
     });
 
@@ -524,8 +595,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 pdvNameElement.textContent = `${pdv.nome}`;
                 pdvBadges.appendChild(pdvNameElement);
             });
+            
+            // Chamar a função para garantir que o grid está exibindo todas as células
+            setTimeout(updateGridDisplay, 500);
         }
     }
+    
+    // Adicionar um event listener para quando a página terminar de carregar
+    window.addEventListener('load', function() {
+        if (document.getElementById('mainGrid')) {
+            updateGridDisplay();
+            recalculateStreamContainers();
+        }
+    });
 });
 </script>
 @stop
@@ -579,30 +661,6 @@ document.addEventListener('DOMContentLoaded', function() {
     #fullscreen-btn i {
         font-size: 1rem;
     }
-    body {
-        background-color: #5a636a !important;
-    }
-
-    .content-wrapper {
-        background-color: #5a636a !important;
-    }
-
-    .card-dark {
-        background-color: #343a40 !important;
-        color: #ecf0f1;
-    }
-
-    .card-dark .card-header {
-        background-color: #5a636a !important;
-    }
-
-    .card-header.collapsed {
-        background-color: #343a40 !important;
-    }
-
-    .card-header .btn-tool i {
-        color: #ecf0f1 !important;
-    }
 
     #screen-mapping .screen-item {
         margin-bottom: 15px;
@@ -619,45 +677,49 @@ document.addEventListener('DOMContentLoaded', function() {
         min-width: 200px;
     }
 
-    .screen-selector-container .screen-item label {
-        color: #ecf0f1;
-    }
-
-    .form-control {
-        background-color: #5a636a !important;
-        color: #ecf0f1 !important;
-        border-color: #343a40 !important;
-    }
-
-    h1 {
-        color: #ffffff !important;
-    }
-
-    #grid-pdv-names {
-        display: flex;
-        justify-content: center;
-        margin-bottom: 15px;
-    }
-
-    .screen-item select {
-        margin-top: 5px;
-    }
-
     .layout-preview {
         margin: 20px 0;
     }
 
     .layout-cell {
         min-height: 50px;
+        border: 1px solid;
+        background-color: #5a636a;
+        color: #ffffff;
     }
 
     .layout-grid {
         display: grid;
         gap: 5px;
-        background-color: #343a40;
         padding: 10px;
         border-radius: 5px;
         height: 200px;
+        border: 1px solid;
+        background-color: #343a40;
+    }
+    
+    /* Ajustes de responsividade para o grid */
+    @media (max-width: 768px) {
+        #fullscreen-overlay {
+            padding: 5px;
+        }
+        
+        .stream-container {
+            flex-direction: column;
+        }
+        
+        .log-container, .video-container {
+            width: 100% !important;
+            height: auto !important;
+        }
+        
+        .log-container {
+            height: 150px !important;
+        }
+        
+        .video-container {
+            flex: 1;
+        }
     }
 </style>
 @stop
