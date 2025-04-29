@@ -459,6 +459,16 @@ return [
                 ],
             ],
         ],
+        'menuLoader' => [
+            'active' => true,
+            'files' => [
+                [
+                    'type' => 'js',
+                    'asset' => true,
+                    'location' => 'js/menu-loader.js'
+                ]
+            ]
+        ],
         'Datatables' => [
             'active' => true,
             'files' => [
