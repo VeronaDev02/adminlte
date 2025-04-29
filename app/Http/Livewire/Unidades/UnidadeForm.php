@@ -122,25 +122,25 @@ class UnidadeForm extends Component
     
     public function save()
     {
-        \Log::info('DEPURAÇÃO DETALHADA', [
-            'unidade_id' => $this->unidadeId,
-            'uni_tip_id' => $this->uni_tip_id,
-            'usuarios_selecionados' => $this->usuariosSelecionados,
-            'unidade_exists' => Unidade::where('uni_id', $this->unidadeId)->exists(),
-            'tip_exists' => TipoUnidade::where('tip_id', $this->uni_tip_id)->exists()
-        ]);
+        // \Log::info('DEPURAÇÃO DETALHADA', [
+        //     'unidade_id' => $this->unidadeId,
+        //     'uni_tip_id' => $this->uni_tip_id,
+        //     'usuarios_selecionados' => $this->usuariosSelecionados,
+        //     'unidade_exists' => Unidade::where('uni_id', $this->unidadeId)->exists(),
+        //     'tip_exists' => TipoUnidade::where('tip_id', $this->uni_tip_id)->exists()
+        // ]);
         
-        \Log::info('Iniciando salvamento de Unidade', [
-            'is_edit' => $this->isEdit,
-            'unidade_id' => $this->unidadeId ?? 'Nova',
-            'usuarios_selecionados' => $this->usuariosSelecionados
-        ]);
+        // \Log::info('Iniciando salvamento de Unidade', [
+        //     'is_edit' => $this->isEdit,
+        //     'unidade_id' => $this->unidadeId ?? 'Nova',
+        //     'usuarios_selecionados' => $this->usuariosSelecionados
+        // ]);
 
         $validatedData = $this->validate();
         
-        \Log::info('Dados validados', [
-            'validated_data' => $validatedData
-        ]);
+        // \Log::info('Dados validados', [
+        //     'validated_data' => $validatedData
+        // ]);
 
         try {
             DB::beginTransaction();
@@ -157,9 +157,9 @@ class UnidadeForm extends Component
                 event(new CreateEvent($unidade->uni_id, request()->ip()));
             }
             
-            \Log::info('Unidade processada', [
-                'unidade_id' => $unidade->uni_id
-            ]);
+            // \Log::info('Unidade processada', [
+            //     'unidade_id' => $unidade->uni_id
+            // ]);
             
             // Limpa os units existentes para esta unidade
             Unit::where('unit_uni_id', $unidade->uni_id)->delete();
@@ -182,13 +182,13 @@ class UnidadeForm extends Component
         } catch (\Exception $e) {
             DB::rollBack();
             
-            \Log::error('Erro ao salvar unidade', [
-                'mensagem' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'unidade_id' => $this->unidadeId ?? 'Nova Unidade',
-                'usuarios_selecionados' => $this->usuariosSelecionados,
-                'dados_validados' => $validatedData
-            ]);
+            // \Log::error('Erro ao salvar unidade', [
+            //     'mensagem' => $e->getMessage(),
+            //     'trace' => $e->getTraceAsString(),
+            //     'unidade_id' => $this->unidadeId ?? 'Nova Unidade',
+            //     'usuarios_selecionados' => $this->usuariosSelecionados,
+            //     'dados_validados' => $validatedData
+            // ]);
 
             session()->flash('error', 'Ocorreu um erro: ' . $e->getMessage());
             return redirect()->back();

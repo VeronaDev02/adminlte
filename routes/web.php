@@ -121,6 +121,11 @@ Route::middleware("auth:web")->group(function () {
     });
 
     Route::post('/save-ui-preferences', [App\Http\Controllers\User\UserController::class, 'saveUIPreferences'])
-    ->middleware('auth')
-    ->name('user.save-ui-preferences');
+        ->name('user.save-ui-preferences');
+    Route::post('/user/save-tela-preferences', [App\Http\Controllers\User\SelfsController::class, 'saveTelaPreferences'])
+        ->name('user.saveTelaPreferences');
+    Route::post('/user/destroy-tela-preferences/{index}', [App\Http\Controllers\User\SelfsController::class, 'destroyTelaPreferences'])
+        ->name('destroy.tela.preferences');
+    Route::get('/selfs/monitor', [App\Http\Controllers\User\SelfsMonitorController::class, 'show'])
+        ->name('selfs.monitor');
 });

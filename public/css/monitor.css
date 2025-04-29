@@ -1,0 +1,267 @@
+/* Configuração para o container principal */
+.monitor-grid-container {
+    display: grid;
+    gap: 10px;
+    height: calc(100vh - 100px);
+    transition: all 0.3s ease;
+}
+
+/* Estrutura do quadrante */
+.stream-container {
+    display: flex !important;
+    flex-direction: row-reverse !important;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    overflow: hidden;
+    height: 100%;
+    transition: all 0.3s ease;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Vídeo ocupa 70% */
+.video-container {
+    flex: 0 0 70% !important;
+    max-width: 70% !important;
+    min-width: 70% !important;
+    background-color: #000;
+    position: relative;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+/* Log ocupa 30% */
+.log-container {
+    flex: 0 0 30% !important;
+    max-width: 30% !important;
+    min-width: 30% !important;
+    padding: 10px;
+    overflow-y: auto;
+    font-family: monospace;
+    font-size: 0.8rem;
+    height: 100%;
+    border-right: 1px solid #ddd;
+    box-sizing: border-box;
+}
+
+/* Estilos para modo light (padrão) */
+body:not(.dark-mode) .log-container {
+    background-color: #f5f5f5;
+    color: #000;
+}
+
+/* Estilos para modo dark */
+body.dark-mode .log-container {
+    background-color: #2c3035;
+    color: #e9ecef;
+    border-right-color: #495057;
+}
+
+/* Conteúdo do log */
+.log-content {
+    white-space: pre-wrap;
+    word-break: break-word;
+    height: 100%;
+    overflow-y: auto;
+}
+
+/* Estilos para modo dark */
+body.dark-mode .log-content {
+    color: #e9ecef;
+}
+
+/* Indicador de status */
+.status-indicator {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background-color: rgba(0,0,0,0.6);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    z-index: 10;
+}
+
+/* Vídeo */
+video {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+    background-color: #000;
+}
+
+/* Botão de fullscreen para cada quadrante */
+.fullscreen-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    border-radius: 3px;
+    padding: 5px;
+    cursor: pointer;
+    z-index: 100;
+}
+
+/* Estilos para alerta de inatividade */
+.inactivity-alert {
+    background-color: #ff9999 !important;
+}
+
+.pdv-notification {
+    background-color: #ff0000;
+    color: white;
+    padding: 5px;
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+/* Estilos para modo dark do PDV notification */
+body.dark-mode .pdv-notification {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+/* Botão F11 fullscreen */
+#browserFullscreenBtn {
+    position: fixed;
+    top: 68px;
+    right: 15px;
+    background-color: rgba(0,0,0,0.5);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 15px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10000;
+    transition: background-color 0.3s;
+}
+
+#browserFullscreenBtn:hover {
+    background-color: rgba(0,0,0,0.7);
+}
+
+body.dark-mode #browserFullscreenBtn {
+    background-color: rgba(255,255,255,0.2);
+    color: #e9ecef;
+}
+
+body.dark-mode #browserFullscreenBtn:hover {
+    background-color: rgba(255,255,255,0.3);
+}
+
+/* Fullscreen específico de um quadrante */
+.stream-container.fullscreen {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 9999 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: flex !important;
+    flex-direction: row-reverse !important;
+    transform: none !important;
+    box-sizing: border-box !important;
+    max-width: none !important;
+    min-width: 100vw !important;
+    max-height: none !important;
+    min-height: 100vh !important;
+    overflow: hidden !important;
+}
+
+/* Garantir que os containers filhos se comportem corretamente em fullscreen */
+.stream-container.fullscreen .video-container {
+    flex: 0 0 70% !important;
+    width: 70% !important;
+    max-width: 70% !important;
+    min-width: 70% !important;
+    height: 100vh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+}
+
+.stream-container.fullscreen .log-container {
+    flex: 0 0 30% !important;
+    width: 30% !important;
+    max-width: 30% !important;
+    min-width: 30% !important;
+    height: 100vh !important;
+    margin: 0 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+}
+
+/* Modo F11 fullscreen do navegador */
+body.browser-fullscreen {
+    overflow: hidden !important;
+}
+
+body.browser-fullscreen .content-wrapper,
+body.browser-fullscreen .content {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+body.browser-fullscreen .main-header,
+body.browser-fullscreen .main-sidebar,
+body.browser-fullscreen .content-header {
+    display: none !important;
+}
+
+body.browser-fullscreen .monitor-grid-container {
+    height: 100vh !important;
+    width: 100vw !important;
+    padding: 10px !important;
+    margin: 0 !important;
+}
+
+/* Esconde botão quando não necessário */
+body.browser-fullscreen #browserFullscreenBtn {
+    top: 13px;
+    right: -120px;
+    opacity: 0.3;
+    white-space: nowrap;
+    visibility: hidden; /* Esconde o texto sem afetar o ícone */
+}
+
+body.browser-fullscreen #browserFullscreenBtn i {
+    visibility: visible; /* Garante que o ícone fique visível */
+    font-size: 36px;
+}
+
+body.browser-fullscreen #browserFullscreenBtn:hover {
+    opacity: 1;
+}
+
+/* Mensagem de instruções no modo fullscreen */
+#fullscreen-instruction {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    z-index: 10000;
+    display: none;
+}
+
+body.browser-fullscreen #fullscreen-instruction,
+.stream-container.fullscreen #fullscreen-instruction {
+    display: block;
+}

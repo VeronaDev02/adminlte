@@ -55,10 +55,10 @@ class SelfCheckoutForm extends Component
             }
             return Crypt::decryptString($value);
         } catch (\Exception $e) {
-            \Log::error('Erro ao descriptografar sel_rtsp_path', [
-                'error' => $e->getMessage(),
-                'value_length' => strlen($value ?? '')
-            ]);
+            // \Log::error('Erro ao descriptografar sel_rtsp_path', [
+            //     'error' => $e->getMessage(),
+            //     'value_length' => strlen($value ?? '')
+            // ]);
             return null;
         }
     }
@@ -165,17 +165,17 @@ class SelfCheckoutForm extends Component
     {
         try {
             // Adicionar log de depuração
-            \Log::info('Iniciando salvamento de SelfCheckout', [
-                'dados' => $this->only(['sel_name', 'sel_pdv_ip', 'sel_uni_id', 'sel_status']),
-                'isEdit' => $this->isEdit
-            ]);
+            // \Log::info('Iniciando salvamento de SelfCheckout', [
+            //     'dados' => $this->only(['sel_name', 'sel_pdv_ip', 'sel_uni_id', 'sel_status']),
+            //     'isEdit' => $this->isEdit
+            // ]);
             
             $validatedData = $this->validate();
             
             $validatedData['sel_status'] = $this->sel_status ? 1 : 0;
 
             // Log após validação
-            \Log::info('Dados validados com sucesso');
+            // \Log::info('Dados validados com sucesso');
 
             if ($this->isEdit) {
                 $self = Selfs::findOrFail($this->selfId);
@@ -188,7 +188,7 @@ class SelfCheckoutForm extends Component
                 ]);
                 
                 // Log sucesso na edição
-                \Log::info('SelfCheckout atualizado', ['id' => $self->sel_id]);
+                // \Log::info('SelfCheckout atualizado', ['id' => $self->sel_id]);
                 
                 session()->flash('success', 'SelfCheckout atualizado com sucesso.');
             } else {
@@ -196,7 +196,7 @@ class SelfCheckoutForm extends Component
                 
                 if (!$self || !$self->sel_id) {
                     // Log erro específico
-                    \Log::error('Falha ao criar SelfCheckout - ID não gerado');
+                    // \Log::error('Falha ao criar SelfCheckout - ID não gerado');
                     throw new \Exception('Falha ao criar SelfCheckout - ID não gerado');
                 }
                 
@@ -207,7 +207,7 @@ class SelfCheckoutForm extends Component
                 ]);
                 
                 // Log sucesso na criação
-                \Log::info('SelfCheckout criado', ['id' => $self->sel_id]);
+                // \Log::info('SelfCheckout criado', ['id' => $self->sel_id]);
                 
                 session()->flash('success', 'SelfCheckout criado com sucesso.');
             }
@@ -216,9 +216,9 @@ class SelfCheckoutForm extends Component
             
         } catch (\Illuminate\Validation\ValidationException $e) {
             // Log erro de validação
-            \Log::error('Erro de validação', [
-                'errors' => $e->validator->errors()->all()
-            ]);
+            // \Log::error('Erro de validação', [
+            //     'errors' => $e->validator->errors()->all()
+            // ]);
             
             $this->dispatchBrowserEvent('validation-errors', [
                 'errors' => $e->validator->errors()->all()
@@ -231,10 +231,10 @@ class SelfCheckoutForm extends Component
             return null;
         } catch (\Exception $e) {
             // Log erro genérico
-            \Log::error('Erro ao salvar SelfCheckout', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
+            // \Log::error('Erro ao salvar SelfCheckout', [
+            //     'message' => $e->getMessage(),
+            //     'trace' => $e->getTraceAsString()
+            // ]);
             
             $this->dispatchBrowserEvent('toastr:error', [
                 'message' => 'Erro ao salvar SelfCheckout: ' . $e->getMessage()

@@ -22,7 +22,7 @@ $(function () {
     $(document).on('click', '[data-widget="pushmenu"]', function() {
         setTimeout(function() {
             const isCollapsed = $('body').hasClass('sidebar-collapse');
-            console.log('Menu estado após clique:', isCollapsed ? 'Colapsado' : 'Expandido');
+            // console.log('Menu estado após clique:', isCollapsed ? 'Colapsado' : 'Expandido');
             
             saveUserPreferences({
                 theme: $('body').hasClass('dark-mode') ? 'dark' : 'light',
@@ -32,7 +32,7 @@ $(function () {
     });
     
     function saveUserPreferences(preferences) {
-        console.log('Salvando preferências:', preferences);
+        // console.log('Salvando preferências:', preferences);
         
         $.ajax({
             url: '/save-ui-preferences',
@@ -42,7 +42,7 @@ $(function () {
                 preferences: preferences
             },
             success: function(response) {
-                console.log('Preferências salvas com sucesso:', response);
+                // console.log('Preferências salvas com sucesso:', response);
             },
             error: function(error) {
                 console.error('Erro ao salvar preferências:', error);
@@ -53,7 +53,7 @@ $(function () {
     function loadUserPreferences() {
         try {
             const userPreferences = JSON.parse($('meta[name="user-preferences"]').attr('content') || '{}');
-            console.log('Carregando preferências:', userPreferences);
+            // console.log('Carregando preferências:', userPreferences);
             
             if (userPreferences.theme === 'dark') {
                 $('body').addClass('dark-mode');
@@ -67,21 +67,21 @@ $(function () {
             const sidebarCollapsed = userPreferences.sidebar_collapsed === true || 
                                     userPreferences.sidebar_collapsed === "true";
             
-            console.log('Estado do menu a ser aplicado:', sidebarCollapsed ? 'Colapsado' : 'Expandido');
+            // console.log('Estado do menu a ser aplicado:', sidebarCollapsed ? 'Colapsado' : 'Expandido');
             
             if (sidebarCollapsed) {
                 if (!$('body').hasClass('sidebar-collapse')) {
                     $('body').addClass('sidebar-collapse');
-                    console.log('Adicionando classe sidebar-collapse');
+                    // console.log('Adicionando classe sidebar-collapse');
                 }
             } else {
                 if ($('body').hasClass('sidebar-collapse')) {
                     $('body').removeClass('sidebar-collapse');
-                    console.log('Removendo classe sidebar-collapse');
+                    // console.log('Removendo classe sidebar-collapse');
                 }
             }
             
-            console.log('Estado final do menu:', $('body').hasClass('sidebar-collapse') ? 'Colapsado' : 'Expandido');
+            // console.log('Estado final do menu:', $('body').hasClass('sidebar-collapse') ? 'Colapsado' : 'Expandido');
         } catch (e) {
             console.error('Erro ao carregar preferências:', e);
         }

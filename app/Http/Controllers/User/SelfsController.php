@@ -3,74 +3,33 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
-use App\Models\Selfs;
+use App\Repositories\Selfs\SelfsRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Crypt;
 
 class SelfsController extends Controller
 {
-    public function index(Request $request)
+    protected $selfsRepository;
+
+    public function __construct(SelfsRepository $selfsRepository)
     {
-        $user = Auth::user();
-        
-        $unidades = $user->unidades()->with('selfs')->get();
-        
-        $selfsList = collect();
+        $this->selfsRepository = $selfsRepository;
+    }
 
-        foreach ($unidades as $unidade) {
-            $selfsList = $selfsList->merge($unidade->selfs()->active()->get());
-        }
+    public function index(Request $request, SelfsRepository $repository)
+    {
+        $selfsList = $repository->getUserSelfs();
         
-        $pdvDataList = [];
+        $pdvDataList = $repository->preparePdvDataList($selfsList);
 
-        foreach($selfsList as $self) {
-            $rtspUrl = null;
-            try {
-                $encryptedUrl = $self->rtspUrl;
-                if($encryptedUrl) {
-                    $rtspUrl = Crypt::decryptString($encryptedUrl);
-                }
-            } catch(\Exception $e) {
-                // Silenciosamente continua se houver erro
-            }
-            
-            $pdvDataList[] = [
-                'id' => $self->sel_id,
-                'nome' => $self->sel_name,
-                'pdvIp' => $self->sel_pdv_ip,
-                'pdvCodigo' => $self->sel_pdv_codigo,
-                'rtspUrl' => $rtspUrl,
-            ];
-        }
-
-        // Obter parâmetros da requisição
         $activeQuadrants = $request->input('quadrants', null);
         $cols = $request->input('cols', null);
         $rows = $request->input('rows', null);
         
-        // Verificar se PDVs específicos foram selecionados
         $selectedPdvs = $request->input('pdv', []);
         
         if (!empty($selectedPdvs) && $activeQuadrants) {
-            // Reordenar a lista de PDVs para que os selecionados apareçam primeiro
-            $orderedPdvList = [];
-            
-            foreach ($selectedPdvs as $pdvId) {
-                $pdv = collect($pdvDataList)->firstWhere('id', $pdvId);
-                if ($pdv) {
-                    $orderedPdvList[] = $pdv;
-                }
-            }
-            
-            // Adicionar os demais PDVs não selecionados ao final da lista
-            foreach ($pdvDataList as $pdv) {
-                if (!in_array($pdv['id'], $selectedPdvs)) {
-                    $orderedPdvList[] = $pdv;
-                }
-            }
-            
-            $pdvDataList = $orderedPdvList;
+            $pdvDataList = $repository->orderSelectedPdvs($pdvDataList, $selectedPdvs);
         }
 
         $serverConfig = [
@@ -78,15 +37,65 @@ class SelfsController extends Controller
             'pdvServer' => config('api_python.websocket_pdv_server')
         ];
         
-        // Inicializar o componente grid com os novos parâmetros
-        $grid = new \App\View\Components\SelfsGrid(
-            $pdvDataList, 
-            $serverConfig,
-            $activeQuadrants,
-            $cols,
-            $rows
-        );
-        
-        return view('user.selfs.index', compact('pdvDataList', 'serverConfig', 'selfsList', 'grid'));
+        return view('user.selfs.index', compact('pdvDataList', 'serverConfig'));
+    }
+
+    public function saveTelaPreferences(Request $request)
+    {
+        try {
+            $user = auth()->user();
+            \Log::info('Iniciando saveTelaPreferences', [
+                'user_id' => $user->id,
+                'request_data' => $request->all()
+            ]);
+            
+            $preferences = $request->input('preferences');
+            \Log::info('Preferências recebidas', ['preferences' => $preferences]);
+            
+            $currentPreferences = $user->ui_preferences ?? [];
+            \Log::info('Preferências atuais', ['currentPreferences' => $currentPreferences]);
+            
+            if (!isset($currentPreferences['tela'])) {
+                $currentPreferences['tela'] = [];
+                \Log::info('Criando array tela vazio');
+            }
+            
+            $currentPreferences['tela'][] = $preferences;
+            \Log::info('Preferências após adição', ['updatedPreferences' => $currentPreferences]);
+            
+            $user->ui_preferences = $currentPreferences;
+            $result = $user->save();
+            \Log::info('Resultado do save()', ['result' => $result]);
+            
+            return response()->json(['success' => true, 'message' => 'Preferências de tela salvas com sucesso']);
+        } catch (\Exception $e) {
+            \Log::error('Erro ao salvar preferências de tela', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function destroyTelaPreferences(Request $request, $index)
+    {
+        try {
+            $user = auth()->user();
+            $currentPreferences = $user->ui_preferences ?? [];
+
+            if (isset($currentPreferences['tela'][$index])) {
+                unset($currentPreferences['tela'][$index]);
+                $currentPreferences['tela'] = array_values($currentPreferences['tela']);
+
+                $user->ui_preferences = $currentPreferences;
+                $user->save();
+
+                return response()->json(['success' => true, 'message' => 'Preferência removida com sucesso']);
+            }
+
+            return response()->json(['success' => false, 'message' => 'Preferência não encontrada'], 404);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
     }
 }
