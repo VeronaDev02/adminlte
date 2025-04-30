@@ -38,7 +38,7 @@ class RoleController extends Controller
             return redirect()->route("admin.role.index")
                 ->with("success", "Função criada com sucesso.");
         } catch (\Exception $e) {
-            Log::error('Erro ao criar função: ' . $e->getMessage());
+            // Log::error('Erro ao criar função: ' . $e->getMessage());
             
             return redirect()->back()
                 ->with("error", "Erro ao cadastrar a função: " . $e->getMessage())
@@ -77,7 +77,7 @@ class RoleController extends Controller
             return redirect()->route("admin.role.index")
                 ->with("success", "Função atualizada com sucesso.");
         } catch (\Exception $e) {
-            Log::error('Erro ao atualizar função: ' . $e->getMessage());
+            // Log::error('Erro ao atualizar função: ' . $e->getMessage());
             
             return redirect()->back()
                 ->with("error", "Erro ao atualizar a função: " . $e->getMessage())
@@ -96,7 +96,7 @@ class RoleController extends Controller
             return redirect()->route("admin.role.index")
                 ->with("success", "Função excluída com sucesso.");
         } catch (\Exception $e) {
-            Log::error('Erro ao excluir função: ' . $e->getMessage());
+            // Log::error('Erro ao excluir função: ' . $e->getMessage());
             
             return redirect()->route("admin.role.index")
                 ->with("error", "Não foi possível excluir a função. Existem usuários associados.");

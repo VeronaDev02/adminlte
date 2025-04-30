@@ -44,35 +44,35 @@ class SelfsController extends Controller
     {
         try {
             $user = auth()->user();
-            \Log::info('Iniciando saveTelaPreferences', [
-                'user_id' => $user->id,
-                'request_data' => $request->all()
-            ]);
+            // \Log::info('Iniciando saveTelaPreferences', [
+            //     'user_id' => $user->id,
+            //     'request_data' => $request->all()
+            // ]);
             
             $preferences = $request->input('preferences');
-            \Log::info('Preferências recebidas', ['preferences' => $preferences]);
+            // \Log::info('Preferências recebidas', ['preferences' => $preferences]);
             
             $currentPreferences = $user->ui_preferences ?? [];
-            \Log::info('Preferências atuais', ['currentPreferences' => $currentPreferences]);
+            // \Log::info('Preferências atuais', ['currentPreferences' => $currentPreferences]);
             
             if (!isset($currentPreferences['tela'])) {
                 $currentPreferences['tela'] = [];
-                \Log::info('Criando array tela vazio');
+                // \Log::info('Criando array tela vazio');
             }
             
             $currentPreferences['tela'][] = $preferences;
-            \Log::info('Preferências após adição', ['updatedPreferences' => $currentPreferences]);
+            // \Log::info('Preferências após adição', ['updatedPreferences' => $currentPreferences]);
             
             $user->ui_preferences = $currentPreferences;
             $result = $user->save();
-            \Log::info('Resultado do save()', ['result' => $result]);
+            // \Log::info('Resultado do save()', ['result' => $result]);
             
             return response()->json(['success' => true, 'message' => 'Preferências de tela salvas com sucesso']);
         } catch (\Exception $e) {
-            \Log::error('Erro ao salvar preferências de tela', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
+            // \Log::error('Erro ao salvar preferências de tela', [
+            //     'error' => $e->getMessage(),
+            //     'trace' => $e->getTraceAsString()
+            // ]);
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }

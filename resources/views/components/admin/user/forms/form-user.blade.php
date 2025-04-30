@@ -3,6 +3,7 @@
     @section('plugins.BootstrapDualListbox', true)
     @section('plugins.Select2', true)
     @section('plugins.Inputmask', true)
+    @section('plugins.Sweetalert2', true)
 
     <form class="form" id="form_user" method="POST"
         @if ($editMode) action="{{ route('admin.user.update', $user->use_id) }}" @else action="{{ route('admin.user.store') }}" @endif>
@@ -217,8 +218,8 @@
                             $('#loadingIcon').hide();
                         },
                         error: function(response) {
-                            console.log(response)
-                            toastr.error('Nenhum Funcionário encontrado.');
+                            // console.log(response)
+                            error.fire('Nenhum Funcionário encontrado.');
                             $('#originalIcon').show();
                             $('#loadingIcon').hide();
                             $('#use_name').val('');

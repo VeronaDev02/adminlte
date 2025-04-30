@@ -2,7 +2,7 @@
 
 @section('plugins.Datatables', true)
 @section('plugins.Sweetalert2', true)
-@section('plugins.Toastr', true)
+@section('plugins.Toastr', false)
 @section('title', 'Usuários')
 
 @section('content_header')
@@ -137,13 +137,6 @@
 
 @section('js')
     <script>
-        @if(session('success'))
-            toastr.success("{{ session('success') }}");
-        @endif
-
-        @if(session('error'))
-            toastr.error("{{ session('error') }}");
-        @endif
         
         Livewire.on('updateStatusUser', (event) => {
             if (event.status) {

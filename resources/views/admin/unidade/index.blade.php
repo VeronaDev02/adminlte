@@ -2,7 +2,7 @@
 
 @section('plugins.Datatables', true)
 @section('plugins.Sweetalert2', true)
-@section('plugins.Toastr', true)
+@section('plugins.Toastr', false)
 @section('title', 'Unidades')
 
 @section('content_header')
@@ -170,13 +170,5 @@
                 });
             });
         });
-
-        // @if(session('success'))
-        //     toastr.success("{{ session('success') }}");
-        // @endif
-
-        // @if(session('error'))
-        //     toastr.error("{{ session('error') }}");
-        // @endif
     </script>
 @endsection

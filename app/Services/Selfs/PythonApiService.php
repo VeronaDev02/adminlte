@@ -24,10 +24,10 @@ class PythonApiService implements PythonApiServiceInterface
         try {
             // Lógica de conexão WebSocket
             // Implementar conexão com servidor Python
-            Log::info("Conectando ao PDV: {$pdvIp}");
+            // Log::info("Conectando ao PDV: {$pdvIp}");
             return true;
         } catch (Exception $e) {
-            Log::error("Erro ao conectar PDV {$pdvIp}: " . $e->getMessage());
+            // Log::error("Erro ao conectar PDV {$pdvIp}: " . $e->getMessage());
             return false;
         }
     }
@@ -40,14 +40,12 @@ class PythonApiService implements PythonApiServiceInterface
                 'pdv_ip' => $pdvIp
             ];
 
-            // Enviar comando de registro
-            // Implementar lógica de envio e recebimento
             return [
                 'success' => true,
                 'message' => "PDV {$pdvIp} registrado com sucesso"
             ];
         } catch (Exception $e) {
-            Log::error("Erro ao registrar PDV {$pdvIp}: " . $e->getMessage());
+            // Log::error("Erro ao registrar PDV {$pdvIp}: " . $e->getMessage());
             return [
                 'success' => false,
                 'message' => $e->getMessage()

@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\Log;
 
 class MenuController extends Controller
 {
-    // Método para gerar a URL com base nas preferências
     private function generateUrl($tela)
     {
         $pdvs = [];
@@ -26,7 +25,6 @@ class MenuController extends Controller
         ], $pdvs)));
     }
 
-    // Método para gerar o menu dinâmico
     public function generateDynamicMenu()
     {
         Log::info('Gerando menu dinâmico');
@@ -43,7 +41,7 @@ class MenuController extends Controller
             return response()->json(['menu' => []]);
         }
 
-        $uiPreferences = $user->ui_preferences; // Não é necessário json_decode
+        $uiPreferences = $user->ui_preferences;
 
         if (!isset($uiPreferences['tela']) || !is_array($uiPreferences['tela']) || empty($uiPreferences['tela'])) {
             Log::warning('Sem configuração de telas');
@@ -75,7 +73,6 @@ class MenuController extends Controller
         return response()->json(['menu' => $menu]);
     }
 
-    // Método para excluir a tela
     public function deleteTela($index)
     {
         $user = Auth::user();
@@ -84,7 +81,7 @@ class MenuController extends Controller
             return response()->json(['message' => 'Nenhuma preferência encontrada.'], 404);
         }
 
-        $uiPreferences = $user->ui_preferences; // Não é necessário json_decode
+        $uiPreferences = $user->ui_preferences;
 
         if (!isset($uiPreferences['tela']) || !is_array($uiPreferences['tela'])) {
             return response()->json(['message' => 'Nenhuma tela configurada.'], 404);
@@ -94,29 +91,24 @@ class MenuController extends Controller
             return response()->json(['message' => 'Tela não encontrada.'], 404);
         }
 
-        // Captura a tela a ser removida
         $telaToDelete = $uiPreferences['tela'][$index];
 
-        // Remove a tela
         unset($uiPreferences['tela'][$index]);
 
-        // Reindexa para evitar buracos nos índices
         $uiPreferences['tela'] = array_values($uiPreferences['tela']);
 
-        // Caso a chave 'tela' esteja vazia após a remoção, mantemos o formato original, com a chave 'tela' vazia
         if (empty($uiPreferences['tela'])) {
             unset($uiPreferences['tela']);
         }
 
-        // Salva as preferências no banco de dados, o Laravel vai manipular o JSON automaticamente
-        $user->ui_preferences = $uiPreferences; // Apenas atribui o array, o Laravel cuida do resto
+        $user->ui_preferences = $uiPreferences;
         $user->save();
 
-        Log::info('Tela removida do usuário', [
-            'user_id' => $user->id,
-            'tela_index' => $index,
-            'tela_removed' => $telaToDelete
-        ]);
+        // Log::info('Tela removida do usuário', [
+        //     'user_id' => $user->id,
+        //     'tela_index' => $index,
+        //     'tela_removed' => $telaToDelete
+        // ]);
 
         return response()->json(['message' => 'Tela removida com sucesso.']);
     }

@@ -87,7 +87,7 @@ class UserController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             
-            Log::error('Erro ao criar usuário: ' . $e->getMessage());
+            // Log::error('Erro ao criar usuário: ' . $e->getMessage());
             
             return redirect()->back()
                 ->with("error", "Erro ao cadastrar o usuário: " . $e->getMessage())
@@ -171,7 +171,7 @@ class UserController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             
-            Log::error('Erro ao atualizar usuário: ' . $e->getMessage());
+            // Log::error('Erro ao atualizar usuário: ' . $e->getMessage());
             
             return redirect()->back()
                 ->with("error", "Erro ao atualizar o usuário: " . $e->getMessage())
@@ -201,7 +201,7 @@ class UserController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             
-            Log::error('Erro ao excluir usuário: ' . $e->getMessage());
+            // Log::error('Erro ao excluir usuário: ' . $e->getMessage());
             
             return redirect()->route("admin.user.index")
                 ->with("error", "Erro ao excluir o usuário: " . $e->getMessage());
@@ -270,7 +270,7 @@ class UserController extends Controller
                 );
             }
         } catch (\Exception $e) {
-            Log::error('Erro na API: ' . $e->getMessage());
+            // Log::error('Erro na API: ' . $e->getMessage());
             return response()->json(["error" => $e->getMessage()], 500);
         }
     }

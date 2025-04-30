@@ -61,23 +61,22 @@ class SelfMonitorScreen extends Component
             }
         }
         
-        // Log para debug
-        Log::info('SelfMonitorScreen montado', [
-            'quadrants' => $this->quadrants,
-            'columns' => $this->columns,
-            'rows' => $this->rows,
-            'selectedPdvs' => $this->selectedPdvs,
-            'pdvCount' => count($this->pdvData)
-        ]);
+        // Log::info('SelfMonitorScreen montado', [
+        //     'quadrants' => $this->quadrants,
+        //     'columns' => $this->columns,
+        //     'rows' => $this->rows,
+        //     'selectedPdvs' => $this->selectedPdvs,
+        //     'pdvCount' => count($this->pdvData)
+        // ]);
 
-        foreach ($this->pdvData as $position => $pdv) {
-            Log::info("PDV na posição {$position}", [
-                'id' => $pdv['id'],
-                'nome' => $pdv['nome'],
-                'pdvIp' => $pdv['pdvIp'],
-                'rtspUrl' => $pdv['rtspUrl']
-            ]);
-        }
+        // foreach ($this->pdvData as $position => $pdv) {
+        //     Log::info("PDV na posição {$position}", [
+        //         'id' => $pdv['id'],
+        //         'nome' => $pdv['nome'],
+        //         'pdvIp' => $pdv['pdvIp'],
+        //         'rtspUrl' => $pdv['rtspUrl']
+        //     ]);
+        // }
     }
     
     protected function loadPdvData()

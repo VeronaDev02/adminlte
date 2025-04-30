@@ -45,7 +45,6 @@ class WebSocketService
         try {
             $processedMessage = $this->pythonApiService->processMessage($message);
             
-            // Implementar lógica de broadcast ou processamento adicional
             return $processedMessage;
         } catch (Exception $e) {
             Log::error("Erro ao processar mensagem WebSocket: " . $e->getMessage());

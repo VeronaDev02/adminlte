@@ -23,7 +23,6 @@ Route::get('/', function () {
 });
 
 
-// Rota principal do dashboard - usando HomeController simplificado
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
 Route::post('/logout', [LoginController::class, 'logout'])

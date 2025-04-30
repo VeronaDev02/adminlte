@@ -93,7 +93,7 @@ class SelfsController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             
-            Log::error('Erro ao criar SelfCheckout: ' . $e->getMessage());
+            // Log::error('Erro ao criar SelfCheckout: ' . $e->getMessage());
             
             return redirect()->back()
                 ->with("error", "Erro ao cadastrar o SelfCheckout: " . $e->getMessage())
@@ -181,7 +181,7 @@ class SelfsController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             
-            Log::error('Erro ao atualizar SelfCheckout: ' . $e->getMessage());
+            // Log::error('Erro ao atualizar SelfCheckout: ' . $e->getMessage());
             
             return redirect()->back()
                 ->with("error", "Erro ao atualizar o SelfCheckout: " . $e->getMessage())
@@ -209,7 +209,7 @@ class SelfsController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             
-            Log::error('Erro ao excluir SelfCheckout: ' . $e->getMessage());
+            // Log::error('Erro ao excluir SelfCheckout: ' . $e->getMessage());
             
             return redirect()->route("admin.selfs.index")
                 ->with("error", "Erro ao excluir o SelfCheckout: " . $e->getMessage());

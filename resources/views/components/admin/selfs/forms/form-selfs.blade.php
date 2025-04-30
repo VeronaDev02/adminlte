@@ -2,6 +2,7 @@
 @section('plugins.BootstrapDualListbox', true)
 @section('plugins.Select2', true)
 @section('plugins.Inputmask', true)
+@section('plugins.Sweetalert2', true)
 
 <form class="form" id="form_self" method="POST"
     @if ($editMode) action="{{ route('admin.selfs.update', $selfs->sel_id) }}" @else action="{{ route('admin.selfs.store') }}" @endif>
@@ -323,7 +324,7 @@
             });
             
             if (!allFieldsFilled) {
-                toastr.warning('Preencha todos os campos obrigatórios para gerar a URL RTSP.');
+                warning.fire('Preencha todos os campos obrigatórios para gerar a URL RTSP.');
                 return;
             }
             
@@ -347,7 +348,7 @@
             document.getElementById('generated-url').value = url;
             document.getElementById('generated-url').readOnly = true;
             
-            toastr.success('URL RTSP gerada com sucesso!');
+            success.fire('URL RTSP gerada com sucesso!');
         }
     }
     

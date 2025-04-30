@@ -67,7 +67,7 @@ class UnidadeController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             
-            Log::error('Erro ao criar unidade: ' . $e->getMessage());
+            // Log::error('Erro ao criar unidade: ' . $e->getMessage());
             
             return redirect()->back()
                 ->with("error", "Erro ao cadastrar a unidade: " . $e->getMessage())
@@ -131,7 +131,7 @@ class UnidadeController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             
-            Log::error('Erro ao atualizar unidade: ' . $e->getMessage());
+            // Log::error('Erro ao atualizar unidade: ' . $e->getMessage());
             
             return redirect()->back()
                 ->with("error", "Erro ao atualizar a unidade: " . $e->getMessage())
@@ -170,7 +170,7 @@ class UnidadeController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             
-            Log::error('Erro ao excluir unidade: ' . $e->getMessage());
+            // Log::error('Erro ao excluir unidade: ' . $e->getMessage());
             
             return redirect()->route("admin.unidade.index")
                 ->with("error", "Erro ao excluir a unidade: " . $e->getMessage());
@@ -188,7 +188,7 @@ class UnidadeController extends Controller
                 'data' => $selfs
             ]);
         } catch (\Exception $e) {
-            Log::error('Erro ao buscar selfs da unidade: ' . $e->getMessage());
+            // Log::error('Erro ao buscar selfs da unidade: ' . $e->getMessage());
             
             return response()->json([
                 'status' => false,
@@ -208,7 +208,7 @@ class UnidadeController extends Controller
                 'data' => $usuarios
             ]);
         } catch (\Exception $e) {
-            Log::error('Erro ao buscar usuários da unidade: ' . $e->getMessage());
+            // Log::error('Erro ao buscar usuários da unidade: ' . $e->getMessage());
             
             return response()->json([
                 'status' => false,
