@@ -167,13 +167,13 @@
         $('.delete-form').on('submit', function(e) {
             e.preventDefault();
             Swal.fire({
-                title: 'Tem certeza?',
-                text: "Você não poderá reverter esta ação!",
-                icon: 'warning',
+                title: 'Warning!',
+                text: "Não há como reverter esta ação!",
+                icon: 'error',
                 showCancelButton: true,
                 confirmButtonColor: '#3085d6',
                 cancelButtonColor: '#d33',
-                confirmButtonText: 'Sim, excluir!',
+                confirmButtonText: 'Excluir!',
                 cancelButtonText: 'Cancelar'
             }).then((result) => {
                 if (result.isConfirmed) {

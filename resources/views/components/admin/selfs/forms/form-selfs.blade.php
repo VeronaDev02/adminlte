@@ -1,5 +1,10 @@
+@section('plugins.Bootstrapswitch', true)
+@section('plugins.BootstrapDualListbox', true)
+@section('plugins.Select2', true)
+@section('plugins.Inputmask', true)
+
 <form class="form" id="form_self" method="POST"
-    @if ($editMode) action="{{ route('admin.self.update', $self->sel_id) }}" @else action="{{ route('admin.self.store') }}" @endif>
+    @if ($editMode) action="{{ route('admin.selfs.update', $selfs->sel_id) }}" @else action="{{ route('admin.selfs.store') }}" @endif>
     @csrf
     @if ($editMode)
         @method('PUT')
@@ -9,7 +14,7 @@
         <div class="col-1 form-group">
             <label for="sel_status">Ativo</label><br>
             <input class="form-control" id="sel_status" name="sel_status" type="checkbox" value="1"
-                @if (!$editMode || ($editMode && $self->sel_status)) checked @endif>
+                @if (!$editMode || ($editMode && $selfs->sel_status)) checked @endif>
             @error('sel_status')
                 <span class="invalid-feedback" style="display: unset;" role="alert">
                     <strong>{{ $message }}</strong>
@@ -19,7 +24,7 @@
         <div class="col-2 form-group">
             <label for="sel_name">Nome do SelfCheckout</label>
             <input type="text" class="form-control" id="sel_name" name="sel_name" placeholder="Nome do SelfCheckout"
-                value="{{ old('sel_name', $editMode ? $self->sel_name : '') }}">
+                value="{{ old('sel_name', $editMode ? $selfs->sel_name : '') }}">
             @error('sel_name')
                 <span class="invalid-feedback" style="display: unset;" role="alert">
                     <strong>{{ $message }}</strong>
@@ -29,7 +34,7 @@
         <div class="col-2 form-group">
             <label for="sel_pdv_codigo">Código PDV</label>
             <input type="text" class="form-control" id="sel_pdv_codigo" name="sel_pdv_codigo" placeholder="Código PDV" maxlength="3"
-                value="{{ old('sel_pdv_codigo', $editMode ? $self->sel_pdv_codigo : '') }}">
+                value="{{ old('sel_pdv_codigo', $editMode ? $selfs->sel_pdv_codigo : '') }}">
             @error('sel_pdv_codigo')
                 <span class="invalid-feedback" style="display: unset;" role="alert">
                     <strong>{{ $message }}</strong>
@@ -39,7 +44,7 @@
         <div class="col-2 form-group">
             <label for="sel_pdv_ip">IP do PDV</label>
             <input type="text" class="form-control" id="sel_pdv_ip" name="sel_pdv_ip" placeholder="IP do PDV"
-                value="{{ old('sel_pdv_ip', $editMode ? $self->sel_pdv_ip : '') }}">
+                value="{{ old('sel_pdv_ip', $editMode ? $selfs->sel_pdv_ip : '') }}">
             @error('sel_pdv_ip')
                 <span class="invalid-feedback" style="display: unset;" role="alert">
                     <strong>{{ $message }}</strong>
@@ -52,7 +57,7 @@
                 <option value="">Selecione uma Unidade</option>
                 @forelse ($unidades as $unidade)
                     <option 
-                        @if ($editMode && $self->sel_uni_id == $unidade->uni_id) selected @endif 
+                        @if ($editMode && $selfs->sel_uni_id == $unidade->uni_id) selected @endif 
                         value="{{ $unidade->uni_id }}">
                         {{ $unidade->uni_codigo }} - {{ $unidade->nome }}
                     </option>
@@ -85,7 +90,7 @@
                             id="sel_dvr_ip" 
                             name="sel_dvr_ip" 
                             placeholder="Digite o endereço IP do DVR"
-                            value="{{ old('sel_dvr_ip', $editMode ? $self->sel_dvr_ip : '') }}">
+                            value="{{ old('sel_dvr_ip', $editMode ? $selfs->sel_dvr_ip : '') }}">
                         @error('sel_dvr_ip')
                             <span class="invalid-feedback" style="display: unset;" role="alert">
                                 <strong>{{ $message }}</strong>
@@ -104,7 +109,7 @@
                             id="sel_dvr_porta" 
                             name="sel_dvr_porta" 
                             placeholder="Digite a porta do DVR"
-                            value="{{ old('sel_dvr_porta', $editMode ? $self->sel_dvr_porta : '') }}">
+                            value="{{ old('sel_dvr_porta', $editMode ? $selfs->sel_dvr_porta : '') }}">
                         @error('sel_dvr_porta')
                             <span class="invalid-feedback" style="display: unset;" role="alert">
                                 <strong>{{ $message }}</strong>
@@ -123,7 +128,7 @@
                             id="sel_camera_canal" 
                             name="sel_camera_canal" 
                             placeholder="Digite o canal da câmera"
-                            value="{{ old('sel_camera_canal', $editMode ? $self->sel_camera_canal : '') }}">
+                            value="{{ old('sel_camera_canal', $editMode ? $selfs->sel_camera_canal : '') }}">
                         @error('sel_camera_canal')
                             <span class="invalid-feedback" style="display: unset;" role="alert">
                                 <strong>{{ $message }}</strong>
@@ -145,7 +150,7 @@
                             id="sel_dvr_username" 
                             name="sel_dvr_username" 
                             placeholder="Digite o usuário do DVR"
-                            value="{{ old('sel_dvr_username', $editMode ? $self->sel_dvr_username : '') }}">
+                            value="{{ old('sel_dvr_username', $editMode ? $selfs->sel_dvr_username : '') }}">
                         @error('sel_dvr_username')
                             <span class="invalid-feedback" style="display: unset;" role="alert">
                                 <strong>{{ $message }}</strong>
@@ -164,7 +169,7 @@
                             id="sel_dvr_password" 
                             name="sel_dvr_password" 
                             placeholder="Digite a senha do DVR"
-                            value="{{ old('sel_dvr_password', $editMode ? $self->sel_dvr_password : '') }}">
+                            value="{{ old('sel_dvr_password', $editMode ? $selfs->sel_dvr_password : '') }}">
                         @error('sel_dvr_password')
                             <span class="invalid-feedback" style="display: unset;" role="alert">
                                 <strong>{{ $message }}</strong>
@@ -226,7 +231,7 @@
                                 id="generated-url" 
                                 name="sel_rtsp_path"
                                 placeholder="rtsp://usuario:senha@ip:porta/caminho?channel=canal&subtype=0"
-                                value="{{ old('sel_rtsp_path', $editMode ? $self->sel_rtsp_path : '') }}"
+                                value="{{ old('sel_rtsp_path', $editMode ? $selfs->sel_rtsp_path : '') }}"
                                 readonly>
                             <div class="input-group-append">
                                 <button class="btn btn-outline-secondary" type="button" 
@@ -256,7 +261,7 @@
                     <i class="fas fa-save mr-1"></i> Salvar
                 @endif
             </button>
-            <a href="{{ route('admin.self.index') }}" class="btn btn-secondary ml-2">
+            <a href="{{ route('admin.selfs.index') }}" class="btn btn-secondary ml-2">
                 <i class="fas fa-arrow-left"></i> Voltar
             </a>
         </div>
@@ -372,10 +377,10 @@
         height: 34px !important;
     }
     
-    #form_self label,
-    #form_self input,
-    #form_self select,
-    #form_self button {
+    #form_selfs label,
+    #form_selfs input,
+    #form_selfs select,
+    #form_selfs button {
         font-weight: normal !important;
     }
 </style>

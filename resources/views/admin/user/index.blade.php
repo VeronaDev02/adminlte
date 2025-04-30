@@ -137,13 +137,13 @@
 
 @section('js')
     <script>
-        // @if(session('success'))
-        //     toastr.success("{{ session('success') }}");
-        // @endif
+        @if(session('success'))
+            toastr.success("{{ session('success') }}");
+        @endif
 
-        // @if(session('error'))
-        //     toastr.error("{{ session('error') }}");
-        // @endif
+        @if(session('error'))
+            toastr.error("{{ session('error') }}");
+        @endif
         
         Livewire.on('updateStatusUser', (event) => {
             if (event.status) {

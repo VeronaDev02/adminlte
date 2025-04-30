@@ -156,26 +156,26 @@
         });
 
 
-        // @if ($message = session('success'))
+        @if ($message = session('success'))
 
-        //     $(document).ready(function() {
-        //         success.fire('Sucesso!', '{{ $message }}', 'success');
-        //     })
-        // @endif
+            $(document).ready(function() {
+                success.fire('Sucesso!', '{{ $message }}', 'success');
+            })
+        @endif
 
-        // @if ($message = session('warning'))
+        @if ($message = session('warning'))
 
-        //     $(document).ready(function() {
-        //         warning.fire('Aviso!', '{{ $message }}', 'warning');
-        //     })
-        // @endif
+            $(document).ready(function() {
+                warning.fire('Aviso!', '{{ $message }}', 'warning');
+            })
+        @endif
 
-        // @if ($message = session('error'))
+        @if ($message = session('error'))
 
-        //     $(document).ready(function() {
-        //         error.fire('Error!', '{{ $message }}', 'error');
-        //     })
-        // @endif
+            $(document).ready(function() {
+                error.fire('Error!', '{{ $message }}', 'error');
+            })
+        @endif
     </script>
 
 </body>

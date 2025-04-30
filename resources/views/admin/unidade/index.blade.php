@@ -156,7 +156,7 @@
 
                 Swal.fire({
                     title: 'Warning!',
-                    text: "Deseja mesmo excluir esta unidade?",
+                    text: "Não há como reverter esta ação!",
                     icon: 'error',
                     showCancelButton: true,
                     confirmButtonColor: '#3085d6',
