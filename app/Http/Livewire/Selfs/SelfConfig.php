@@ -27,7 +27,7 @@ class SelfConfig extends Component
         $user = auth()->user();
         $selfsList = $repository->getUserSelfs();
         $this->pdvs = $repository->preparePdvDataList($selfsList);
-        $this->selectedPdvs = array_fill(1, 16, null); // Máximo de 16 telas
+        $this->selectedPdvs = array_fill(1, 16, null);
     }
 
     public function getQuadrantOptions()

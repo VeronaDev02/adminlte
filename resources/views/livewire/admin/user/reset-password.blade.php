@@ -1,4 +1,3 @@
-{{-- reset-password.blade.php --}}
 <div class="d-flex justify-content-center">
     <button class="btn bg-primary" data-toggle="modal" data-target="#modal{{ $user->use_id }}"> Redefinir senha </button>
     <div wire:ignore.self class="modal fade" id="modal{{ $user->use_id }}" tabindex="-1" role="dialog"
@@ -41,8 +40,8 @@
                         </h4>
                     </div>
                     <div class="modal-body d-flex flex-column align-items-center">
-                        <button style="width:100%" type="button" class="btn btn-primary"
-                            wire:click='resetPassword'>Outra senha</button>
+                        {{-- <button style="width:100%" type="button" class="btn btn-primary"
+                            wire:click='resetPassword'>Outra senha</button> --}}
                         <button style="width:100%" type="button" class="btn btn-secondary m-1"
                             data-dismiss="modal">Voltar</button>
                     </div>

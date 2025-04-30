@@ -40,7 +40,6 @@ class UserController extends Controller
             'use_username' => 'required|string|max:50|unique:users,use_username',
             'use_email' => 'nullable|string|email|max:255|unique:users,use_email',
             'use_cod_func' => 'required|string|max:50|unique:users,use_cod_func',
-            'use_cpf' => 'required| string|unique:users,use_cpf',
             'use_rol_id' => 'required|exists:role,rol_id',
             'unidades' => 'required|array',
             'unidades.*' => 'exists:unidade,uni_id',
@@ -52,8 +51,6 @@ class UserController extends Controller
             'use_email.unique' => 'Este email já está em uso.',
             'use_cod_func.required' => 'O código do funcionário é obrigatório.',
             'use_cod_func.unique' => 'Este código de funcionário já está em uso.',
-            'use_cpf.required' => 'O CPF é obrigatório.',
-            'use_cpf.unique' => 'Este CPF já está em uso.',
             'use_rol_id.required' => 'A função é obrigatória.',
             'unidades.required' => 'Pelo menos uma unidade é obrigatória.',
         ]);
@@ -69,10 +66,8 @@ class UserController extends Controller
                 'use_cell' => $request->use_cell,
                 'use_rol_id' => $request->use_rol_id,
                 'use_cod_func' => $request->use_cod_func,
-                'use_cpf' => $request->use_cpf,
                 'use_active' => $request->has('use_active'),
-                'use_login_ativo' => $request->has('use_login_ativo'),
-                'use_allow_updates' => $request->has('use_allow_updates'),
+                'use_login_ativo' => true,
                 'use_status_password' => false,
             ]);
             
@@ -119,7 +114,6 @@ class UserController extends Controller
             'use_username' => 'required|string|max:50|unique:users,use_username,'.$id.',use_id',
             'use_email' => 'nullable|string|email|max:255|unique:users,use_email,'.$id.',use_id',
             'use_cod_func' => 'required|string|max:50|unique:users,use_cod_func,'.$id.',use_id',
-            'use_cpf' => 'required|string|unique:users,use_cpf,'.$id.',use_id',
             'use_rol_id' => 'required|exists:role,rol_id',
             'unidades' => 'required|array',
             'unidades.*' => 'exists:unidade,uni_id',
@@ -131,8 +125,6 @@ class UserController extends Controller
             'use_email.unique' => 'Este email já está em uso.',
             'use_cod_func.required' => 'O código do funcionário é obrigatório.',
             'use_cod_func.unique' => 'Este código de funcionário já está em uso.',
-            'use_cpf.required' => 'O CPF é obrigatório.',
-            'use_cpf.unique' => 'Este CPF já está em uso.',
             'use_rol_id.required' => 'A função é obrigatória.',
             'unidades.required' => 'Pelo menos uma unidade é obrigatória.',
         ]);
@@ -147,10 +139,8 @@ class UserController extends Controller
                 'use_cell' => $request->use_cell,
                 'use_rol_id' => $request->use_rol_id,
                 'use_cod_func' => $request->use_cod_func,
-                'use_cpf' => $request->use_cpf,
                 'use_active' => $request->has('use_active'),
-                'use_login_ativo' => $request->has('use_login_ativo'),
-                'use_allow_updates' => $request->has('use_allow_updates'),
+                'use_login_ativo' => true,
             ];
             
             if ($request->filled('use_password')) {

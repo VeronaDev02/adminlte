@@ -41,7 +41,7 @@
                     @enderror
                 </div>
             </div>
-            <div class="col-2 form-group">
+            <div class="col-3 form-group">
                 <label for="use_name">Nome</label>
                 <input type="text" onkeyup="gera_username()" onchange="gera_username()" class="form-control"
                     id="use_name" name="use_name" placeholder="Nome"
@@ -52,7 +52,7 @@
                     </span>
                 @enderror
             </div>
-            <div class="col-2 form-group">
+            <div class="col-3 form-group">
                 <label for="use_username">Usuário</label>
                 <input class="form-control" readonly id="use_username" name="use_username" type="text"
                     value="{{ old('use_username', $editMode ? $user->use_username : '') }}">
@@ -62,11 +62,19 @@
                     </span>
                 @enderror
             </div>
-            <div class="col-md-2 col-6 form-group">
-                <label for="use_cpf">CPF</label>
-                <input class="form-control" id="use_cpf" name="use_cpf" placeholder="CPF" type="text"
-                    value="{{ old('use_cpf', $editMode && isset($user->use_cpf) ? $user->use_cpf : '') }}">
-                @error('use_cpf')
+            <div class="col-3 form-group">
+                <label for="use_rol_id">Função</label>
+                <select name="use_rol_id" id="use_rol_id" class="form-control">
+                    <option value="">Selecione uma função</option>
+                    @forelse ($roles as $role)
+                        <option @if ($editMode && $user->use_rol_id == $role->rol_id) selected @endif value="{{ $role->rol_id }}">
+                            {{ $role->rol_name }}
+                        </option>
+                    @empty
+                        <option>Nenhuma função encontrada</option>
+                    @endforelse
+                </select>
+                @error('use_rol_id')
                     <span class="invalid-feedback" style="display: unset;" role="alert">
                         <strong>{{ $message }}</strong>
                     </span>
@@ -88,44 +96,6 @@
                 <input class="form-control" id="use_cell" name="use_cell" type="text" placeholder="(00) 00000-0000"
                     value="{{ old('use_cell', $editMode ? $user->use_cell : '') }}">
                 @error('use_cell')
-                    <span class="invalid-feedback" style="display: unset;" role="alert">
-                        <strong>{{ $message }}</strong>
-                    </span>
-                @enderror
-            </div>
-            <div class="col-2 form-group">
-                <label for="use_rol_id">Função</label>
-                <select name="use_rol_id" id="use_rol_id" class="form-control">
-                    <option value="">Selecione uma função</option>
-                    @forelse ($roles as $role)
-                        <option @if ($editMode && $user->use_rol_id == $role->rol_id) selected @endif value="{{ $role->rol_id }}">
-                            {{ $role->rol_name }}
-                        </option>
-                    @empty
-                        <option>Nenhuma função encontrada</option>
-                    @endforelse
-                </select>
-                @error('use_rol_id')
-                    <span class="invalid-feedback" style="display: unset;" role="alert">
-                        <strong>{{ $message }}</strong>
-                    </span>
-                @enderror
-            </div>
-            <div class="col-1 form-group">
-                <label for="use_login_ativo">Login Ativo</label><br>
-                <input class="form-control" id="use_login_ativo" name="use_login_ativo" type="checkbox" value="1"
-                    @if (!$editMode || ($editMode && $user->use_login_ativo)) checked @endif>
-                @error('use_login_ativo')
-                    <span class="invalid-feedback" style="display: unset;" role="alert">
-                        <strong>{{ $message }}</strong>
-                    </span>
-                @enderror
-            </div>
-            <div class="col-1 form-group">
-                <label for="use_allow_updates">Atualizações</label><br>
-                <input class="form-control" id="use_allow_updates" name="use_allow_updates" type="checkbox" value="1"
-                    @if ($editMode && $user->use_allow_updates) checked @endif>
-                @error('use_allow_updates')
                     <span class="invalid-feedback" style="display: unset;" role="alert">
                         <strong>{{ $message }}</strong>
                     </span>
@@ -212,7 +182,6 @@
                         },
                         success: function(response) {
                             $('#use_name').val(response.nome);
-                            $('#use_cpf').val(response.cpf)
                             gera_username();
                             $('#originalIcon').show();
                             $('#loadingIcon').hide();
@@ -223,7 +192,6 @@
                             $('#originalIcon').show();
                             $('#loadingIcon').hide();
                             $('#use_name').val('');
-                            $('#use_cpf').val('');
                         }
                     });
                 });
@@ -247,10 +215,6 @@
                     infoText: 'Mostrando Todas {0}',
                     infoTextFiltered: '<span class="badge badge-warning">Filtrando</span> {0} De {1}',
                     infoTextEmpty: 'Lista Vazia',
-                });
-                
-                $('#use_cpf').inputmask('999.999.999-99', {
-                    "placeholder": "___.___.___-__"
                 });
             });
         </script>

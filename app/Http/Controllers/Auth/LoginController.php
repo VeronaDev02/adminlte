@@ -65,7 +65,15 @@ class LoginController extends Controller
             if ($request->hasSession()) {
                 $request->session()->put("auth.password_confirmed_at", time());
             }
+
+            Auth::user()->update([
+                'use_last_seen' => now(),
+                'use_ip_origin' => $request->getIp(),
+                'use_login_ativo' => true
+            ]);
+
             event(new User\Auth\Login($request->use_username, $request->getIp()));
+
             return $this->sendLoginResponse($request);
         }
         event(
@@ -87,13 +95,23 @@ class LoginController extends Controller
 
     public function logout(Request $request)
     {
-        $username = Auth::user() ? Auth::user()->use_username : null;
+
+        $user = Auth::user();
         
-        if ($username) {
+        if ($user) {
             try {
                 $ip = $request->ip();
-                event(new User\Auth\Logout($username, $ip));
+                event(new User\Auth\Logout($user->use_username, $ip));
+
+                $user->update([
+                    'use_last_seen' => now(),
+                    'use_ip_origin' => $ip,
+                    'use_login_ativo' => false
+                ]);                
+
             } catch (\Exception $e) {
+                \Log::error("Erro ao atualizar o usuário: " . $e->getMessage());
+                dd($e->getMessage());
             }
         } 
         $this->guard()->logout();

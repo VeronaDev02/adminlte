@@ -22,7 +22,6 @@ class User extends Authenticatable
         'use_name',
         'use_email',
         'use_cod_func',
-        'use_cpf',
         'use_last_seen',
         'use_ip_origin',
         'use_username',
@@ -30,7 +29,6 @@ class User extends Authenticatable
         'use_cell',
         'use_active',
         'use_login_ativo',
-        'use_allow_updates',
         'use_rol_id',
         'img_user',
         'use_status_password',
@@ -39,13 +37,11 @@ class User extends Authenticatable
 
     protected $hidden = [
         'use_password',
-        'remember_token',
     ];
 
     protected $casts = [
         'use_active' => 'boolean',
         'use_login_ativo' => 'boolean',
-        'use_allow_updates' => 'boolean',
         'use_status_password' => 'boolean',
         'ui_preferences' => 'array',
     ];
