@@ -95,7 +95,7 @@ Route::middleware("auth:web")->group(function () {
         
     Route::get('/menu', [App\Http\Controllers\User\MenuController::class, 'generateDynamicMenu'])
         ->name('menu.generate');
-    Route::get('/selfs/monitor', [App\Http\Controllers\User\SelfsMonitorController::class, 'show'])
+    Route::get('/selfs/monitor', [App\Http\Controllers\User\SelfsController::class, 'show'])
         ->name('selfs.monitor');
     Route::delete('/menu/tela/{index}', [App\Http\Controllers\User\MenuController::class, 'deleteTela'])
         ->name('menu.deleteTela');
