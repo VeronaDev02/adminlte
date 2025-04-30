@@ -20,4 +20,14 @@ class Role extends Model
     {
         return $this->hasMany(User::class, 'use_rol_id', 'rol_id');
     }
+
+    public function getQuantidadeUsersAttribute()
+    {
+        return $this->users()->count();
+    }
+
+    public function getAllUsers()
+    {
+        return $this->users->pluck('use_name')->toArray();
+    }
 }

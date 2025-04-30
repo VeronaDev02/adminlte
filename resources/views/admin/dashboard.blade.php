@@ -19,7 +19,7 @@
                 <div class="icon">
                     <i class="fas fa-users"></i>
                 </div>
-                <a href="{{ route('users.index') }}" class="small-box-footer">
+                <a href="{{ route('admin.user.index') }}" class="small-box-footer">
                     Mais informações <i class="fas fa-arrow-circle-right"></i>
                 </a>
             </div>
@@ -35,7 +35,7 @@
                 <div class="icon">
                     <i class="fas fa-building"></i>
                 </div>
-                <a href="{{ route('unidades.index') }}" class="small-box-footer">
+                <a href="{{ route('admin.unidade.index') }}" class="small-box-footer">
                     Mais informações <i class="fas fa-arrow-circle-right"></i>
                 </a>
             </div>
@@ -51,7 +51,7 @@
                 <div class="icon">
                     <i class="fas fa-cash-register"></i>
                 </div>
-                <a href="{{ route('selfs.index') }}" class="small-box-footer">
+                <a href="{{ route('admin.selfs.index') }}" class="small-box-footer">
                     Mais informações <i class="fas fa-arrow-circle-right"></i>
                 </a>
             </div>
@@ -67,7 +67,7 @@
                 <div class="icon">
                     <i class="fas fa-user-tag"></i>
                 </div>
-                <a href="{{ route('roles.index') }}" class="small-box-footer">
+                <a href="{{ route('admin.role.index') }}" class="small-box-footer">
                     Mais informações <i class="fas fa-arrow-circle-right"></i>
                 </a>
             </div>
@@ -207,13 +207,13 @@
                                     <p>Você está logado como <strong>{{ Auth::user()->use_name }}</strong>.</p>
                                     <p>Suas unidades: <strong>{{ $userUnidades ?: 'Nenhuma unidade associada' }}</strong></p>
                                     <div class="mt-3">
-                                        <a href="{{ route('users.index') }}" class="btn btn-sm btn-primary mr-1">
+                                        <a href="{{ route('admin.user.index') }}" class="btn btn-sm btn-primary mr-1">
                                             <i class="fas fa-users mr-1"></i> Usuários
                                         </a>
-                                        <a href="{{ route('unidades.index') }}" class="btn btn-sm btn-success mr-1">
+                                        <a href="{{ route('admin.unidade.index') }}" class="btn btn-sm btn-success mr-1">
                                             <i class="fas fa-building mr-1"></i> Unidades
                                         </a>
-                                        <a href="{{ route('selfs.index') }}" class="btn btn-sm btn-warning">
+                                        <a href="{{ route('admin.selfs.index') }}" class="btn btn-sm btn-warning">
                                             <i class="fas fa-cash-register mr-1"></i> Self Checkouts
                                         </a>
                                     </div>

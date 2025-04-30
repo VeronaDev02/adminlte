@@ -22,6 +22,7 @@ class User extends Authenticatable
         'use_name',
         'use_email',
         'use_cod_func',
+        'use_cpf',
         'use_last_seen',
         'use_ip_origin',
         'use_username',
@@ -49,6 +50,13 @@ class User extends Authenticatable
         'ui_preferences' => 'array',
     ];
 
+    protected $appends = [
+        'name',
+        'email',
+        'unidades_codigo',
+        'unidades_formatado',
+        'formatted_last_seen'
+    ];
 
     public function username()
     {
@@ -97,13 +105,28 @@ class User extends Authenticatable
         return $this->use_email;
     }
     
+    public function getFormattedLastSeenAttribute()
+    {
+        if (!$this->use_last_seen) {
+            return 'Nunca acessou';
+        }
+        
+        return date('d/m/Y H:i', strtotime($this->use_last_seen));
+    }
+    
+    public function getUnidadesFormatadoAttribute()
+    {
+        return implode(' - ', $this->unidades_codigo);
+    }
+    
     public function adminlte_profile_url()
     {
         return route('user.profile'); 
     }
+    
     public function adminlte_image()
     {
-        return null;
+        return $this->img_user ?: asset('img/user-default.png');
     }
 
     public function getUnidadesCodigoAttribute()
@@ -117,5 +140,44 @@ class User extends Authenticatable
                 ->toArray();
 
         return $unidadesCodigos;
+    }
+    
+    // Métodos auxiliares
+    public function isActive()
+    {
+        return $this->use_active;
+    }
+    
+    public function hasLoginActive()
+    {
+        return $this->use_login_ativo;
+    }
+    
+    public function hasResetPassword()
+    {
+        return $this->use_status_password;
+    }
+    
+    // Scopes para facilitar consultas
+    public function scopeActive($query)
+    {
+        return $query->where('use_active', true);
+    }
+
+    public function scopeWithActiveLogin($query)
+    {
+        return $query->where('use_login_ativo', true);
+    }
+
+    public function scopeByRole($query, $roleId)
+    {
+        return $query->where('use_rol_id', $roleId);
+    }
+    
+    public function scopeByUnidade($query, $unidadeId)
+    {
+        return $query->whereHas('unidades', function($q) use ($unidadeId) {
+            $q->where('uni_id', $unidadeId);
+        });
     }
 }

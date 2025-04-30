@@ -42,9 +42,7 @@ class Unidade extends Model
 
     public function getNomeAttribute()
     {
-        return $this->
-            tipoUnidade->tip_nome . ' - ' .
-            $this->uni_nome;
+        return $this->tipoUnidade->tip_nome . ' - ' . $this->uni_nome;
     }
 
     public function getUnitIdsAttribute()

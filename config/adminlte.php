@@ -329,77 +329,25 @@ return [
             'submenu' => [
                 [
                     'text' => 'Unidades',
-                    'url' => '/unidades',
+                    'url' => '/admin/unidades',
                     'icon' => 'fas fa-fw fa-store',
                     'admin' => true,
-                    /*
-                    'submenu' => [
-                        [
-                            'text' => 'Adega',
-                            'url' => '/tipo-unidade/5',
-                            'icon' => 'far fa-circle',
-                            'icon_color' => 'gray',
-                        ],
-                        [
-                            'text' => 'Box Atacadista',
-                            'url' => '/tipo-unidade/2',
-                            'icon' => 'far fa-circle',
-                            'icon_color' => 'blue',
-                        ],
-                        [
-                            'text' => 'Central ADM',
-                            'url' => '/tipo-unidade/7',
-                            'icon' => 'far fa-circle',
-                            'icon_color' => 'secondary',
-                        ],
-                        [
-                            'text' => 'Farmacia',
-                            'url' => '/tipo-unidade/6',
-                            'icon' => 'far fa-circle',
-                            'icon_color' => 'info',
-                        ],
-                        [
-                            'text' => 'Indústria de Pães',
-                            'url' => '/tipo-unidade/8',
-                            'icon' => 'far fa-circle',
-                            'icon_color' => 'yellow',
-                        ],
-                        [
-                            'text' => 'Posto - Route 366',
-                            'url' => '/tipo-unidade/3',
-                            'icon' => 'far fa-circle',
-                            'icon_color' => 'green',
-                        ],
-                        [
-                            'text' => 'Restaurante',
-                            'url' => '/tipo-unidade/4',
-                            'icon' => 'far fa-circle',
-                            'icon_color' => 'red',
-                        ],
-                        [
-                            'text' => 'Verona',
-                            'url' => '/tipo-unidade/1',
-                            'icon' => 'far fa-circle',
-                            'icon_color' => 'orange',
-                        ],
-                    ],
-                    */
                 ],
                 [
                     'text' => 'Usuários',
-                    'url' => '/users',
+                    'url' => '/admin/users',
                     'icon' => 'fas fa-fw fa-users',
                     'admin' => true,
                 ],
                 [
                     'text' => 'Funções',
-                    'url' => '/roles',
+                    'url' => '/admin/roles',
                     'icon' => 'fas fa-fw fa-user-tag',
                     'admin' => true,
                 ],
                 [
                     'text' => 'IPs & RTSPs',
-                    'url' => '/selfs',
+                    'url' => '/admin/selfs',
                     'icon' => 'fas fa-fw fa-network-wired',
                     'admin' => true,
                 ],
@@ -469,88 +417,247 @@ return [
                 ]
             ]
         ],
-        'Datatables' => [
-            'active' => true,
-            'files' => [
+    "Datatables" => [
+            "active" => true,
+            "files" => [
                 [
-                    'type' => 'js',
-                    'asset' => false,
-                    'location' => '//cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js',
+                    "type" => "js",
+                    "asset" => false,
+                    "location" =>
+                        "/vendor/datatables/js/jquery.dataTables.min.js",
                 ],
                 [
-                    'type' => 'js',
-                    'asset' => false,
-                    'location' => '//cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js',
+                    "type" => "js",
+                    "asset" => false,
+                    "location" =>
+                        "/vendor/datatables/js/dataTables.bootstrap4.min.js",
                 ],
                 [
-                    'type' => 'css',
-                    'asset' => false,
-                    'location' => '//cdn.datatables.net/1.10.19/css/dataTables.bootstrap4.min.css',
-                ],
-            ],
-        ],
-        'Toastr' => [
-            'active' => true,
-            'files' => [
-                [
-                    'type' => 'js',
-                    'asset' => false,
-                    'location' => '//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js',
-                ],
-                [
-                    'type' => 'css',
-                    'asset' => false,
-                    'location' => '//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css',
+                    "type" => "css",
+                    "asset" => false,
+                    "location" =>
+                        "/vendor/datatables/css/dataTables.bootstrap4.min.css",
                 ],
             ],
         ],
-        'Select2' => [
-            'active' => false,
-            'files' => [
+        "DatatablesPlugins" => [
+            "active" => false,
+            "files" => [
                 [
-                    'type' => 'js',
-                    'asset' => false,
-                    'location' => '//cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js',
+                    "type" => "js",
+                    "asset" => true,
+                    "location" =>
+                        "/vendor/datatables-plugins/buttons/js/dataTables.buttons.js",
                 ],
                 [
-                    'type' => 'css',
-                    'asset' => false,
-                    'location' => '//cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.css',
+                    "type" => "js",
+                    "asset" => true,
+                    "location" =>
+                        "/vendor/datatables-plugins/buttons/js/buttons.bootstrap4.min.js",
+                ],
+                [
+                    "type" => "js",
+                    "asset" => true,
+                    "location" =>
+                        "/vendor/datatables-plugins/buttons/js/buttons.html5.min.js",
+                ],
+                [
+                    "type" => "js",
+                    "asset" => true,
+                    "location" =>
+                        "/vendor/datatables-plugins/buttons/js/buttons.print.min.js",
+                ],
+                [
+                    "type" => "js",
+                    "asset" => true,
+                    "location" =>
+                        "/vendor/datatables-plugins/jszip/jszip.min.js",
+                ],
+                [
+                    "type" => "js",
+                    "asset" => true,
+                    "location" =>
+                        "/vendor/datatables-plugins/pdfmake/pdfmake.min.js",
+                ],
+                [
+                    "type" => "js",
+                    "asset" => true,
+                    "location" =>
+                        "/vendor/datatables-plugins/pdfmake/vfs_fonts.js",
+                ],
+                [
+                    "type" => "css",
+                    "asset" => true,
+                    "location" =>
+                        "/vendor/datatables-plugins/buttons/css/buttons.bootstrap4.min.css",
                 ],
             ],
         ],
-        'Chartjs' => [
-            'active' => false,
-            'files' => [
+        "BootstrapDualListbox" => [
+            "active" => false,
+            "files" => [
                 [
-                    'type' => 'js',
-                    'asset' => false,
-                    'location' => '//cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.0/Chart.bundle.min.js',
+                    "type" => "js",
+                    "asset" => false,
+                    "location" =>
+                        "/vendor/bootstrap4-duallistbox/jquery.bootstrap-duallistbox.js",
+                ],
+                [
+                    "type" => "css",
+                    "asset" => false,
+                    "location" =>
+                        "/vendor/bootstrap4-duallistbox/bootstrap-duallistbox.css",
                 ],
             ],
         ],
-        'Sweetalert2' => [
-            'active' => false,
-            'files' => [
+        "Sweetalert2" => [
+            "active" => false,
+            "files" => [
                 [
-                    'type' => 'js',
-                    'asset' => false,
-                    'location' => '//cdn.jsdelivr.net/npm/sweetalert2@8',
+                    "type" => "js",
+                    "asset" => true,
+                    "location" => "/vendor/sweetalert2/sweetalert2.min.js",
+                ],
+                [
+                    "type" => "css",
+                    "asset" => true,
+                    "location" =>
+                        "/vendor/sweetalert2-theme-bootstrap-4/bootstrap-4.min.css",
                 ],
             ],
         ],
-        'Pace' => [
-            'active' => false,
-            'files' => [
+        "Bootstrapswitch" => [
+            "active" => false,
+            "files" => [
                 [
-                    'type' => 'css',
-                    'asset' => false,
-                    'location' => '//cdnjs.cloudflare.com/ajax/libs/pace/1.0.2/themes/blue/pace-theme-center-radar.min.css',
+                    "type" => "css",
+                    "asset" => false,
+                    "location" =>
+                        "/vendor/bootstrap-switch/css/bootstrap3/bootstrap-switch.css",
                 ],
                 [
-                    'type' => 'js',
-                    'asset' => false,
-                    'location' => '//cdnjs.cloudflare.com/ajax/libs/pace/1.0.2/pace.min.js',
+                    "type" => "js",
+                    "asset" => false,
+                    "location" =>
+                        "/vendor/bootstrap-switch/js/bootstrap-switch.js",
+                ],
+            ],
+        ],
+        "Inputmask" => [
+            "active" => false,
+            "files" => [
+                [
+                    "type" => "js",
+                    "asset" => false,
+                    "location" => "/vendor/inputmask/jquery.inputmask.js",
+                ],
+            ],
+        ],
+        "Chartjs" => [
+            "active" => false,
+            "files" => [
+                [
+                    "type" => "js",
+                    "asset" => true,
+                    "location" => "/vendor/chart.js/Chart.js",
+                ],
+                [
+                    "type" => "js",
+                    "asset" => true,
+                    "location" => "/vendor/chart.js/Chart.min.js",
+                ],
+                [
+                    "type" => "css",
+                    "asset" => true,
+                    "location" => "/vendor/chart.js/Chart.css",
+                ],
+                [
+                    "type" => "css",
+                    "asset" => true,
+                    "location" => "/vendor/chart.js/Chart.min.css",
+                ],
+            ],
+        ],
+        "dropzone" => [
+            "active" => false,
+            "files" => [
+                [
+                    "type" => "js",
+                    "asset" => true,
+                    "location" => "/vendor/dropzone/min/dropzone.min.js",
+                ],
+                [
+                    "type" => "js",
+                    "asset" => true,
+                    "location" =>
+                        "/vendor/dropzone/min/dropzone-amd-module.min.js",
+                ],
+                [
+                    "type" => "css",
+                    "asset" => true,
+                    "location" => "/vendor/dropzone/min/dropzone.min.css",
+                ],
+                [
+                    "type" => "css",
+                    "asset" => true,
+                    "location" => "/vendor/dropzone/min/basic.min.css",
+                ],
+            ],
+        ],
+        "Pace" => [
+            "active" => false,
+            "files" => [
+                [
+                    "type" => "css",
+                    "asset" => false,
+                    "location" =>
+                        "//cdnjs.cloudflare.com/ajax/libs/pace/1.0.2/themes/blue/pace-theme-center-radar.min.css",
+                ],
+                [
+                    "type" => "js",
+                    "asset" => false,
+                    "location" =>
+                        "//cdnjs.cloudflare.com/ajax/libs/pace/1.0.2/pace.min.js",
+                ],
+            ],
+        ],
+        "Toastr" => [
+            "active" => true,
+            "files" => [
+                [
+                    "type" => "css",
+                    "asset" => true,
+                    "location" => "/vendor/toastr/toastr.min.css",
+                ],
+                [
+                    "type" => "js",
+                    "asset" => true,
+                    "location" => "/vendor/toastr/toastr.min.js",
+                ],
+            ],
+        ],
+        "Select2" => [
+            "active" => false,
+            "files" => [
+                [
+                    "type" => "js",
+                    "asset" => false,
+                    "location" => "/vendor/select2/js/select2.min.js",
+                ],
+                [
+                    "type" => "js",
+                    "asset" => false,
+                    "location" => "/vendor/select2/js/select2.min.js",
+                ],
+                [
+                    "type" => "css",
+                    "asset" => false,
+                    "location" => "/vendor/select2/css/select2.css",
+                ],
+                [
+                    "type" => "css",
+                    "asset" => false,
+                    "location" => "/vendor/select2/css/select2.min.css",
                 ],
             ],
         ],

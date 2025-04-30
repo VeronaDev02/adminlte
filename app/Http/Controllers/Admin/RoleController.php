@@ -5,54 +5,101 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Role;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class RoleController extends Controller
 {
     public function index()
     {
-        return view('admin.roles.index');
+        // dd(session()->all());
+        $roles = Role::orderBy('rol_id')->get();
+        return view("admin.role.index", compact("roles"));
     }
 
     public function create()
     {
-        return view('admin.roles.create');
+        return view("admin.role.create");
     }
 
-    public function edit($id)
+    public function store(Request $request)
     {
-        return view('admin.roles.edit', ['roleId' => $id]);
+        $request->validate([
+            'rol_name' => 'required|string|max:255|unique:role,rol_name',
+        ], [
+            'rol_name.required' => 'O nome da função é obrigatório.',
+            'rol_name.unique' => 'Esta função já está cadastrada.',
+        ]);
+
+        try {
+            $role = Role::create([
+                'rol_name' => $request->rol_name,
+            ]);
+
+            return redirect()->route("admin.role.index")
+                ->with("success", "Função criada com sucesso.");
+        } catch (\Exception $e) {
+            Log::error('Erro ao criar função: ' . $e->getMessage());
+            
+            return redirect()->back()
+                ->with("error", "Erro ao cadastrar a função: " . $e->getMessage())
+                ->withInput();
+        }
     }
 
     public function show($id)
     {
         $role = Role::findOrFail($id);
-        return view('admin.roles.show', compact('role'));
+        return view("admin.role.show", compact("role"));
     }
 
-    public function search(Request $request)
-    {
-        $query = Role::query();
-
-        if ($request->has('name') && !empty($request->name)) {
-            $query->where('rol_name', 'like', '%' . $request->name . '%');
-        }
-
-        $roles = $query->get();
-
-        return view('admin.roles.index', compact('roles'));
-    }
-
-    public function usuarios($id)
+    public function edit($id)
     {
         $role = Role::findOrFail($id);
-        $usuarios = $role->users;
-        
-        return view('admin.roles.usuarios', compact('role', 'usuarios'));
+        return view("admin.role.edit", compact("role"));
     }
 
-    public function processarUsuarios(Request $request, $id)
+    public function update(Request $request, $id)
     {
-        return redirect()->route('roles.edit', $id)
-            ->with('error', 'Processamento de usuários agora é feito pelo componente Livewire');
+        $role = Role::findOrFail($id);
+        
+        $request->validate([
+            'rol_name' => 'required|string|max:255|unique:role,rol_name,'.$id.',rol_id',
+        ], [
+            'rol_name.required' => 'O nome da função é obrigatório.',
+            'rol_name.unique' => 'Esta função já está cadastrada.',
+        ]);
+
+        try {
+            $role->update([
+                'rol_name' => $request->rol_name,
+            ]);
+
+            return redirect()->route("admin.role.index")
+                ->with("success", "Função atualizada com sucesso.");
+        } catch (\Exception $e) {
+            Log::error('Erro ao atualizar função: ' . $e->getMessage());
+            
+            return redirect()->back()
+                ->with("error", "Erro ao atualizar a função: " . $e->getMessage())
+                ->withInput();
+        }
+    }
+
+    public function destroy($id)
+    {
+        try {
+            $role = Role::findOrFail($id);
+            $roleName = $role->rol_name;
+            
+            $role->delete();
+            
+            return redirect()->route("admin.role.index")
+                ->with("success", "Função excluída com sucesso.");
+        } catch (\Exception $e) {
+            Log::error('Erro ao excluir função: ' . $e->getMessage());
+            
+            return redirect()->route("admin.role.index")
+                ->with("error", "Não foi possível excluir a função. Existem usuários associados.");
+        }
     }
 }
