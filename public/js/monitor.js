@@ -1,6 +1,4 @@
-// monitor.js - Refatorado para integração com Livewire
-
-// Estado global mínimo necessário (reduzido)
+// Estado global mínimo necessário
 const state = {
     rtspWebsockets: {},
     pdvConnection: null,
@@ -22,7 +20,6 @@ const iceServers = {
 document.addEventListener('DOMContentLoaded', () => {
     console.log("DOM carregado, inicializando monitor");
     
-    // Verifica se a configuração está disponível
     if (window.monitorConfig) {
         initializeMonitor();
         initializeInterfaceEvents();
@@ -41,22 +38,16 @@ function initializeMonitor() {
     }
     
     // Conecta ao servidor central
-    console.log(`Conectando ao servidor PDV: ${connectionConfig.serverUrls.pdv}`);
     connectToServer(connectionConfig.serverUrls.pdv);
     
     // Para cada PDV, inicializa conexões
     if (connectionConfig.connections) {
         Object.entries(connectionConfig.connections).forEach(([position, pdv]) => {
-            console.log(`Configurando PDV na posição ${position}:`, pdv);
-            
             // Inicializa conexão com a câmera
             if (pdv.rtspUrl) {
-                console.log(`Iniciando conexão com a câmera ${position} URL: ${pdv.rtspUrl}`);
                 connectCamera(position, pdv.rtspUrl, connectionConfig.serverUrls.rtsp);
             } else {
-                console.warn(`Sem URL RTSP para a posição ${position}`);
-                // Utilizamos evento Livewire para atualizar status
-                Livewire.emit('updateStatus', position, 'Sem URL RTSP');
+                Livewire.emit('updateStatus', position, '', 'error');
             }
         });
     }
@@ -65,12 +56,9 @@ function initializeMonitor() {
 // Conexão com o servidor WebSocket
 function connectToServer(serverUrl) {
     try {
-        console.log(`Iniciando conexão WebSocket com: ws://${serverUrl}`);
         state.pdvConnection = new WebSocket(`ws://${serverUrl}`);
         
         state.pdvConnection.onopen = () => {
-            console.log('Conectado ao servidor PDV');
-            // Delegamos a atualização de status para o Livewire
             Livewire.emit('serverConnectionStatusChanged', true);
             state.isConnectedToServer = true;
             
@@ -78,7 +66,6 @@ function connectToServer(serverUrl) {
             if (window.monitorConfig && window.monitorConfig.connectionConfig) {
                 Object.entries(window.monitorConfig.connectionConfig.connections).forEach(([position, pdv]) => {
                     if (pdv.pdvIp) {
-                        console.log(`Registrando PDV ${pdv.pdvIp} na posição ${position}`);
                         registerPDV(position, pdv.pdvIp);
                     }
                 });
@@ -86,13 +73,11 @@ function connectToServer(serverUrl) {
         };
         
         state.pdvConnection.onclose = () => {
-            console.log('Desconectado do servidor PDV');
             Livewire.emit('serverConnectionStatusChanged', false);
             state.isConnectedToServer = false;
         };
         
-        state.pdvConnection.onerror = (error) => {
-            console.error('Erro na conexão com o servidor PDV:', error);
+        state.pdvConnection.onerror = () => {
             Livewire.emit('serverConnectionStatusChanged', false, 'error');
             state.isConnectedToServer = false;
         };
@@ -100,7 +85,6 @@ function connectToServer(serverUrl) {
         // Configura handler para mensagens
         setupMessageHandler();
     } catch (error) {
-        console.error('Falha ao conectar ao servidor:', error);
         Livewire.emit('serverConnectionStatusChanged', false, 'error');
     }
 }
@@ -108,7 +92,6 @@ function connectToServer(serverUrl) {
 // Registra PDV no servidor
 function registerPDV(position, pdvIp) {
     if (!state.isConnectedToServer || !state.pdvConnection) {
-        console.error('Não conectado ao servidor. Impossível registrar PDV.');
         return;
     }
     
@@ -122,10 +105,8 @@ function registerPDV(position, pdvIp) {
             pdv_ip: pdvIp
         };
         
-        console.log(`Enviando registro para PDV ${pdvIp}:`, registerCommand);
         state.pdvConnection.send(JSON.stringify(registerCommand));
     } catch (error) {
-        console.error(`Erro ao conectar ao PDV ${position}:`, error);
         Livewire.emit('pdvConnectionError', position, pdvIp, error.message);
     }
 }
@@ -141,65 +122,53 @@ function connectCamera(position, rtspUrl, serverUrl) {
     }
     
     // Atualiza interface via Livewire
-    Livewire.emit('updateStatus', position, 'Conectando câmera...');
+    Livewire.emit('updateStatus', position, '', '');
     
     try {
-        console.log(`Iniciando WebSocket para RTSP na posição ${position}: ws://${serverUrl}`);
         // Cria nova conexão WebSocket para RTSP
         state.rtspWebsockets[position] = new WebSocket(`ws://${serverUrl}`);
         
         state.rtspWebsockets[position].onopen = async () => {
-            console.log(`WebSocket ${position} conectado. Enviando URL RTSP:`, rtspUrl);
             state.rtspWebsockets[position].send(rtspUrl);
         };
         
         state.rtspWebsockets[position].onmessage = async (event) => {
             try {
-                console.log(`Mensagem recebida da câmera ${position}:`, event.data.substring(0, 100) + '...');
                 const message = JSON.parse(event.data);
                 
                 // Verifica se a mensagem contém sdp (oferta SDP)
                 if (message.sdp && message.type === 'offer') {
-                    console.log(`Recebida oferta SDP para câmera ${position}`);
                     const videoElement = document.getElementById(`remoteVideo${position}`);
                     if (videoElement) {
                         await handleOffer(position, message, videoElement);
-                        Livewire.emit('updateStatus', position, `Conectado - Câmera ${position}`, 'connected');
+                        Livewire.emit('updateStatus', position, '', 'connected');
                     }
-                } else {
-                    console.log(`Câmera ${position} recebeu mensagem:`, message);
                 }
             } catch (error) {
-                console.error(`Erro ao processar mensagem na câmera ${position}:`, error);
-                Livewire.emit('updateStatus', position, 'Erro na câmera', 'error');
+                Livewire.emit('updateStatus', position, '', 'error');
             }
         };
         
         state.rtspWebsockets[position].onclose = () => {
-            console.log(`WebSocket ${position} fechado`);
-            Livewire.emit('updateStatus', position, 'Câmera desconectada');
+            Livewire.emit('updateStatus', position, '', '');
         };
         
-        state.rtspWebsockets[position].onerror = (error) => {
-            console.error(`Erro no WebSocket ${position}:`, error);
-            Livewire.emit('updateStatus', position, 'Erro na câmera', 'error');
+        state.rtspWebsockets[position].onerror = () => {
+            Livewire.emit('updateStatus', position, '', 'error');
         };
     } catch (error) {
-        console.error(`Erro ao conectar à câmera ${position}:`, error);
-        Livewire.emit('updateStatus', position, 'Erro na câmera', 'error');
+        Livewire.emit('updateStatus', position, '', 'error');
     }
 }
 
 // Handler para mensagens do PDV
 function setupMessageHandler() {
     if (!state.pdvConnection) {
-        console.error("Sem conexão PDV para configurar handler de mensagem");
         return;
     }
     
     state.pdvConnection.onmessage = (event) => {
         try {
-            console.log("Mensagem recebida do servidor:", event.data.substring(0, 100) + '...');
             const message = JSON.parse(event.data);
             
             // Se for uma resposta de registro, processa
@@ -231,71 +200,53 @@ async function handleOffer(position, offer, videoElement) {
             state.peerConnections[position].close();
         }
         
-        console.log(`Criando RTCPeerConnection para câmera ${position}`);
-        
         // Cria uma nova conexão RTCPeerConnection
         state.peerConnections[position] = new RTCPeerConnection(iceServers);
         
         // Configura os handlers de eventos
         state.peerConnections[position].ontrack = (event) => {
             if (event.track.kind === 'video') {
-                console.log(`Recebido stream de vídeo para câmera ${position}`);
-                
                 videoElement.srcObject = event.streams[0];
                 
                 // Adicione eventos para monitorar o estado do vídeo
                 videoElement.onloadedmetadata = () => {
-                    console.log(`Vídeo metadata carregada para câmera ${position}`);
-                    // Tente iniciar a reprodução explicitamente
-                    videoElement.play().then(() => {
-                        console.log(`Vídeo iniciado com sucesso para câmera ${position}`);
-                    }).catch(err => {
-                        console.error(`Erro ao iniciar vídeo para câmera ${position}:`, err);
-                    });
+                    videoElement.play().catch(() => {});
                 };
                 
-                console.log(`Câmera ${position}: Stream de vídeo conectado`);
-                Livewire.emit('updateStatus', position, `Conectado - Câmera ${position}`, 'connected');
+                Livewire.emit('updateStatus', position, '', 'connected');
             }
         };
         
         state.peerConnections[position].onicecandidate = (event) => {
             if (event.candidate === null) {
                 // ICE gathering completed, envia a resposta final
-                console.log(`ICE gathering completo para câmera ${position}, enviando resposta`);
                 sendAnswer(position);
             }
         };
         
         state.peerConnections[position].oniceconnectionstatechange = () => {
             const connectionState = state.peerConnections[position].iceConnectionState;
-            console.log(`ICE connection state para câmera ${position}:`, connectionState);
             
             // Delegamos atualização de status para o Livewire
             if (connectionState === 'connected' || connectionState === 'completed') {
-                Livewire.emit('updateStatus', position, `Conectado - Câmera ${position}`, 'connected');
+                Livewire.emit('updateStatus', position, '', 'connected');
             } else if (connectionState === 'failed' || connectionState === 'disconnected' || connectionState === 'closed') {
                 const statusClass = connectionState === 'failed' ? 'error' : '';
-                Livewire.emit('updateStatus', position, `Câmera ${connectionState}`, statusClass);
+                Livewire.emit('updateStatus', position, '', statusClass);
             }
         };
         
         // Define a oferta remota
-        console.log(`Definindo oferta remota para câmera ${position}`);
         await state.peerConnections[position].setRemoteDescription({
             type: offer.type,
             sdp: offer.sdp
         });
         
         // Cria a resposta
-        console.log(`Criando resposta para câmera ${position}`);
         const answer = await state.peerConnections[position].createAnswer();
         await state.peerConnections[position].setLocalDescription(answer);
-        
-        console.log(`Resposta SDP para câmera ${position} criada com sucesso`);
     } catch (error) {
-        console.error(`Erro ao processar oferta para câmera ${position}:`, error);
-        Livewire.emit('updateStatus', position, 'Erro WebRTC', 'error');
+        Livewire.emit('updateStatus', position, '', 'error');
     }
 }
 
@@ -311,13 +262,10 @@ function sendAnswer(position) {
                 sdp: state.peerConnections[position].localDescription.sdp
             };
             
-            console.log(`Enviando resposta SDP para câmera ${position}`);
             state.rtspWebsockets[position].send(JSON.stringify(answer));
-        } else {
-            console.error(`Não foi possível enviar resposta para câmera ${position}: RTCPeerConnection ou WebSocket não disponíveis`);
         }
     } catch (error) {
-        console.error(`Erro ao enviar resposta para câmera ${position}:`, error);
+        console.error(`Erro ao enviar resposta:`, error);
     }
 }
 
@@ -460,8 +408,6 @@ function enterBrowserFullscreen() {
             docElm.webkitRequestFullscreen();
         } else if (docElm.msRequestFullscreen) {
             docElm.msRequestFullscreen();
-        } else {
-            console.error('Nenhum método de fullscreen suportado');
         }
     } catch (error) {
         console.error('Erro ao tentar entrar em fullscreen:', error);
@@ -532,6 +478,7 @@ function handleFullscreenChange() {
         Livewire.emit('browserFullscreenChanged', isFullscreen);
     }
 }
+
 function scrollLogsToBottom() {
     // Seleciona todos os containers de log
     const logContainers = document.querySelectorAll('.log-container');

@@ -17,24 +17,19 @@
             @php 
                 $pdvInfo = isset($pdvData[$i]) ? $pdvData[$i] : null;
                 $pdvName = $pdvInfo ? $pdvInfo['nome'] : 'Sem PDV';
-                $pdvIp = $pdvInfo ? $pdvInfo['pdvIp'] : '';
-                $pdvCode = $pdvInfo ? $pdvInfo['pdvCodigo'] : '';
+                $pdvCode = $pdvInfo && !empty($pdvInfo['pdvCodigo']) ? substr($pdvInfo['pdvCodigo'], -2) : '--';
                 $status = isset($pdvStatus[$i]) ? $pdvStatus[$i] : ['message' => 'Desconectado', 'class' => ''];
                 $logs = isset($pdvLogs[$i]) ? $pdvLogs[$i] : [];
             @endphp
             <div id="quadrant{{ $i }}" class="stream-container {{ $activeFullscreenQuadrant == $i ? 'fullscreen' : '' }}">
                 <div class="video-container">
                     <video id="remoteVideo{{ $i }}" autoplay muted playsinline></video>
-                    <span id="status{{ $i }}" class="status-indicator {{ $status['class'] }}">{{ $status['message'] }}</span>
-                    {{-- <button class="fullscreen-btn" onclick="toggleQuadrantFullscreen(document.getElementById('quadrant{{ $i }}'))">
-                        <i class="fas fa-expand"></i>
-                    </button> --}}
+                    <span id="status{{ $i }}" class="status-indicator {{ $status['class'] }}">PDV {{ $pdvCode }}</span>
                 </div>
                 
                 <div id="log{{ $i }}" class="log-container">
                     <div class="log-header">
-                        <strong>{{ $pdvName }}</strong>
-                        <small>{{ $pdvIp }} ({{ $pdvCode }})</small>
+                        {{-- <strong>PDV {{ $pdvCode }}</strong> --}}
                     </div>
                     <div class="log-content">
                         @foreach($logs as $log)
