@@ -285,7 +285,12 @@ class SelfMonitorScreen extends Component
             
             // Escapar caracteres HTML na mensagem
             $safeMessage = htmlspecialchars($message);
-            
+
+            $safeMessage = trim($safeMessage);
+            // $safeMessage = preg_replace('/\n+/', ' |', $safeMessage);
+            $safeMessage = preg_replace('/\s+/', ' ', $safeMessage);
+
+
             // Adiciona a mensagem ao log
             // $this->pdvLogs[$position][] = "[{$timestamp}] {$safeMessage}";
             $this->pdvLogs[$position][] = "{$safeMessage}";
