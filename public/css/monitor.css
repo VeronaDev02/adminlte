@@ -1,164 +1,279 @@
-/* Configuração para o container principal */
-.monitor-grid-container {
+/* ====================================
+   1. VARIÁVEIS GLOBAIS
+==================================== */
+:root {
+    --video-width: 70%;
+    --log-width: 30%;
+    --dark-bg: #2c3035;
+    --light-bg: #f5f5f5;
+    --dark-text: #e9ecef;
+    --border-color: #ddd;
+    --dark-border: #495057;
+    --status-bg: rgba(0, 0, 0, 0.6);
+    --button-bg: rgba(0, 0, 0, 0.5);
+    --button-hover-bg: rgba(0, 0, 0, 0.7);
+    --alert-bg: #ff9999;
+    --notification-bg: #ff0000;
+    --dark-notification: #dc3545;
+  }
+  
+  /* ====================================
+     2. LAYOUT PRINCIPAL
+  ==================================== */
+  .monitor-grid-container {
     display: grid;
     gap: 10px;
     height: calc(100vh - 100px);
     transition: all 0.3s ease;
-}
-
-/* Estrutura do quadrante */
-.stream-container {
+  }
+  
+  /* Estrutura do quadrante */
+  .stream-container {
     display: flex !important;
     flex-direction: row-reverse !important;
-    border: 1px solid #ddd;
+    border: 1px solid var(--border-color);
     border-radius: 4px;
     overflow: hidden;
     height: 100%;
     transition: all 0.3s ease;
     width: 100%;
     box-sizing: border-box;
-}
-
-/* Vídeo ocupa 70% */
-.video-container {
-    flex: 0 0 70% !important;
-    max-width: 70% !important;
-    min-width: 70% !important;
+  }
+  
+  /* ====================================
+     3. CONTAINERS DE VÍDEO E LOG
+  ==================================== */
+  /* Vídeo container */
+  .video-container {
+    flex: 0 0 var(--video-width) !important;
+    max-width: var(--video-width) !important;
+    min-width: var(--video-width) !important;
     background-color: #000;
     position: relative;
     height: 100%;
     box-sizing: border-box;
-}
-
-/* Log ocupa 30% */
-.log-container {
-    flex: 0 0 30% !important;
-    max-width: 30% !important;
-    min-width: 30% !important;
+  }
+  
+  /* Elemento de vídeo */
+  video {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+    background-color: #000;
+  }
+  
+  /* Log container */
+  .log-container {
+    flex: 0 0 var(--log-width) !important;
+    max-width: var(--log-width) !important;
+    min-width: var(--log-width) !important;
     padding: 10px;
     overflow-y: auto;
     font-family: monospace;
     font-size: 0.8rem;
     height: 100%;
-    border-right: 1px solid #ddd;
+    border-right: 1px solid var(--border-color);
     box-sizing: border-box;
-}
-
-/* Estilos para modo light (padrão) */
-body:not(.dark-mode) .log-container {
-    background-color: #f5f5f5;
-    color: #000;
-}
-
-/* Estilos para modo dark */
-body.dark-mode .log-container {
-    background-color: #2c3035;
-    color: #e9ecef;
-    border-right-color: #495057;
-}
-
-/* Conteúdo do log */
-.log-content {
+    scroll-behavior: smooth;
+  }
+  
+  /* Conteúdo do log */
+  .log-content {
     white-space: pre-wrap;
     word-break: break-word;
-    height: 100%;
-    overflow-y: auto;
-}
-
-/* Estilos para modo dark */
-body.dark-mode .log-content {
-    color: #e9ecef;
-}
-
-/* Indicador de status */
-.status-indicator {
+    height: auto;
+    overflow-y: visible;
+    font-size: 0.56rem;
+  }
+  
+  /* ====================================
+     4. TEMA CLARO/ESCURO
+  ==================================== */
+  /* Estilos para modo light (padrão) */
+  body:not(.dark-mode) .log-container {
+    background-color: var(--light-bg);
+    color: #000;
+  }
+  
+  /* Estilos para modo dark */
+  body.dark-mode .log-container {
+    background-color: var(--dark-bg);
+    color: var(--dark-text);
+    border-right-color: var(--dark-border);
+  }
+  
+  body.dark-mode .log-content {
+    color: var(--dark-text);
+  }
+  
+  body.dark-mode #browserFullscreenBtn {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: var(--dark-text);
+  }
+  
+  body.dark-mode #browserFullscreenBtn:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+  }
+  
+  body.dark-mode .pdv-notification {
+    background-color: var(--dark-notification);
+    color: #fff;
+  }
+  
+  /* ====================================
+     5. INDICADORES DE STATUS
+  ==================================== */
+  .status-indicator {
     position: absolute;
     top: 10px;
     left: 10px;
-    background-color: rgba(0,0,0,0.6);
+    background-color: var(--status-bg);
     color: white;
     padding: 5px 10px;
     border-radius: 4px;
     font-size: 0.75rem;
     z-index: 10;
-}
-
-/* Vídeo */
-video {
-    width: 100% !important;
-    height: 100% !important;
-    object-fit: contain !important;
-    background-color: #000;
-}
-
-/* Botão de fullscreen para cada quadrante */
-.fullscreen-btn {
+  }
+  
+  .inactivity-alert {
+    background-color: var(--alert-bg) !important;
+  }
+  
+  .pdv-notification {
+    background-color: var(--notification-bg);
+    color: white;
+    padding: 5px;
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+  
+  /* ====================================
+     6. BOTÕES DE CONTROLE
+  ==================================== */
+  /* Botão de fullscreen para cada quadrante */
+  .fullscreen-btn {
+    display: none;
     position: absolute;
     top: 10px;
     right: 10px;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: var(--button-bg);
     color: white;
     border: none;
     border-radius: 3px;
     padding: 5px;
     cursor: pointer;
     z-index: 100;
-}
-
-/* Estilos para alerta de inatividade */
-.inactivity-alert {
-    background-color: #ff9999 !important;
-}
-
-.pdv-notification {
-    background-color: #ff0000;
-    color: white;
-    padding: 5px;
-    text-align: center;
-    font-weight: bold;
-    margin-bottom: 5px;
-}
-
-/* Estilos para modo dark do PDV notification */
-body.dark-mode .pdv-notification {
-    background-color: #dc3545;
-    color: #fff;
-}
-
-/* Botão F11 fullscreen */
-#browserFullscreenBtn {
-    position: fixed;
-    top: 68px;
-    right: 15px;
-    background-color: rgba(0,0,0,0.5);
+  }
+  
+  /* Botão F11 fullscreen - versão base */
+  #browserFullscreenBtn {
+    position: relative;
+    background-color: var(--button-bg);
     color: white;
     border: none;
     border-radius: 4px;
     padding: 10px 15px;
-    height: 50px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     z-index: 10000;
     transition: background-color 0.3s;
-}
-
-#browserFullscreenBtn:hover {
-    background-color: rgba(0,0,0,0.7);
-}
-
-body.dark-mode #browserFullscreenBtn {
-    background-color: rgba(255,255,255,0.2);
-    color: #e9ecef;
-}
-
-body.dark-mode #browserFullscreenBtn:hover {
-    background-color: rgba(255,255,255,0.3);
-}
-
-/* Fullscreen específico de um quadrante */
-.stream-container.fullscreen {
+    font-size: 0.9rem;
+  }
+  
+  #browserFullscreenBtn:hover {
+    background-color: var(--button-hover-bg);
+  }
+  
+  /* Botão dentro do título */
+  h1 #browserFullscreenBtn {
+    display: inline-flex !important;
+  }
+  
+  h1 .title-button#browserFullscreenBtn {
+    display: inline-flex !important;
+    position: static !important; 
+    top: auto !important;
+    right: auto !important;
+    float: none !important;
+    margin-left: 15px !important;
+    vertical-align: middle !important;
+    font-size: 0.7rem !important;
+    height: auto !important;
+    padding: 5px 10px !important;
+    background-color: var(--button-bg) !important;
+  }
+  
+  /* Responsividade do botão */
+  @media (max-width: 768px) {
+    #browserFullscreenBtn {
+      padding: 8px 12px;
+      height: 35px;
+      font-size: 0.8rem;
+    }
+  }
+  
+  /* ====================================
+     7. MODO TELA CHEIA (FULLSCREEN)
+  ==================================== */
+  /* Ícone de saída em tela cheia */
+  body.browser-fullscreen .exit-fullscreen-icon {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    background-color: rgba(0, 0, 0, 0.3);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10000;
+  }
+  
+  body.browser-fullscreen .exit-fullscreen-icon:hover {
+    background-color: var(--button-hover-bg);
+  }
+  
+  /* Modo Fullscreen de navegador (F11) */
+  body.browser-fullscreen {
+    overflow: hidden !important;
+  }
+  
+  body.browser-fullscreen .content-wrapper,
+  body.browser-fullscreen .content {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  
+  body.browser-fullscreen .main-header,
+  body.browser-fullscreen .main-sidebar,
+  body.browser-fullscreen .content-header,
+  body.browser-fullscreen .monitor-header,
+  body.browser-fullscreen h1,
+  body.browser-fullscreen #serverStatus {
+    display: none !important;
+  }
+  
+  body.browser-fullscreen .monitor-grid-container {
+    height: 100vh !important;
+    width: 100vw !important;
+    padding: 10px !important;
+    margin: 0 !important;
+  }
+  
+  body.browser-fullscreen #browserFullscreenBtn {
+    display: none !important;
+  }
+  
+  /* Fullscreen específico de um quadrante */
+  .stream-container.fullscreen {
     position: fixed !important;
     top: 0 !important;
     left: 0 !important;
@@ -180,93 +295,39 @@ body.dark-mode #browserFullscreenBtn:hover {
     max-height: none !important;
     min-height: 100vh !important;
     overflow: hidden !important;
-}
-
-/* Garantir que os containers filhos se comportem corretamente em fullscreen */
-.stream-container.fullscreen .video-container {
-    flex: 0 0 70% !important;
-    width: 70% !important;
-    max-width: 70% !important;
-    min-width: 70% !important;
+  }
+  
+  .stream-container.fullscreen .video-container {
+    flex: 0 0 var(--video-width) !important;
+    width: var(--video-width) !important;
+    max-width: var(--video-width) !important;
+    min-width: var(--video-width) !important;
     height: 100vh !important;
     margin: 0 !important;
     padding: 0 !important;
     overflow: hidden !important;
-}
-
-.stream-container.fullscreen .log-container {
-    flex: 0 0 30% !important;
-    width: 30% !important;
-    max-width: 30% !important;
-    min-width: 30% !important;
+  }
+  
+  .stream-container.fullscreen .log-container {
+    flex: 0 0 var(--log-width) !important;
+    width: var(--log-width) !important;
+    max-width: var(--log-width) !important;
+    min-width: var(--log-width) !important;
     height: 100vh !important;
     margin: 0 !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
-}
-
-/* Modo F11 fullscreen do navegador */
-body.browser-fullscreen {
-    overflow: hidden !important;
-}
-
-body.browser-fullscreen .content-wrapper,
-body.browser-fullscreen .content {
-    padding: 0 !important;
-    margin: 0 !important;
-}
-
-body.browser-fullscreen .main-header,
-body.browser-fullscreen .main-sidebar,
-body.browser-fullscreen .content-header {
-    display: none !important;
-}
-
-body.browser-fullscreen .monitor-grid-container {
-    height: 100vh !important;
-    width: 100vw !important;
-    padding: 10px !important;
-    margin: 0 !important;
-}
-
-/* Esconde botão quando não necessário */
-body.browser-fullscreen #browserFullscreenBtn {
-    top: 13px;
-    right: -120px;
-    opacity: 0.3;
-    white-space: nowrap;
-    visibility: hidden; /* Esconde o texto sem afetar o ícone */
-}
-
-body.browser-fullscreen #browserFullscreenBtn i {
-    visibility: visible; /* Garante que o ícone fique visível */
-    font-size: 36px;
-}
-
-body.browser-fullscreen #browserFullscreenBtn:hover {
-    opacity: 1;
-}
-
-/* Mensagem de instruções no modo fullscreen */
-#fullscreen-instruction {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: rgba(0, 0, 0, 0.7);
-    color: white;
-    padding: 10px 20px;
-    border-radius: 5px;
-    z-index: 10000;
-    display: none;
-}
-
-body.browser-fullscreen #fullscreen-instruction,
-.stream-container.fullscreen #fullscreen-instruction {
+  }
+  
+  body.browser-fullscreen #fullscreen-instruction,
+  .stream-container.fullscreen #fullscreen-instruction {
     display: block;
-}
-
-.content-header h1 {
+  }
+  
+  /* ====================================
+     8. UTILITÁRIOS E OUTROS
+  ==================================== */
+  .content-header h1 {
     font-size: 1.2rem !important;
     margin-bottom: 10px;
-}
+  }

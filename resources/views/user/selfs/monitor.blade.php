@@ -11,10 +11,6 @@
 
 @section('content')
     <div class="container-fluid p-0">
-        <button id="browserFullscreenBtn" onclick="toggleBrowserFullscreen()">
-            <i class="fas fa-desktop"></i> Tela Cheia (F11)
-        </button>
-        
         <livewire:selfs.self-monitor-screen />
     </div>
 @stop

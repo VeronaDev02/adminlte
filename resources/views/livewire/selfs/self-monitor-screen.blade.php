@@ -1,12 +1,13 @@
 <div>
     <div class="monitor-header">
-        <h1>{{ $pageTitle }}</h1>
-        <div class="monitor-controls">
-            <button id="browserFullscreenBtn" onclick="toggleBrowserFullscreen()">
-                <i class="fas fa-desktop"></i> Tela Cheia (F11)
+        <h1>{{ $pageTitle }}
+            <button id="browserFullscreenBtn" class="title-button" onclick="toggleBrowserFullscreen()">
+                <i class="fas fa-desktop"></i> {{ $isBrowserFullscreen ? 'Sair da Tela Cheia' : 'Tela Cheia (F11)' }}
             </button>
-            <div id="serverStatus" class="server-status">
-                Conectando ao servidor...
+        </h1>
+        <div class="monitor-controls">
+            <div id="serverStatus" class="server-status {{ $serverStatusClass }}">
+                {{ $serverStatus }}
             </div>
         </div>
     </div>
@@ -18,14 +19,16 @@
                 $pdvName = $pdvInfo ? $pdvInfo['nome'] : 'Sem PDV';
                 $pdvIp = $pdvInfo ? $pdvInfo['pdvIp'] : '';
                 $pdvCode = $pdvInfo ? $pdvInfo['pdvCodigo'] : '';
+                $status = isset($pdvStatus[$i]) ? $pdvStatus[$i] : ['message' => 'Desconectado', 'class' => ''];
+                $logs = isset($pdvLogs[$i]) ? $pdvLogs[$i] : [];
             @endphp
-            <div id="quadrant{{ $i }}" class="stream-container">
+            <div id="quadrant{{ $i }}" class="stream-container {{ $activeFullscreenQuadrant == $i ? 'fullscreen' : '' }}">
                 <div class="video-container">
                     <video id="remoteVideo{{ $i }}" autoplay muted playsinline></video>
-                    <span id="status{{ $i }}" class="status-indicator">Desconectado</span>
-                    <button class="fullscreen-btn" onclick="toggleQuadrantFullscreen(document.getElementById('quadrant{{ $i }}'))">
+                    <span id="status{{ $i }}" class="status-indicator {{ $status['class'] }}">{{ $status['message'] }}</span>
+                    {{-- <button class="fullscreen-btn" onclick="toggleQuadrantFullscreen(document.getElementById('quadrant{{ $i }}'))">
                         <i class="fas fa-expand"></i>
-                    </button>
+                    </button> --}}
                 </div>
                 
                 <div id="log{{ $i }}" class="log-container">
@@ -33,15 +36,14 @@
                         <strong>{{ $pdvName }}</strong>
                         <small>{{ $pdvIp }} ({{ $pdvCode }})</small>
                     </div>
-                    <div class="log-content"></div>
+                    <div class="log-content">
+                        @foreach($logs as $log)
+                            {{ $log }}
+                        @endforeach
+                    </div>
                 </div>
             </div>
         @endfor
-    </div>
-    
-    <!-- Mensagem de instrução de tela cheia (inicialmente escondida) -->
-    <div id="fullscreen-instruction" style="display: none;" class="fullscreen-instruction">
-        Duplo clique para sair ou pressione ESC
     </div>
     
     <!-- Passar dados para JavaScript -->

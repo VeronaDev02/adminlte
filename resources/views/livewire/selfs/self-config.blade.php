@@ -52,7 +52,7 @@
                     </div>
                 </div>
                 
-                <div class="col-md-3">
+                {{-- <div class="col-md-3">
                     <div class="form-group">
                         <label>Número de Linhas</label>
                         <input 
@@ -62,20 +62,7 @@
                             readonly
                         >
                     </div>
-                </div>
-                
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label>Nome da Preferência</label>
-                        <input 
-                            type="text" 
-                            wire:model="preferenceName" 
-                            class="form-control" 
-                            placeholder="Ex: Caixas Principais"
-                            {{ $selectedQuadrants == 0 ? 'disabled' : '' }}
-                        >
-                    </div>
-                </div>
+                </div> --}}
             </div>
 
             @if($layoutPreviewHtml)
@@ -108,7 +95,7 @@
                                                 <option value="">Selecione um PDV</option>
                                                 @foreach($pdvs as $pdv)
                                                     <option value="{{ $pdv['id'] }}">
-                                                        {{ $pdv['nome'] }} ({{ $pdv['pdvIp'] }})
+                                                        {{ $pdv['nome'] }}
                                                     </option>
                                                 @endforeach
                                             </select>

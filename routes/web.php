@@ -93,8 +93,6 @@ Route::middleware("auth:web")->group(function () {
     Route::post('/user/destroy-tela-preferences/{index}', [App\Http\Controllers\User\SelfsController::class, 'destroyTelaPreferences'])
         ->name('destroy.tela.preferences');
         
-    Route::get('/menu', [App\Http\Controllers\User\MenuController::class, 'generateDynamicMenu'])
-        ->name('menu.generate');
     Route::get('/selfs/monitor', [App\Http\Controllers\User\SelfsController::class, 'show'])
         ->name('selfs.monitor');
     Route::delete('/menu/tela/{index}', [App\Http\Controllers\User\MenuController::class, 'deleteTela'])

@@ -20,6 +20,9 @@
                 @endif>
                 {{-- Configured sidebar links --}}
                 @each('adminlte::partials.sidebar.menu-item', $adminlte->menu('sidebar'), 'item')
+
+                {{-- Componente Livewire para menu dinâmico --}}
+                @livewire('menu.dynamic-menu')
             </ul>
         </nav>
     </div>

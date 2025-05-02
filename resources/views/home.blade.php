@@ -66,7 +66,7 @@
                                 <i class="fas fa-desktop"></i> Self Checkouts
                             </a>
                         </div>
-                        @if(isset(Auth::user()->ui_preferences['tela']) && count(Auth::user()->ui_preferences['tela']) > 0)
+                        {{-- @if(isset(Auth::user()->ui_preferences['tela']) && count(Auth::user()->ui_preferences['tela']) > 0)
                             <div class="col-6 col-md-4 text-center mb-3">
                                 <a href="{{ url(route('selfs.monitor', [
                                     'quadrants' => Auth::user()->ui_preferences['tela'][0]['quadrants'],
@@ -76,7 +76,7 @@
                                     <i class="fas fa-tv"></i> Monitor 1
                                 </a>
                             </div>
-                        @endif
+                        @endif --}}
                         <div class="col-6 col-md-4 text-center mb-3">
                             <a href="{{ route('user.profile') }}" class="btn btn-app bg-primary">
                                 <i class="fas fa-user-cog"></i> Perfil

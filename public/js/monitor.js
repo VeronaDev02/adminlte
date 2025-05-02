@@ -1,13 +1,11 @@
-// monitor.js - JavaScript essencial para WebRTC e conexões WebSocket
+// monitor.js - Refatorado para integração com Livewire
 
-// Estado global mínimo necessário
+// Estado global mínimo necessário (reduzido)
 const state = {
     rtspWebsockets: {},
     pdvConnection: null,
     peerConnections: {},
     isConnectedToServer: false,
-    pdvMapping: {},
-    inactivityAlerts: { queue: [], active: {} },
     isFullScreenMode: false,
     originalSidebarCollapsed: false
 };
@@ -46,13 +44,10 @@ function initializeMonitor() {
     console.log(`Conectando ao servidor PDV: ${connectionConfig.serverUrls.pdv}`);
     connectToServer(connectionConfig.serverUrls.pdv);
     
-    // Para cada PDV, cria mapeamento e inicializa conexões
+    // Para cada PDV, inicializa conexões
     if (connectionConfig.connections) {
         Object.entries(connectionConfig.connections).forEach(([position, pdv]) => {
             console.log(`Configurando PDV na posição ${position}:`, pdv);
-            
-            // Mapeia IP do PDV para posição no grid
-            state.pdvMapping[pdv.pdvIp] = position;
             
             // Inicializa conexão com a câmera
             if (pdv.rtspUrl) {
@@ -60,7 +55,8 @@ function initializeMonitor() {
                 connectCamera(position, pdv.rtspUrl, connectionConfig.serverUrls.rtsp);
             } else {
                 console.warn(`Sem URL RTSP para a posição ${position}`);
-                updateStatus(position, 'Sem URL RTSP');
+                // Utilizamos evento Livewire para atualizar status
+                Livewire.emit('updateStatus', position, 'Sem URL RTSP');
             }
         });
     }
@@ -68,17 +64,14 @@ function initializeMonitor() {
 
 // Conexão com o servidor WebSocket
 function connectToServer(serverUrl) {
-    const serverStatus = document.getElementById('serverStatus');
-    if (!serverStatus) return;
-    
     try {
         console.log(`Iniciando conexão WebSocket com: ws://${serverUrl}`);
         state.pdvConnection = new WebSocket(`ws://${serverUrl}`);
         
         state.pdvConnection.onopen = () => {
             console.log('Conectado ao servidor PDV');
-            serverStatus.textContent = 'Conectado ao servidor';
-            serverStatus.classList.add('connected');
+            // Delegamos a atualização de status para o Livewire
+            Livewire.emit('serverConnectionStatusChanged', true);
             state.isConnectedToServer = true;
             
             // Registra todos os PDVs agora que estamos conectados
@@ -94,15 +87,13 @@ function connectToServer(serverUrl) {
         
         state.pdvConnection.onclose = () => {
             console.log('Desconectado do servidor PDV');
-            serverStatus.textContent = 'Desconectado do servidor';
-            serverStatus.classList.remove('connected');
+            Livewire.emit('serverConnectionStatusChanged', false);
             state.isConnectedToServer = false;
         };
         
         state.pdvConnection.onerror = (error) => {
             console.error('Erro na conexão com o servidor PDV:', error);
-            serverStatus.textContent = 'Erro na conexão com o servidor';
-            serverStatus.classList.remove('connected');
+            Livewire.emit('serverConnectionStatusChanged', false, 'error');
             state.isConnectedToServer = false;
         };
         
@@ -110,8 +101,7 @@ function connectToServer(serverUrl) {
         setupMessageHandler();
     } catch (error) {
         console.error('Falha ao conectar ao servidor:', error);
-        serverStatus.textContent = 'Falha na conexão com o servidor';
-        serverStatus.classList.remove('connected');
+        Livewire.emit('serverConnectionStatusChanged', false, 'error');
     }
 }
 
@@ -122,17 +112,8 @@ function registerPDV(position, pdvIp) {
         return;
     }
     
-    const logContainer = document.getElementById(`log${position}`);
-    const statusElement = document.getElementById(`status${position}`);
-    
-    if (!logContainer || !statusElement) {
-        console.error(`Elementos de log ou status não encontrados para a posição ${position}`);
-        return;
-    }
-    
-    // Adiciona log inicial
-    logContainer.innerHTML += `[INFO] Conectando ao PDV ${pdvIp}...\n`;
-    statusElement.textContent = 'Conectando PDV...';
+    // Notifica Livewire sobre tentativa de conexão
+    Livewire.emit('pdvConnectionAttempt', position, pdvIp);
     
     // Envia comando de registro para o PDV
     try {
@@ -145,21 +126,12 @@ function registerPDV(position, pdvIp) {
         state.pdvConnection.send(JSON.stringify(registerCommand));
     } catch (error) {
         console.error(`Erro ao conectar ao PDV ${position}:`, error);
-        logContainer.innerHTML += '[ERRO] Falha na conexão com o PDV\n';
-        statusElement.textContent = 'Erro PDV';
+        Livewire.emit('pdvConnectionError', position, pdvIp, error.message);
     }
 }
 
 // Conecta câmera RTSP via WebSocket
 function connectCamera(position, rtspUrl, serverUrl) {
-    const videoElement = document.getElementById(`remoteVideo${position}`);
-    const statusElement = document.getElementById(`status${position}`);
-    
-    if (!videoElement || !statusElement) {
-        console.error(`Elementos de vídeo ou status não encontrados para a posição ${position}`);
-        return;
-    }
-    
     // Fecha conexão existente, se houver
     if (state.rtspWebsockets[position]) {
         state.rtspWebsockets[position].close();
@@ -168,8 +140,8 @@ function connectCamera(position, rtspUrl, serverUrl) {
         state.peerConnections[position].close();
     }
     
-    // Atualiza interface
-    statusElement.textContent = 'Conectando câmera...';
+    // Atualiza interface via Livewire
+    Livewire.emit('updateStatus', position, 'Conectando câmera...');
     
     try {
         console.log(`Iniciando WebSocket para RTSP na posição ${position}: ws://${serverUrl}`);
@@ -189,45 +161,32 @@ function connectCamera(position, rtspUrl, serverUrl) {
                 // Verifica se a mensagem contém sdp (oferta SDP)
                 if (message.sdp && message.type === 'offer') {
                     console.log(`Recebida oferta SDP para câmera ${position}`);
-                    await handleOffer(position, message, videoElement);
-                    statusElement.textContent = `Conectado - Câmera ${position}`;
-                    statusElement.classList.add('connected');
+                    const videoElement = document.getElementById(`remoteVideo${position}`);
+                    if (videoElement) {
+                        await handleOffer(position, message, videoElement);
+                        Livewire.emit('updateStatus', position, `Conectado - Câmera ${position}`, 'connected');
+                    }
                 } else {
                     console.log(`Câmera ${position} recebeu mensagem:`, message);
                 }
             } catch (error) {
                 console.error(`Erro ao processar mensagem na câmera ${position}:`, error);
-                statusElement.textContent = 'Erro na câmera';
-                statusElement.classList.remove('connected');
-                statusElement.classList.add('error');
+                Livewire.emit('updateStatus', position, 'Erro na câmera', 'error');
             }
         };
         
         state.rtspWebsockets[position].onclose = () => {
             console.log(`WebSocket ${position} fechado`);
-            statusElement.textContent = 'Câmera desconectada';
-            statusElement.classList.remove('connected');
+            Livewire.emit('updateStatus', position, 'Câmera desconectada');
         };
         
         state.rtspWebsockets[position].onerror = (error) => {
             console.error(`Erro no WebSocket ${position}:`, error);
-            statusElement.textContent = 'Erro na câmera';
-            statusElement.classList.remove('connected');
-            statusElement.classList.add('error');
+            Livewire.emit('updateStatus', position, 'Erro na câmera', 'error');
         };
     } catch (error) {
         console.error(`Erro ao conectar à câmera ${position}:`, error);
-        statusElement.textContent = 'Erro na câmera';
-        statusElement.classList.remove('connected');
-        statusElement.classList.add('error');
-    }
-}
-
-// Atualiza o status de um quadrante na UI
-function updateStatus(position, message) {
-    const statusElement = document.getElementById(`status${position}`);
-    if (statusElement) {
-        statusElement.textContent = message;
+        Livewire.emit('updateStatus', position, 'Erro na câmera', 'error');
     }
 }
 
@@ -245,161 +204,23 @@ function setupMessageHandler() {
             
             // Se for uma resposta de registro, processa
             if (message.type === 'register_response') {
-                handleRegisterResponse(message);
+                // Delegamos ao Livewire
+                Livewire.emit('handleRegisterResponse', message.pdv_ip, message.success);
             }
             // Se for dados do PDV, exibe no log do quadrante correspondente
             else if (message.type === 'pdv_data') {
-                handlePdvData(message);
+                // Delegamos a manipulação de dados ao Livewire
+                Livewire.emit('handlePdvData', message.pdv_ip, message.data);
             }
             // Se for alerta de inatividade do PDV
             else if (message.type === 'pdv_inativo_timeout') {
-                handleInactivityAlert(message);
+                // Delegamos ao Livewire
+                Livewire.emit('handleInactivityAlert', message.pdv_ip, message.inactive_time);
             }
         } catch (error) {
             console.error('Erro ao processar mensagem do PDV:', error);
         }
     };
-}
-
-// Resposta de registro do PDV
-function handleRegisterResponse(message) {
-    const pdvIp = message.pdv_ip;
-    const position = state.pdvMapping[pdvIp];
-    
-    if (position) {
-        const logContainer = document.getElementById(`log${position}`);
-        const statusElement = document.getElementById(`status${position}`);
-        
-        if (message.success) {
-            console.log(`Registrado com sucesso para o PDV ${pdvIp}`);
-            statusElement.textContent = `Conectado - PDV ${pdvIp}`;
-            statusElement.classList.add('connected');
-            logContainer.innerHTML += `[INFO] Registrado no PDV ${pdvIp}\n`;
-        } else {
-            console.log(`Falha ao registrar para o PDV ${pdvIp}`);
-            statusElement.textContent = 'Falha - PDV';
-            statusElement.classList.remove('connected');
-            statusElement.classList.add('error');
-            logContainer.innerHTML += `[ERRO] Falha ao registrar no PDV ${pdvIp}\n`;
-        }
-    }
-}
-
-// Processa dados recebidos do PDV
-function handlePdvData(message) {
-    const pdvIp = message.pdv_ip;
-    const position = state.pdvMapping[pdvIp];
-    
-    if (position) {
-        const logContainer = document.getElementById(`log${position}`);
-        
-        if (!logContainer) {
-            console.error(`Elemento de log não encontrado para a posição ${position}`);
-            return;
-        }
-        
-        // Formata a data/hora atual
-        const now = new Date();
-        const timestamp = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
-        
-        // Adiciona a mensagem ao log e escapa caracteres HTML
-        const messageText = message.data || '';
-        const safeMessage = messageText.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        logContainer.innerHTML += `[${timestamp}] ${safeMessage}\n`;
-        
-        // Mantém o scroll no final do log
-        logContainer.scrollTop = logContainer.scrollHeight;
-    } else {
-        console.warn(`Recebida mensagem do PDV ${pdvIp}, mas não há quadrante associado`);
-    }
-}
-
-// Processa alertas de inatividade do PDV
-function handleInactivityAlert(message) {
-    const pdvIp = message.pdv_ip;
-    const position = state.pdvMapping[pdvIp];
-    
-    if (position) {
-        // Adiciona o alerta à fila
-        addInactivityAlert(position, pdvIp, message.inactive_time);
-        
-        // Adiciona mensagem ao log
-        const logContainer = document.getElementById(`log${position}`);
-        
-        if (!logContainer) {
-            console.error(`Elemento de log não encontrado para a posição ${position}`);
-            return;
-        }
-        
-        // Formata a data/hora atual
-        const now = new Date();
-        const timestamp = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
-        
-        // Adiciona a mensagem ao log
-        logContainer.innerHTML += `[${timestamp}] [ALERTA] PDV ${pdvIp} inativo por ${message.inactive_time} segundos!\n`;
-        
-        // Mantém o scroll no final do log
-        logContainer.scrollTop = logContainer.scrollHeight;
-        
-        console.log(`Alerta de inatividade do PDV ${pdvIp} no quadrante ${position} por ${message.inactive_time} segundos`);
-    }
-}
-
-// Adiciona alerta de inatividade à fila
-function addInactivityAlert(position, pdvIp, inactiveTime) {
-    // Se já existe um alerta para esta posição, não faça nada
-    if (state.inactivityAlerts.active[position]) {
-        return;
-    }
-    
-    // Cria o objeto de alerta
-    const alert = {
-        position,
-        pdvIp,
-        inactiveTime
-    };
-    
-    // Adiciona à fila
-    state.inactivityAlerts.queue.push(alert);
-    
-    // Se não há alertas ativos nesta posição, inicia o alerta
-    if (!state.inactivityAlerts.active[position]) {
-        processNextAlert();
-    }
-}
-
-// Processa o próximo alerta na fila
-function processNextAlert() {
-    // Se não há alertas na fila, não faz nada
-    if (state.inactivityAlerts.queue.length === 0) {
-        return;
-    }
-    
-    // Pega o próximo alerta da fila
-    const alert = state.inactivityAlerts.queue.shift();
-    
-    // Mostra o alerta
-    showInactivityAlert(alert);
-}
-
-// Mostra alerta de inatividade visualmente
-function showInactivityAlert(alert) {
-    // Marca como ativo
-    state.inactivityAlerts.active[alert.position] = alert;
-    
-    const quadrantElement = document.getElementById(`quadrant${alert.position}`);
-    const logContainer = document.getElementById(`log${alert.position}`);
-    
-    if (quadrantElement && logContainer) {
-        // Adiciona a classe de alerta
-        logContainer.classList.add('inactivity-alert');
-        
-        // Adiciona ou atualiza um elemento de notificação
-        let notificationElement = document.createElement('div');
-        notificationElement.className = 'pdv-notification';
-        notificationElement.textContent = `PDV ${alert.pdvIp} inativo por ${alert.inactiveTime}s`;
-        logContainer.appendChild(notificationElement);
-    }
 }
 
 // Configuração do WebRTC
@@ -434,7 +255,7 @@ async function handleOffer(position, offer, videoElement) {
                 };
                 
                 console.log(`Câmera ${position}: Stream de vídeo conectado`);
-                updateStatus(position, `Conectado - Câmera ${position}`);
+                Livewire.emit('updateStatus', position, `Conectado - Câmera ${position}`, 'connected');
             }
         };
         
@@ -450,21 +271,12 @@ async function handleOffer(position, offer, videoElement) {
             const connectionState = state.peerConnections[position].iceConnectionState;
             console.log(`ICE connection state para câmera ${position}:`, connectionState);
             
-            // Atualiza status na interface
-            const statusElement = document.getElementById(`status${position}`);
-            
-            if (!statusElement) return;
-            
+            // Delegamos atualização de status para o Livewire
             if (connectionState === 'connected' || connectionState === 'completed') {
-                statusElement.textContent = `Conectado - Câmera ${position}`;
-                statusElement.classList.add('connected');
-                statusElement.classList.remove('error');
+                Livewire.emit('updateStatus', position, `Conectado - Câmera ${position}`, 'connected');
             } else if (connectionState === 'failed' || connectionState === 'disconnected' || connectionState === 'closed') {
-                statusElement.textContent = `Câmera ${connectionState}`;
-                statusElement.classList.remove('connected');
-                if (connectionState === 'failed') {
-                    statusElement.classList.add('error');
-                }
+                const statusClass = connectionState === 'failed' ? 'error' : '';
+                Livewire.emit('updateStatus', position, `Câmera ${connectionState}`, statusClass);
             }
         };
         
@@ -483,7 +295,7 @@ async function handleOffer(position, offer, videoElement) {
         console.log(`Resposta SDP para câmera ${position} criada com sucesso`);
     } catch (error) {
         console.error(`Erro ao processar oferta para câmera ${position}:`, error);
-        updateStatus(position, 'Erro WebRTC');
+        Livewire.emit('updateStatus', position, 'Erro WebRTC', 'error');
     }
 }
 
@@ -509,7 +321,7 @@ function sendAnswer(position) {
     }
 }
 
-// Eventos básicos de UI que não podem ser facilmente migrados para Livewire
+// Eventos de interface que utilizam Alpine.js, mantidos no JS para manipulação DOM específica
 function initializeInterfaceEvents() {
     // Duplo clique para fullscreen
     const quadrants = document.querySelectorAll('.stream-container');
@@ -518,14 +330,6 @@ function initializeInterfaceEvents() {
             toggleQuadrantFullscreen(this);
         });
     });
-    
-    // Botão de fullscreen do navegador
-    const fullscreenBtn = document.getElementById('browserFullscreenBtn');
-    if (fullscreenBtn) {
-        fullscreenBtn.addEventListener('click', function() {
-            toggleBrowserFullscreen();
-        });
-    }
     
     // Escuta tecla ESC para sair do fullscreen
     document.addEventListener('keydown', function(event) {
@@ -550,6 +354,15 @@ function initializeInterfaceEvents() {
     document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
     document.addEventListener('mozfullscreenchange', handleFullscreenChange);
     document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+    
+    // Eventos Livewire para integração bidirecional
+    Livewire.on('reconnectCamera', (position, rtspUrl, serverUrl) => {
+        connectCamera(position, rtspUrl, serverUrl);
+    });
+    
+    Livewire.on('reconnectPdv', (position, pdvIp) => {
+        registerPDV(position, pdvIp);
+    });
 }
 
 // Função para alternar fullscreen de um quadrante específico
@@ -580,6 +393,9 @@ function toggleQuadrantFullscreen(element) {
         if (state.originalSidebarCollapsed) {
             document.body.classList.add('sidebar-collapse');
         }
+        
+        // Notifica o Livewire
+        Livewire.emit('quadrantFullscreenChanged', null);
     } else {
         // Guarda o estado original do sidebar
         state.originalSidebarCollapsed = document.body.classList.contains('sidebar-collapse');
@@ -604,6 +420,12 @@ function toggleQuadrantFullscreen(element) {
         const instruction = document.getElementById('fullscreen-instruction');
         if (instruction) {
             instruction.style.display = 'block';
+        }
+        
+        // Notifica o Livewire da mudança
+        const positionMatch = element.id.match(/quadrant(\d+)/);
+        if (positionMatch && positionMatch[1]) {
+            Livewire.emit('quadrantFullscreenChanged', positionMatch[1]);
         }
     }
 }
@@ -648,11 +470,8 @@ function enterBrowserFullscreen() {
     document.body.classList.add('browser-fullscreen');
     state.isFullScreenMode = true;
     
-    // Atualiza o botão de controle
-    const fullscreenBtn = document.getElementById('browserFullscreenBtn');
-    if (fullscreenBtn) {
-        fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i> Sair da Tela Cheia';
-    }
+    // Notifica o Livewire
+    Livewire.emit('browserFullscreenChanged', true);
 }
 
 // Sai do fullscreen do navegador
@@ -675,11 +494,8 @@ function exitBrowserFullscreen() {
         document.body.classList.add('sidebar-collapse');
     }
     
-    // Atualiza o botão de controle
-    const fullscreenBtn = document.getElementById('browserFullscreenBtn');
-    if (fullscreenBtn) {
-        fullscreenBtn.innerHTML = '<i class="fas fa-desktop"></i> Tela Cheia (F11)';
-    }
+    // Notifica o Livewire
+    Livewire.emit('browserFullscreenChanged', false);
 }
 
 // Gerencia mudanças de fullscreen do navegador
@@ -712,15 +528,26 @@ function handleFullscreenChange() {
             }
         }
         
-        // Atualiza botão
-        const fullscreenBtn = document.getElementById('browserFullscreenBtn');
-        if (fullscreenBtn) {
-            fullscreenBtn.innerHTML = isFullscreen ? 
-                '<i class="fas fa-compress"></i> Sair da Tela Cheia' : 
-                '<i class="fas fa-desktop"></i> Tela Cheia (F11)';
-        }
+        // Notifica o Livewire da mudança
+        Livewire.emit('browserFullscreenChanged', isFullscreen);
     }
 }
+function scrollLogsToBottom() {
+    // Seleciona todos os containers de log
+    const logContainers = document.querySelectorAll('.log-container');
+    
+    // Para cada container, rola para o fundo
+    logContainers.forEach(container => {
+        container.scrollTop = container.scrollHeight;
+    });
+}
+
+Livewire.on('logsUpdated', () => {
+    // Pequeno atraso para garantir que o DOM foi atualizado
+    setTimeout(scrollLogsToBottom, 50);
+});
 
 // Expor funções globais necessárias
 window.toggleBrowserFullscreen = toggleBrowserFullscreen;
+window.toggleQuadrantFullscreen = toggleQuadrantFullscreen;
+window.scrollLogsToBottom = scrollLogsToBottom;

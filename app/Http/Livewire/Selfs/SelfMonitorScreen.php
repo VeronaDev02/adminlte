@@ -17,11 +17,32 @@ class SelfMonitorScreen extends Component
     public $pdvData = [];
     public $pageTitle = "Monitoramento de PDVs";
     
+    // Novo estado para gerenciar logs e status
+    public $pdvStatus = [];
+    public $pdvLogs = [];
+    public $serverStatus = "Conectando ao servidor...";
+    public $serverStatusClass = "";
+    public $activeFullscreenQuadrant = null;
+    public $isBrowserFullscreen = false;
+    
     // Configurações do servidor
     public $rtspServerUrl;
     public $pdvServerUrl;
     
     protected $gridLayoutService;
+    
+    // Defina listeners para eventos do JavaScript
+    protected $listeners = [
+        'updateStatus' => 'updateStatus',
+        // 'serverConnectionStatusChanged' => 'updateServerStatus',
+        'pdvConnectionAttempt' => 'handlePdvConnectionAttempt',
+        'pdvConnectionError' => 'handlePdvConnectionError',
+        'handleRegisterResponse' => 'handleRegisterResponse',
+        'handlePdvData' => 'handlePdvData',
+        'handleInactivityAlert' => 'handleInactivityAlert',
+        'quadrantFullscreenChanged' => 'updateFullscreenQuadrant',
+        'browserFullscreenChanged' => 'updateBrowserFullscreen',
+    ];
     
     public function boot(GridLayoutService $gridLayoutService)
     {
@@ -42,6 +63,15 @@ class SelfMonitorScreen extends Component
         
         // Carregar dados dos PDVs
         $this->loadPdvData();
+        
+        // Inicializar arrays de status e logs
+        foreach ($this->pdvData as $position => $pdv) {
+            $this->pdvStatus[$position] = [
+                'message' => 'Desconectado',
+                'class' => ''
+            ];
+            $this->pdvLogs[$position] = [];
+        }
         
         // Gerar o título personalizado da página
         $this->generatePageTitle();
@@ -118,7 +148,7 @@ class SelfMonitorScreen extends Component
                     $tela['rows'] == $this->rows &&
                     $this->areSelectedPdvsEqual($tela['selectedPdvs'], $this->selectedPdvs)) {
                     
-                    $configName = $tela['display_name'] ?? 'Monitor ||';
+                    $configName = 'Monitor || ';
                     break;
                 }
             }
@@ -197,6 +227,118 @@ class SelfMonitorScreen extends Component
         return $connectionConfig;
     }
     
+    // Novos métodos para lidar com eventos do JavaScript
+    
+    public function updateStatus($position, $message, $class = '')
+    {
+        $this->pdvStatus[$position] = [
+            'message' => $message,
+            'class' => $class
+        ];
+    }
+    
+    // public function updateServerStatus($connected, $statusClass = '')
+    // {
+    //     $this->serverStatus = $connected ? 'Conectado ao servidor' : 'Desconectado do servidor';
+    //     $this->serverStatusClass = $connected ? 'connected' : $statusClass;
+    // }
+    
+    public function handlePdvConnectionAttempt($position, $pdvIp)
+    {
+        $timestamp = now()->format('H:i:s');
+        $this->pdvLogs[$position][] = "[{$timestamp}] [INFO] Conectando ao PDV {$pdvIp}...";
+        $this->updateStatus($position, 'Conectando PDV...');
+    }
+    
+    public function handlePdvConnectionError($position, $pdvIp, $errorMessage)
+    {
+        $timestamp = now()->format('H:i:s');
+        $this->pdvLogs[$position][] = "[{$timestamp}] [ERRO] Falha na conexão com o PDV: {$errorMessage}";
+        $this->updateStatus($position, 'Erro PDV', 'error');
+    }
+    
+    public function handleRegisterResponse($pdvIp, $success)
+    {
+        // Obter posição pelo IP do PDV
+        $position = $this->getPdvPositionByIp($pdvIp);
+        
+        if ($position) {
+            $timestamp = now()->format('H:i:s');
+            
+            if ($success) {
+                $this->pdvLogs[$position][] = "[{$timestamp}] [INFO] Registrado no PDV {$pdvIp}";
+                $this->updateStatus($position, "Conectado - PDV {$pdvIp}", 'connected');
+            } else {
+                $this->pdvLogs[$position][] = "[{$timestamp}] [ERRO] Falha ao registrar no PDV {$pdvIp}";
+                $this->updateStatus($position, 'Falha - PDV', 'error');
+            }
+        }
+    }
+    
+    public function handlePdvData($pdvIp, $message)
+    {
+        // Obter posição pelo IP do PDV
+        $position = $this->getPdvPositionByIp($pdvIp);
+        
+        if ($position) {
+            $timestamp = now()->format('H:i:s');
+            
+            // Escapar caracteres HTML na mensagem
+            $safeMessage = htmlspecialchars($message);
+            
+            // Adiciona a mensagem ao log
+            $this->pdvLogs[$position][] = "[{$timestamp}] {$safeMessage}";
+            
+            // Limitar o tamanho do log (opcional, para evitar problemas de memória)
+            if (count($this->pdvLogs[$position]) > 100) {
+                array_shift($this->pdvLogs[$position]);
+            }
+
+            $this->emit('logsUpdated');
+        }
+    }
+    
+    public function handleInactivityAlert($pdvIp, $inactiveTime)
+    {
+        // Obter posição pelo IP do PDV
+        $position = $this->getPdvPositionByIp($pdvIp);
+        
+        if ($position) {
+            $timestamp = now()->format('H:i:s');
+            
+            // Adiciona alerta ao log
+            $this->pdvLogs[$position][] = "[{$timestamp}] [ALERTA] PDV {$pdvIp} inativo por {$inactiveTime} segundos!";
+            
+            // Define um atributo para marcar o quadrante com alerta
+            $this->dispatchBrowserEvent('inactivity-alert', [
+                'position' => $position,
+                'pdvIp' => $pdvIp,
+                'inactiveTime' => $inactiveTime
+            ]);
+        }
+    }
+    
+    public function updateFullscreenQuadrant($position)
+    {
+        $this->activeFullscreenQuadrant = $position;
+    }
+    
+    public function updateBrowserFullscreen($isFullscreen)
+    {
+        $this->isBrowserFullscreen = $isFullscreen;
+    }
+    
+    protected function getPdvPositionByIp($pdvIp)
+    {
+        foreach ($this->pdvData as $position => $pdv) {
+            if ($pdv['pdvIp'] === $pdvIp) {
+                return $position;
+            }
+        }
+        
+        return null;
+    }
+    
     public function render()
     {
         $connectionConfig = $this->getConnectionConfigData();
@@ -204,7 +346,13 @@ class SelfMonitorScreen extends Component
         return view('livewire.selfs.self-monitor-screen', [
             'pdvData' => $this->pdvData,
             'connectionConfig' => $connectionConfig,
-            'pageTitle' => $this->pageTitle
+            'pageTitle' => $this->pageTitle,
+            'pdvStatus' => $this->pdvStatus,
+            'pdvLogs' => $this->pdvLogs,
+            'serverStatus' => $this->serverStatus,
+            'serverStatusClass' => $this->serverStatusClass,
+            'activeFullscreenQuadrant' => $this->activeFullscreenQuadrant,
+            'isBrowserFullscreen' => $this->isBrowserFullscreen
         ]);
     }
 }
