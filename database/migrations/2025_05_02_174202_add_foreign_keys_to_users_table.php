@@ -4,19 +4,29 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddUiPreferencesToUsersTable extends Migration
+return new class extends Migration
 {
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->json('ui_preferences')->nullable()->after('remember_token');
+            $table->foreign(['use_rol_id'])->references(['rol_id'])->on('role')->onDelete('RESTRICT');
         });
     }
 
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
     public function down()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('ui_preferences');
+            $table->dropForeign('users_use_rol_id_foreign');
         });
     }
-}
+};

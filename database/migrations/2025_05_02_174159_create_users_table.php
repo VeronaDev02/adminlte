@@ -6,14 +6,18 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-
-    public function up(): void
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
     {
         Schema::create('users', function (Blueprint $table) {
-            $table->id('use_id');
+            $table->bigIncrements('use_id');
             $table->string('use_name');
-            $table->string('use_email')->unique();
-            $table->string('use_cod_func')->nullable();
+            $table->string('use_email')->nullable()->unique();
+            $table->string('use_cod_func')->unique();
             $table->timestamp('use_last_seen')->nullable();
             $table->string('use_ip_origin')->nullable();
             $table->string('use_username')->unique();
@@ -21,25 +25,20 @@ return new class extends Migration
             $table->string('use_cell')->nullable();
             $table->boolean('use_active')->default(true);
             $table->boolean('use_login_ativo')->default(true);
-            $table->boolean('use_allow_updates')->default(false);
-            $table->unsignedBigInteger('use_uni_id')->nullable();
-            $table->unsignedBigInteger('use_rol_id');
-            $table->rememberToken();
+            $table->bigInteger('use_rol_id');
             $table->timestamps();
-
-            $table->foreign('use_uni_id')
-                ->references('uni_id')
-                ->on('unidade')
-                ->onDelete('set null');
-
-            $table->foreign('use_rol_id')
-                ->references('rol_id')
-                ->on('role')
-                ->onDelete('restrict');
+            $table->text('img_user')->nullable();
+            $table->boolean('use_status_password')->default(false);
+            $table->json('ui_preferences')->nullable();
         });
     }
 
-    public function down(): void
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
     {
         Schema::dropIfExists('users');
     }
