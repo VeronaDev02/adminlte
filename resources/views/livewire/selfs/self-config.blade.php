@@ -20,7 +20,7 @@
             @endif
 
             <div class="row">
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <div class="form-group">
                         <label>Quantidade de Telas</label>
                         <select wire:model="selectedQuadrants" class="form-control">
@@ -32,7 +32,7 @@
                     </div>
                 </div>
                 
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <div class="form-group">
                         <label>Número de Colunas</label>
                         <select 
@@ -52,7 +52,7 @@
                     </div>
                 </div>
                 
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <div class="form-group">
                         <label>Número de Linhas</label>
                         <input 
@@ -60,6 +60,19 @@
                             class="form-control" 
                             value="{{ $selectedColumns > 0 ? ($selectedQuadrants / $selectedColumns) : '' }}" 
                             readonly
+                        >
+                    </div>
+                </div>
+                
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label>Nome da Preferência</label>
+                        <input 
+                            type="text" 
+                            wire:model="preferenceName" 
+                            class="form-control" 
+                            placeholder="Ex: Caixas Principais"
+                            {{ $selectedQuadrants == 0 ? 'disabled' : '' }}
                         >
                     </div>
                 </div>

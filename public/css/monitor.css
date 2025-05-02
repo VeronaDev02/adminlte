@@ -265,3 +265,8 @@ body.browser-fullscreen #fullscreen-instruction,
 .stream-container.fullscreen #fullscreen-instruction {
     display: block;
 }
+
+.content-header h1 {
+    font-size: 1.2rem !important;
+    margin-bottom: 10px;
+}

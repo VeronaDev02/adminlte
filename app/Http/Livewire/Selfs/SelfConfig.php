@@ -3,8 +3,8 @@
 namespace App\Http\Livewire\Selfs;
 
 use Livewire\Component;
-use App\Repositories\Selfs\SelfsRepository;
 use App\Services\Selfs\GridLayoutService;
+use Illuminate\Support\Facades\Auth;
 
 class SelfConfig extends Component
 {
@@ -14,6 +14,7 @@ class SelfConfig extends Component
     public $selectedRows = 0;
     public $selectedPdvs = [];
     public $layoutPreviewHtml = '';
+    public $preferenceName = '';
 
     protected $gridLayoutService;
 
@@ -22,11 +23,29 @@ class SelfConfig extends Component
         $this->gridLayoutService = $gridLayoutService;
     }
 
-    public function mount(SelfsRepository $repository)
+    public function mount()
     {
-        $user = auth()->user();
-        $selfsList = $repository->getUserSelfs();
-        $this->pdvs = $repository->preparePdvDataList($selfsList);
+        $user = Auth::user();
+        
+        // Obter todos os selfs do usuário através de suas unidades (sem usar o repository)
+        $selfsList = $user->unidades()
+            ->with('selfs')
+            ->get()
+            ->flatMap(function($unidade) {
+                return $unidade->selfs()->active()->get();
+            });
+        
+        // Preparar a lista de PDVs
+        $this->pdvs = $selfsList->map(function ($self) {
+            return [
+                'id' => $self->sel_id,
+                'nome' => $self->sel_name,
+                'pdvIp' => $self->sel_pdv_ip,
+                'pdvCodigo' => $self->sel_pdv_codigo,
+                'rtspUrl' => $self->sel_rtsp_path,
+            ];
+        })->toArray();
+        
         $this->selectedPdvs = array_fill(1, 16, null);
     }
 
@@ -80,7 +99,8 @@ class SelfConfig extends Component
             'quadrants' => $this->selectedQuadrants,
             'columns' => $this->selectedColumns,
             'rows' => $this->selectedRows,
-            'selectedPdvs' => $this->selectedPdvs
+            'selectedPdvs' => $this->selectedPdvs,
+            'display_name' => !empty($this->preferenceName) ? $this->preferenceName : 'Monitor ' . (count(auth()->user()->ui_preferences['tela'] ?? []) + 1)
         ];
 
         $user = auth()->user();

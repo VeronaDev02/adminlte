@@ -60,7 +60,6 @@ class SelfsController extends Controller
     {
         $user = Auth::user();
         
-        // Obter todos os selfs do usuário através de suas unidades
         $selfsList = $user->unidades()
             ->with('selfs')
             ->get()
@@ -68,7 +67,6 @@ class SelfsController extends Controller
                 return $unidade->selfs()->active()->get();
             });
         
-        // Preparar a lista de PDVs para a view de monitor
         $pdvDataList = $selfsList->map(function ($self) {
             return [
                 'id' => $self->sel_id,
@@ -84,7 +82,23 @@ class SelfsController extends Controller
             'pdvServer' => config('api_python.websocket_pdv_server')
         ];
         
-        return view('user.selfs.monitor', compact('pdvDataList', 'serverConfig'));
+        $pageTitle = 'Monitoramento de PDVs';
+
+        // Tratamento dos parâmetros de quadrantes
+        $cols = $request->input('cols', 2);
+        $rows = $request->input('rows', 2);
+        $quadrants = $request->input('quadrants', 4);
+        $selectedPdvs = $request->input('pdv', []);
+
+        return view('user.selfs.monitor', compact(
+            'pdvDataList', 
+            'serverConfig', 
+            'pageTitle', 
+            'cols', 
+            'rows', 
+            'quadrants', 
+            'selectedPdvs'
+        ));
     }
 
     public function saveTelaPreferences(Request $request)
