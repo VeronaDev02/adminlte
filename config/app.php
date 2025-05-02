@@ -162,6 +162,7 @@ return [
         Illuminate\Validation\ValidationServiceProvider::class,
         Illuminate\View\ViewServiceProvider::class,
         App\Providers\SelfsServiceProvider::class,
+        Orangehill\Iseed\IseedServiceProvider::class,
         
         /*
          * Package Service Providers...
