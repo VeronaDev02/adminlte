@@ -99,6 +99,21 @@
                     <div class="card-body">
                         <div class="row">
                             @foreach(Auth::user()->ui_preferences['tela'] as $index => $tela)
+                                @php
+                                    // Gerar URL correta com PDVs usando a mesma lógica que o DynamicMenu
+                                    $pdvs = [];
+                                    foreach ($tela['selectedPdvs'] as $key => $value) {
+                                        if (!empty($value)) {
+                                            $pdvs["pdv[{$key}]"] = $value;
+                                        }
+                                    }
+                                    
+                                    $monitorUrl = route('selfs.monitor', array_merge([
+                                        'quadrants' => $tela['quadrants'],
+                                        'cols' => $tela['columns'],
+                                        'rows' => $tela['rows']
+                                    ], $pdvs));
+                                @endphp
                                 <div class="col-md-4">
                                     <div class="info-box">
                                         <span class="info-box-icon bg-success"><i class="fas fa-tv"></i></span>
@@ -108,11 +123,7 @@
                                                 {{ $tela['quadrants'] }} quadrantes ({{ $tela['columns'] }}x{{ $tela['rows'] }})
                                             </span>
                                             <div class="mt-2">
-                                                <a href="{{ url(route('selfs.monitor', [
-                                                    'quadrants' => $tela['quadrants'],
-                                                    'cols' => $tela['columns'],
-                                                    'rows' => $tela['rows']
-                                                ])) }}" class="btn btn-xs btn-success mr-1">
+                                                <a href="{{ $monitorUrl }}" class="btn btn-xs btn-success mr-1" target="_blank">
                                                     <i class="fas fa-eye"></i> Visualizar
                                                 </a>
                                                 <button type="button" class="btn btn-xs btn-danger" 

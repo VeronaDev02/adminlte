@@ -181,7 +181,7 @@ class SelfsController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             
-            // Log::error('Erro ao atualizar SelfCheckout: ' . $e->getMessage());
+            // Log::error('Erro ao atualizar SelfCheckout: ' . $e->tMessage());
             
             return redirect()->back()
                 ->with("error", "Erro ao atualizar o SelfCheckout: " . $e->getMessage())
