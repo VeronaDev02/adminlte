@@ -50,6 +50,7 @@
                 window.alertingLogs = new Set();
             }
             
+            // Esta função é chamada pelo toggleQuadrantFullscreen para parar o alerta
             window.stopAlert = function(position) {
                 window.alertingLogs.delete(position);
                 const logContainer = document.getElementById(`log${position}`);
@@ -58,30 +59,7 @@
                 }
             };
             
-            function applyAlerts() {
-                window.alertingLogs.forEach(position => {
-                    const logContainer = document.getElementById(`log${position}`);
-                    if (logContainer) {
-                        logContainer.classList.add('inactivity-alert-blink');
-                        
-                        logContainer.addEventListener('dblclick', function() {
-                            window.stopAlert(position);
-                        });
-                        
-                        const videoContainer = document.getElementById(`remoteVideo${position}`);
-                        if (videoContainer) {
-                            videoContainer.addEventListener('dblclick', function() {
-                                window.stopAlert(position);
-                            });
-                        }
-                    }
-                });
-            }
-            
-            Livewire.hook('message.processed', (message, component) => {
-                applyAlerts();
-            });
-
+            // Este evento é disparado pelo Livewire (handleInactivityAlert) e adiciona a classe de animação
             window.addEventListener('inactivity-alert', function(e) {
                 const { position } = e.detail;
                 window.alertingLogs.add(position);
@@ -89,28 +67,8 @@
                 const logContainer = document.getElementById(`log${position}`);
                 if (logContainer) {
                     logContainer.classList.add('inactivity-alert-blink');
-                    
-                    logContainer.addEventListener('dblclick', function() {
-                        window.stopAlert(position);
-                    });
-                    
-                    const videoContainer = document.getElementById(`remoteVideo${position}`);
-                    if (videoContainer) {
-                        videoContainer.addEventListener('dblclick', function() {
-                            window.stopAlert(position);
-                        });
-                    }
-                    
-                    const quadrant = document.getElementById(`quadrant${position}`);
-                    if (quadrant) {
-                        quadrant.addEventListener('dblclick', function() {
-                            window.stopAlert(position);
-                        });
-                    }
                 }
             });
-            
-            applyAlerts();
         });
     </script>
 </div>

@@ -314,6 +314,17 @@ function initializeInterfaceEvents() {
 
 // Função para alternar fullscreen de um quadrante específico
 function toggleQuadrantFullscreen(element) {
+    // Obter o ID do quadrante
+    const positionMatch = element.id.match(/quadrant(\d+)/);
+    const position = positionMatch ? parseInt(positionMatch[1]) : null;
+    
+    // Se o quadrante estiver em alerta, pare o alerta - mas continue com o toggle
+    if (position && window.alertingLogs && window.alertingLogs.has(position)) {
+        window.stopAlert(position);
+        // Não retorna aqui - continuamos para alternar o fullscreen também
+    }
+    
+    // Resto do código existente
     const allQuadrants = document.querySelectorAll('.stream-container');
     
     if (element.classList.contains('fullscreen')) {
@@ -370,9 +381,8 @@ function toggleQuadrantFullscreen(element) {
         }
         
         // Notifica o Livewire da mudança
-        const positionMatch = element.id.match(/quadrant(\d+)/);
-        if (positionMatch && positionMatch[1]) {
-            Livewire.emit('quadrantFullscreenChanged', positionMatch[1]);
+        if (position) {
+            Livewire.emit('quadrantFullscreenChanged', position);
         }
     }
 }
