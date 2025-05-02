@@ -31,21 +31,19 @@ $(function () {
         }, 200);
     });
     
-    function saveUserPreferences(preferences) {
-        // console.log('Salvando preferências:', preferences);
-        
+    function saveUserPreferences(themePreferences) {
         $.ajax({
-            url: '/save-ui-preferences',
+            url: '/save-ui-preferences', 
             type: 'POST',
             data: {
                 _token: $('meta[name="csrf-token"]').attr('content'),
-                preferences: preferences
+                theme_preferences: themePreferences
             },
             success: function(response) {
-                // console.log('Preferências salvas com sucesso:', response);
+                // console.log('Preferências de tema salvas com sucesso:', response);
             },
             error: function(error) {
-                console.error('Erro ao salvar preferências:', error);
+                console.error('Erro ao salvar preferências de tema:', error);
             }
         });
     }

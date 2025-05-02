@@ -86,7 +86,7 @@ Route::middleware("auth:web")->group(function () {
         Route::get('/', [App\Http\Controllers\User\SelfsController::class, 'index'])->name('index');
     });
 
-    Route::post('/save-ui-preferences', [App\Http\Controllers\User\UserController::class, 'saveUIPreferences'])
+    Route::post('/save-ui-preferences', [App\Http\Controllers\User\UserController::class, 'saveThemePreferences'])
         ->name('user.save-ui-preferences');
     Route::post('/user/save-tela-preferences', [App\Http\Controllers\User\SelfsController::class, 'saveTelaPreferences'])
         ->name('user.saveTelaPreferences');

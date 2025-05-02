@@ -176,4 +176,42 @@ class User extends Authenticatable
             $q->where('uni_id', $unidadeId);
         });
     }
+
+    protected static function booted()
+    {
+        static::updating(function ($user) {
+            if ($user->isDirty('ui_preferences')) {
+                $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 10);
+                $callers = [];
+                
+                foreach ($backtrace as $trace) {
+                    if (isset($trace['class']) && isset($trace['function'])) {
+                        $callers[] = $trace['class'] . '::' . $trace['function'];
+                    } elseif (isset($trace['function'])) {
+                        $callers[] = $trace['function'];
+                    }
+                }
+                
+                \Log::info('Modificação nas preferências do usuário', [
+                    'user_id' => $user->use_id,
+                    'antes' => $user->getOriginal('ui_preferences'),
+                    'depois' => $user->ui_preferences,
+                    'chamado_por' => $callers,
+                    'request_url' => request()->fullUrl(),
+                    'request_method' => request()->method(),
+                    'request_ip' => request()->ip(),
+                    'request_user_agent' => request()->userAgent()
+                ]);
+            }
+        });
+        
+        static::saved(function ($user) {
+            if ($user->wasChanged('ui_preferences')) {
+                \Log::info('Preferências do usuário salvas', [
+                    'user_id' => $user->use_id,
+                    'ui_preferences' => $user->ui_preferences
+                ]);
+            }
+        });
+    }
 }

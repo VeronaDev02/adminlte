@@ -5,11 +5,6 @@
                 <i class="fas fa-desktop"></i> {{ $isBrowserFullscreen ? 'Sair da Tela Cheia' : 'Tela Cheia (F11)' }}
             </button>
         </h1>
-        <div class="monitor-controls">
-            <div id="serverStatus" class="server-status {{ $serverStatusClass }}">
-                {{ $serverStatus }}
-            </div>
-        </div>
     </div>
     
     <div class="monitor-grid-container" style="grid-template-columns: repeat({{ $columns }}, 1fr); grid-template-rows: repeat({{ $rows }}, 1fr);">
@@ -41,9 +36,7 @@
         @endfor
     </div>
     
-    <!-- Passar dados para JavaScript -->
     <script>
-        // Configuração para o JavaScript
         window.monitorConfig = {
             quadrants: {{ $quadrants }},
             columns: {{ $columns }},
@@ -51,5 +44,73 @@
             connectionConfig: {!! json_encode($connectionConfig) !!},
             pdvData: {!! json_encode($pdvData) !!}
         };
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!window.alertingLogs) {
+                window.alertingLogs = new Set();
+            }
+            
+            window.stopAlert = function(position) {
+                window.alertingLogs.delete(position);
+                const logContainer = document.getElementById(`log${position}`);
+                if (logContainer) {
+                    logContainer.classList.remove('inactivity-alert-blink');
+                }
+            };
+            
+            function applyAlerts() {
+                window.alertingLogs.forEach(position => {
+                    const logContainer = document.getElementById(`log${position}`);
+                    if (logContainer) {
+                        logContainer.classList.add('inactivity-alert-blink');
+                        
+                        logContainer.addEventListener('dblclick', function() {
+                            window.stopAlert(position);
+                        });
+                        
+                        const videoContainer = document.getElementById(`remoteVideo${position}`);
+                        if (videoContainer) {
+                            videoContainer.addEventListener('dblclick', function() {
+                                window.stopAlert(position);
+                            });
+                        }
+                    }
+                });
+            }
+            
+            Livewire.hook('message.processed', (message, component) => {
+                applyAlerts();
+            });
+
+            window.addEventListener('inactivity-alert', function(e) {
+                const { position } = e.detail;
+                window.alertingLogs.add(position);
+                
+                const logContainer = document.getElementById(`log${position}`);
+                if (logContainer) {
+                    logContainer.classList.add('inactivity-alert-blink');
+                    
+                    logContainer.addEventListener('dblclick', function() {
+                        window.stopAlert(position);
+                    });
+                    
+                    const videoContainer = document.getElementById(`remoteVideo${position}`);
+                    if (videoContainer) {
+                        videoContainer.addEventListener('dblclick', function() {
+                            window.stopAlert(position);
+                        });
+                    }
+                    
+                    const quadrant = document.getElementById(`quadrant${position}`);
+                    if (quadrant) {
+                        quadrant.addEventListener('dblclick', function() {
+                            window.stopAlert(position);
+                        });
+                    }
+                }
+            });
+            
+            applyAlerts();
+        });
     </script>
 </div>

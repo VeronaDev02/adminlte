@@ -58,7 +58,7 @@
   video {
     width: 100% !important;
     height: 100% !important;
-    object-fit: contain !important;
+    object-fit: fill !important;
     background-color: #000;
   }
   
@@ -85,6 +85,22 @@
     overflow-y: visible;
     font-size: 0.56rem;
   }
+
+  /* Efeito de alerta piscando */
+@keyframes alertBlink {
+  0% { background-color: #ffcc00; } /* Amarelo */
+  50% { background-color: #ff3333; } /* Vermelho */
+  100% { background-color: #ffcc00; } /* Amarelo novamente */
+}
+
+.inactivity-alert-blink {
+  animation: alertBlink 1s infinite;
+}
+
+/* Classe para modo escuro */
+body.dark-mode .inactivity-alert-blink {
+  color: #ffffff !important; /* Texto branco para melhor visibilidade */
+}
   
   /* ====================================
      4. TEMA CLARO/ESCURO

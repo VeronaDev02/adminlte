@@ -20,7 +20,7 @@ class SelfMonitorScreen extends Component
     // Novo estado para gerenciar logs e status
     public $pdvStatus = [];
     public $pdvLogs = [];
-    public $serverStatus = "Conectando ao servidor...";
+    // public $serverStatus = "Conectando ao servidor...";
     public $serverStatusClass = "";
     public $activeFullscreenQuadrant = null;
     public $isBrowserFullscreen = false;
@@ -243,37 +243,37 @@ class SelfMonitorScreen extends Component
     //     $this->serverStatusClass = $connected ? 'connected' : $statusClass;
     // }
     
-    public function handlePdvConnectionAttempt($position, $pdvIp)
-    {
-        $timestamp = now()->format('H:i:s');
-        $this->pdvLogs[$position][] = "[{$timestamp}] [INFO] Conectando ao PDV {$pdvIp}...";
-        $this->updateStatus($position, 'Conectando PDV...');
-    }
+    // public function handlePdvConnectionAttempt($position, $pdvIp)
+    // {
+    //     $timestamp = now()->format('H:i:s');
+    //     $this->pdvLogs[$position][] = "[{$timestamp}] [INFO] Conectando ao PDV {$pdvIp}...";
+    //     $this->updateStatus($position, 'Conectando PDV...');
+    // }
     
-    public function handlePdvConnectionError($position, $pdvIp, $errorMessage)
-    {
-        $timestamp = now()->format('H:i:s');
-        $this->pdvLogs[$position][] = "[{$timestamp}] [ERRO] Falha na conexão com o PDV: {$errorMessage}";
-        $this->updateStatus($position, 'Erro PDV', 'error');
-    }
+    // public function handlePdvConnectionError($position, $pdvIp, $errorMessage)
+    // {
+    //     $timestamp = now()->format('H:i:s');
+    //     $this->pdvLogs[$position][] = "[{$timestamp}] [ERRO] Falha na conexão com o PDV: {$errorMessage}";
+    //     $this->updateStatus($position, 'Erro PDV', 'error');
+    // }
     
-    public function handleRegisterResponse($pdvIp, $success)
-    {
-        // Obter posição pelo IP do PDV
-        $position = $this->getPdvPositionByIp($pdvIp);
+    // public function handleRegisterResponse($pdvIp, $success)
+    // {
+    //     // Obter posição pelo IP do PDV
+    //     $position = $this->getPdvPositionByIp($pdvIp);
         
-        if ($position) {
-            $timestamp = now()->format('H:i:s');
+    //     if ($position) {
+    //         $timestamp = now()->format('H:i:s');
             
-            if ($success) {
-                $this->pdvLogs[$position][] = "[{$timestamp}] [INFO] Registrado no PDV {$pdvIp}";
-                $this->updateStatus($position, "Conectado - PDV {$pdvIp}", 'connected');
-            } else {
-                $this->pdvLogs[$position][] = "[{$timestamp}] [ERRO] Falha ao registrar no PDV {$pdvIp}";
-                $this->updateStatus($position, 'Falha - PDV', 'error');
-            }
-        }
-    }
+    //         if ($success) {
+    //             $this->pdvLogs[$position][] = "[{$timestamp}] [INFO] Registrado no PDV {$pdvIp}";
+    //             $this->updateStatus($position, "Conectado - PDV {$pdvIp}", 'connected');
+    //         } else {
+    //             $this->pdvLogs[$position][] = "[{$timestamp}] [ERRO] Falha ao registrar no PDV {$pdvIp}";
+    //             $this->updateStatus($position, 'Falha - PDV', 'error');
+    //         }
+    //     }
+    // }
     
     public function handlePdvData($pdvIp, $message)
     {
@@ -281,14 +281,15 @@ class SelfMonitorScreen extends Component
         $position = $this->getPdvPositionByIp($pdvIp);
         
         if ($position) {
-            $timestamp = now()->format('H:i:s');
+            // $timestamp = now()->format('H:i:s');
             
             // Escapar caracteres HTML na mensagem
             $safeMessage = htmlspecialchars($message);
             
             // Adiciona a mensagem ao log
-            $this->pdvLogs[$position][] = "[{$timestamp}] {$safeMessage}";
-            
+            // $this->pdvLogs[$position][] = "[{$timestamp}] {$safeMessage}";
+            $this->pdvLogs[$position][] = "{$safeMessage}";
+
             // Limitar o tamanho do log (opcional, para evitar problemas de memória)
             if (count($this->pdvLogs[$position]) > 100) {
                 array_shift($this->pdvLogs[$position]);
@@ -304,10 +305,9 @@ class SelfMonitorScreen extends Component
         $position = $this->getPdvPositionByIp($pdvIp);
         
         if ($position) {
-            $timestamp = now()->format('H:i:s');
             
             // Adiciona alerta ao log
-            $this->pdvLogs[$position][] = "[{$timestamp}] [ALERTA] PDV {$pdvIp} inativo por {$inactiveTime} segundos!";
+            // $this->pdvLogs[$position][] = "[ALERTA] PDV inativo por {$inactiveTime} segundos!";
             
             // Define um atributo para marcar o quadrante com alerta
             $this->dispatchBrowserEvent('inactivity-alert', [
@@ -349,7 +349,7 @@ class SelfMonitorScreen extends Component
             'pageTitle' => $this->pageTitle,
             'pdvStatus' => $this->pdvStatus,
             'pdvLogs' => $this->pdvLogs,
-            'serverStatus' => $this->serverStatus,
+            // 'serverStatus' => $this->serverStatus,
             'serverStatusClass' => $this->serverStatusClass,
             'activeFullscreenQuadrant' => $this->activeFullscreenQuadrant,
             'isBrowserFullscreen' => $this->isBrowserFullscreen

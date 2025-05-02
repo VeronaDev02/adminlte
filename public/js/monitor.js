@@ -96,7 +96,7 @@ function registerPDV(position, pdvIp) {
     }
     
     // Notifica Livewire sobre tentativa de conexão
-    Livewire.emit('pdvConnectionAttempt', position, pdvIp);
+    // Livewire.emit('pdvConnectionAttempt', position, pdvIp);
     
     // Envia comando de registro para o PDV
     try {
@@ -172,12 +172,11 @@ function setupMessageHandler() {
             const message = JSON.parse(event.data);
             
             // Se for uma resposta de registro, processa
-            if (message.type === 'register_response') {
-                // Delegamos ao Livewire
-                Livewire.emit('handleRegisterResponse', message.pdv_ip, message.success);
-            }
+            // if (message.type === 'register_response') {
+            //     Livewire.emit('handleRegisterResponse', message.pdv_ip, message.success);
+            // }
             // Se for dados do PDV, exibe no log do quadrante correspondente
-            else if (message.type === 'pdv_data') {
+            if (message.type === 'pdv_data') {
                 // Delegamos a manipulação de dados ao Livewire
                 Livewire.emit('handlePdvData', message.pdv_ip, message.data);
             }

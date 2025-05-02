@@ -106,6 +106,29 @@ class UserController extends Controller
         }
     }
 
+    public function saveThemePreferences(Request $request)
+    {
+        try {
+            $user = Auth::user();
+            $themePreferences = $request->input('theme_preferences');
+            
+            // Obter preferências atuais completas
+            $currentPreferences = $user->ui_preferences ?? [];
+            
+            // Atualizar apenas as chaves relacionadas ao tema
+            $currentPreferences['theme'] = $themePreferences['theme'];
+            $currentPreferences['sidebar_collapsed'] = $themePreferences['sidebar_collapsed'];
+            
+            // Manter todas as outras configurações intactas
+            $user->ui_preferences = $currentPreferences;
+            $user->save();
+            
+            return response()->json(['success' => true, 'message' => 'Preferências de tema salvas com sucesso']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
     public function update(Request $request, $id)
     {
         //
