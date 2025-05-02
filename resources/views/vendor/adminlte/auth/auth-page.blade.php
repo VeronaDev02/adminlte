@@ -1,16 +1,15 @@
 @extends('adminlte::master')
 
 @php
-    $authType = $authType ?? 'login';
-    $dashboardUrl = View::getSection('dashboard_url') ?? config('adminlte.dashboard_url', 'home');
+    $dashboard_url = View::getSection('dashboard_url') ?? config('adminlte.dashboard_url', 'home');
 
     if (config('adminlte.use_route_url', false)) {
-        $dashboardUrl = $dashboardUrl ? route($dashboardUrl) : '';
+        $dashboard_url = $dashboard_url ? route($dashboard_url) : '';
     } else {
-        $dashboardUrl = $dashboardUrl ? url($dashboardUrl) : '';
+        $dashboard_url = $dashboard_url ? url($dashboard_url) : '';
     }
 
-    $bodyClasses = "{$authType}-page";
+    $bodyClasses = ($auth_type ?? 'login') . '-page';
 
     if (! empty(config('adminlte.layout_dark_mode', null))) {
         $bodyClasses .= ' dark-mode';
@@ -20,20 +19,32 @@
 @section('adminlte_css')
     @stack('css')
     @yield('css')
+
 @stop
 
-@section('classes_body'){{ $bodyClasses }}@stop
+@section('classes_body'){{ $bodyClasses }}
+
+
+
+@stop
 
 @section('body')
-    <div class="{{ $authType }}-box">
+
+    {{-- Imagem no Topo --}}
+    <div class="top-banner">
+    </div>
+
+
+
+    <div class="{{ $auth_type ?? 'login' }}-box">
 
         {{-- Logo --}}
-        <div class="{{ $authType }}-logo">
-            <a href="{{ $dashboardUrl }}">
+        <div class="{{ $auth_type ?? 'login' }}-logo">
+            <a href="{{ $dashboard_url }}">
 
                 {{-- Logo Image --}}
                 @if (config('adminlte.auth_logo.enabled', false))
-                    <img src="{{ asset(config('adminlte.auth_logo.img.path')) }}"
+                    <img style="margin-bottom: 2rem;" src="{{ asset(config('adminlte.auth_logo.img.path')) }}"
                          alt="{{ config('adminlte.auth_logo.img.alt') }}"
                          @if (config('adminlte.auth_logo.img.class', null))
                             class="{{ config('adminlte.auth_logo.img.class') }}"
@@ -68,7 +79,7 @@
             @endif
 
             {{-- Card Body --}}
-            <div class="card-body {{ $authType }}-card-body {{ config('adminlte.classes_auth_body', '') }}">
+            <div class="card-body {{ $auth_type ?? 'login' }}-card-body {{ config('adminlte.classes_auth_body', '') }}">
                 @yield('auth_body')
             </div>
 

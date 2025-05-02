@@ -50,7 +50,6 @@
                 window.alertingLogs = new Set();
             }
             
-            // Esta função é chamada para parar o alerta
             window.stopAlert = function(position) {
                 window.alertingLogs.delete(position);
                 const logContainer = document.getElementById(`log${position}`);
@@ -59,7 +58,6 @@
                 }
             };
             
-            // Função para aplicar alertas a todos os elementos que estão na lista
             function applyAlerts() {
                 window.alertingLogs.forEach(position => {
                     const logContainer = document.getElementById(`log${position}`);
@@ -69,21 +67,17 @@
                 });
             }
             
-            // Este evento é disparado pelo Livewire (handleInactivityAlert)
             window.addEventListener('inactivity-alert', function(e) {
                 const { position } = e.detail;
                 
-                // SEMPRE adiciona à lista de alertas
                 window.alertingLogs.add(position);
                 
-                // Aplica o alerta imediatamente
                 const logContainer = document.getElementById(`log${position}`);
                 if (logContainer) {
                     logContainer.classList.add('inactivity-alert-blink');
                 }
             });
             
-            // IMPORTANTE: Reaplicar os alertas após cada atualização do Livewire
             Livewire.hook('message.processed', (message, component) => {
                 applyAlerts();
             });

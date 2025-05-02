@@ -112,7 +112,6 @@ class SelfMonitorScreen extends Component
             ];
         })->toArray();
         
-        // Filtrar apenas os PDVs selecionados
         foreach ($this->selectedPdvs as $position => $pdvId) {
             $pdv = $this->findPdvById($allPdvData, $pdvId);
             if ($pdv) {
@@ -133,14 +132,12 @@ class SelfMonitorScreen extends Component
     
     protected function generatePageTitle()
     {
-        // Título base
         $this->pageTitle = "SelfCheckout ||";
         
         $user = Auth::user();
         $configName = "";
         $pdvNames = [];
         
-        // Busca nome da configuração se estiver salva
         if ($user->ui_preferences && isset($user->ui_preferences['tela'])) {
             foreach ($user->ui_preferences['tela'] as $tela) {
                 if ($tela['quadrants'] == $this->quadrants && 
@@ -154,7 +151,6 @@ class SelfMonitorScreen extends Component
             }
         }
         
-        // Busca nomes de todos os PDVs selecionados
         if (!empty($this->pdvData)) {
             foreach ($this->selectedPdvs as $position => $pdvId) {
                 $pdv = $this->pdvData[$position] ?? null;
@@ -166,7 +162,6 @@ class SelfMonitorScreen extends Component
             }
         }
         
-        // Monta o título completo de forma mais concisa
         $titleParts = [];
         
         if (!empty($configName)) {
@@ -182,7 +177,6 @@ class SelfMonitorScreen extends Component
             $titleParts[] = implode(' ', $limitedPdvNames);
         }
         
-        // Combina partes do título
         if (!empty($titleParts)) {
             $this->pageTitle .= " " . implode(' ', $titleParts);
         }
@@ -226,9 +220,7 @@ class SelfMonitorScreen extends Component
         
         return $connectionConfig;
     }
-    
-    // Novos métodos para lidar com eventos do JavaScript
-    
+        
     public function updateStatus($position, $message, $class = '')
     {
         $this->pdvStatus[$position] = [
@@ -291,11 +283,9 @@ class SelfMonitorScreen extends Component
             $safeMessage = preg_replace('/\s+/', ' ', $safeMessage);
 
 
-            // Adiciona a mensagem ao log
             // $this->pdvLogs[$position][] = "[{$timestamp}] {$safeMessage}";
             $this->pdvLogs[$position][] = "{$safeMessage}";
 
-            // Limitar o tamanho do log (opcional, para evitar problemas de memória)
             if (count($this->pdvLogs[$position]) > 100) {
                 array_shift($this->pdvLogs[$position]);
             }
