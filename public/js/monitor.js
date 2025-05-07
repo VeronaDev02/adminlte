@@ -35,6 +35,29 @@ document.addEventListener('DOMContentLoaded', function() {
         if (logContainer) {
             logContainer.classList.remove('inactivity-alert-blink');
         }
+
+        // Marcar o alerta como resolvido no banco de dados
+        if (window.alertSystem.alertIds && window.alertSystem.alertIds[position]) {
+            fetch('/alertas/resolver', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({
+                    alerta_id: window.alertSystem.alertIds[position]
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    delete window.alertSystem.alertIds[position];
+                }
+            })
+            .catch(error => {
+                console.error('Erro ao resolver alerta:', error);
+            });
+        }
         
         // Remove da lista de alertas ativos
         window.alertSystem.alertingLogs.delete(position);
@@ -88,6 +111,35 @@ document.addEventListener('DOMContentLoaded', function() {
             logContainer.classList.add('inactivity-alert-blink');
         }
         
+        // Obter dados do PDV da configuração
+        const pdvData = window.monitorConfig.connectionConfig.connections[position];
+
+        // Registrar o alerta no banco de dados
+        if (pdvData) {
+            // Enviar requisição para o backend
+            fetch('/alertas/registrar', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({
+                    pdv_codigo: pdvData.pdvCode || pdvData.selfId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Armazenar o ID do alerta para resolver posteriormente
+                    if (!window.alertSystem.alertIds) window.alertSystem.alertIds = {};
+                    window.alertSystem.alertIds[position] = data.alerta_id;
+                }
+            })
+            .catch(error => {
+                console.error('Erro ao registrar alerta:', error);
+            });
+        }
+
         // Se já temos um alerta ativo, adiciona à fila
         if (window.alertSystem.activeAlert !== null) {
             if (!window.alertSystem.queue.includes(position)) {

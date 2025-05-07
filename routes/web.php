@@ -98,5 +98,27 @@ Route::middleware("auth:web")->group(function () {
     Route::delete('/menu/tela/{index}', [App\Http\Controllers\User\MenuController::class, 'deleteTela'])
         ->name('menu.deleteTela');
     
-
+    // ------------------------- Rotas de Alertas -------------------------
+    Route::post('/alertas/registrar', function (Illuminate\Http\Request $request) {
+        $alerta = App\Models\AlertaLog::create([
+            'alert_origin' => $request->input('pdv_codigo'),
+        ]);
+        
+        return response()->json(['success' => true, 'alerta_id' => $alerta->id]);
+    })->name('alertas.registrar');
+    
+    Route::post('/alertas/resolver', function (Illuminate\Http\Request $request) {
+        $alerta = App\Models\AlertaLog::find($request->input('alerta_id'));
+        
+        if ($alerta) {
+            $alerta->update([
+                'alert_resolved_by' => auth()->id(),
+                'closed_at' => now()
+            ]);
+            
+            return response()->json(['success' => true]);
+        }
+        
+        return response()->json(['success' => false, 'message' => 'Alerta não encontrado'], 404);
+    })->name('alertas.resolver');
 });
