@@ -17,9 +17,136 @@ const iceServers = {
 };
 
 // Inicialização principal
-document.addEventListener('DOMContentLoaded', () => {
-    console.log("DOM carregado, inicializando monitor");
+document.addEventListener('DOMContentLoaded', function() {
     
+    // Sistema de fila de alertas
+    if (!window.alertSystem) {
+        window.alertSystem = {
+            queue: [],           // Fila de posições com alertas pendentes
+            activeAlert: null,   // Alerta atualmente sendo exibido em fullscreen
+            alertingLogs: new Set() // Mantemos o set para rastrear todos os logs em alerta
+        };
+    }
+    
+    // Função para parar um alerta específico
+    window.stopAlert = function(position) {
+        // Remove a classe de animação
+        const logContainer = document.getElementById(`log${position}`);
+        if (logContainer) {
+            logContainer.classList.remove('inactivity-alert-blink');
+        }
+        
+        // Remove da lista de alertas ativos
+        window.alertSystem.alertingLogs.delete(position);
+        
+        // Se este era o alerta ativo no momento, fecha o fullscreen
+        if (window.alertSystem.activeAlert === position) {
+            window.alertSystem.activeAlert = null;
+            
+            // Sai do modo fullscreen do quadrante
+            const quadrant = document.getElementById(`quadrant${position}`);
+            if (quadrant && quadrant.classList.contains('fullscreen')) {
+                toggleQuadrantFullscreen(quadrant);
+            }
+            
+            // Processa o próximo alerta da fila, se houver
+            setTimeout(processNextAlert, 500);
+        }
+        
+        // Se o alerta está na fila, remove-o
+        window.alertSystem.queue = window.alertSystem.queue.filter(pos => pos !== position);
+    };
+    
+    // Função para processar o próximo alerta da fila
+    function processNextAlert() {
+        // Se já temos um alerta ativo ou a fila está vazia, não fazemos nada
+        if (window.alertSystem.activeAlert !== null || window.alertSystem.queue.length === 0) {
+            return;
+        }
+        
+        // Pegamos o próximo alerta da fila
+        const nextPosition = window.alertSystem.queue.shift();
+        
+        // Definimos como alerta ativo
+        window.alertSystem.activeAlert = nextPosition;
+        
+        // Colocamos o quadrante em fullscreen
+        const quadrant = document.getElementById(`quadrant${nextPosition}`);
+        if (quadrant && !quadrant.classList.contains('fullscreen')) {
+            toggleQuadrantFullscreen(quadrant);
+        }
+    }
+    
+    // Função para adicionar um alerta e processá-lo
+    function addAlert(position) {
+        // Adiciona à lista de logs com alerta (para o efeito visual)
+        window.alertSystem.alertingLogs.add(position);
+        
+        // Aplica a classe de animação
+        const logContainer = document.getElementById(`log${position}`);
+        if (logContainer) {
+            logContainer.classList.add('inactivity-alert-blink');
+        }
+        
+        // Se já temos um alerta ativo, adiciona à fila
+        if (window.alertSystem.activeAlert !== null) {
+            if (!window.alertSystem.queue.includes(position)) {
+                window.alertSystem.queue.push(position);
+            }
+            return;
+        }
+        
+        // Se não temos alerta ativo, este se torna o ativo
+        window.alertSystem.activeAlert = position;
+        
+        // Coloca o quadrante em fullscreen
+        const quadrant = document.getElementById(`quadrant${position}`);
+        if (quadrant && !quadrant.classList.contains('fullscreen')) {
+            toggleQuadrantFullscreen(quadrant);
+        }
+    }
+    
+    // Reaplicamos alertas visuais após atualizações do DOM
+    function applyAlerts() {
+        window.alertSystem.alertingLogs.forEach(position => {
+            const logContainer = document.getElementById(`log${position}`);
+            if (logContainer) {
+                logContainer.classList.add('inactivity-alert-blink');
+            }
+        });
+    }
+    
+    // Listener para o evento de inatividade
+    window.addEventListener('inactivity-alert', function(e) {
+        const { position } = e.detail;
+        addAlert(position);
+    });
+    
+    // Módificamos a função de toggle para integrar com o sistema de fila
+    window.originalToggleQuadrantFullscreen = window.toggleQuadrantFullscreen;
+    window.toggleQuadrantFullscreen = function(element) {
+        // Obter o ID do quadrante
+        const positionMatch = element.id.match(/quadrant(\d+)/);
+        const position = positionMatch ? parseInt(positionMatch[1]) : null;
+        
+        // Se estamos saindo do fullscreen em um alerta ativo
+        if (element.classList.contains('fullscreen') && 
+            position && window.alertSystem.activeAlert === position) {
+            
+            // Paramos o alerta atual
+            window.stopAlert(position);
+            // Não precisamos chamar processNextAlert() aqui porque stopAlert() já faz isso
+        } else {
+            // Comportamento padrão para outros casos
+            window.originalToggleQuadrantFullscreen(element);
+        }
+    };
+    
+    // Após atualização do Livewire, reaplicamos os alertas visuais
+    Livewire.hook('message.processed', (message, component) => {
+        applyAlerts();
+    });
+
     if (window.monitorConfig) {
         initializeMonitor();
         initializeInterfaceEvents();
@@ -318,13 +445,75 @@ function toggleQuadrantFullscreen(element) {
     const positionMatch = element.id.match(/quadrant(\d+)/);
     const position = positionMatch ? parseInt(positionMatch[1]) : null;
     
-    // Se o quadrante estiver em alerta, pare o alerta - mas continue com o toggle
-    if (position && window.alertingLogs && window.alertingLogs.has(position)) {
-        window.stopAlert(position);
-        // Não retorna aqui - continuamos para alternar o fullscreen também
+    // Se o quadrante estiver em alerta e estamos saindo do fullscreen
+    if (position && window.alertSystem && 
+        window.alertSystem.alertingLogs.has(position) && 
+        element.classList.contains('fullscreen')) {
+        
+        // Removemos apenas o efeito visual, sem afetar a fila se for apenas clique de fechamento
+        const logContainer = document.getElementById(`log${position}`);
+        if (logContainer) {
+            logContainer.classList.remove('inactivity-alert-blink');
+        }
+        
+        // Remove da lista de alertas ativos
+        window.alertSystem.alertingLogs.delete(position);
+        
+        // Se este era o alerta ativo no momento
+        if (window.alertSystem.activeAlert === position) {
+            // Salvamos que não temos mais alerta ativo
+            window.alertSystem.activeAlert = null;
+            
+            // Remove este alerta da fila (caso esteja lá também)
+            window.alertSystem.queue = window.alertSystem.queue.filter(pos => pos !== position);
+            
+            // Definimos um timeout para processar o próximo alerta depois que este quadrante fechar
+            setTimeout(function() {
+                // Processamos o próximo alerta da fila, se houver
+                if (window.alertSystem.queue.length > 0) {
+                    const nextPosition = window.alertSystem.queue.shift();
+                    window.alertSystem.activeAlert = nextPosition;
+                    
+                    // Colocamos o próximo quadrante em fullscreen
+                    const nextQuadrant = document.getElementById(`quadrant${nextPosition}`);
+                    if (nextQuadrant) {
+                        // Usamos o toggleQuadrantFullscreen original para evitar recursão
+                        const allQuadrants = document.querySelectorAll('.stream-container');
+                        
+                        // Guarda o estado original do sidebar
+                        state.originalSidebarCollapsed = document.body.classList.contains('sidebar-collapse');
+                        
+                        // Se o sidebar estiver colapsado, expande-o para o modo fullscreen
+                        if (state.originalSidebarCollapsed) {
+                            document.body.classList.remove('sidebar-collapse');
+                        }
+                        
+                        // Salva o estado de exibição atual de todos os quadrantes
+                        allQuadrants.forEach(quadrant => {
+                            if (quadrant !== nextQuadrant) {
+                                quadrant.setAttribute('data-original-display', quadrant.style.display || 'flex');
+                                quadrant.style.display = 'none';
+                            }
+                        });
+                        
+                        // Entra no modo fullscreen do quadrante
+                        nextQuadrant.classList.add('fullscreen');
+                        
+                        // Mostra a mensagem de instrução
+                        const instruction = document.getElementById('fullscreen-instruction');
+                        if (instruction) {
+                            instruction.style.display = 'block';
+                        }
+                        
+                        // Notifica o Livewire da mudança
+                        Livewire.emit('quadrantFullscreenChanged', nextPosition);
+                    }
+                }
+            }, 300); // Pequeno atraso para garantir que a transição do quadrante atual seja concluída
+        }
     }
     
-    // Resto do código existente
+    // Resto do código existente para alternar fullscreen
     const allQuadrants = document.querySelectorAll('.stream-container');
     
     if (element.classList.contains('fullscreen')) {

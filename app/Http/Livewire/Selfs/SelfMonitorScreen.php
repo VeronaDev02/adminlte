@@ -300,15 +300,16 @@ class SelfMonitorScreen extends Component
         $position = $this->getPdvPositionByIp($pdvIp);
         
         if ($position) {
-            
-            // Adiciona alerta ao log
-            // $this->pdvLogs[$position][] = "[ALERTA] PDV inativo por {$inactiveTime} segundos!";
+            // Adiciona mensagem ao log (opcional, descomentado para melhor visibilidade)
+            $timestamp = now()->format('H:i:s');
+            $this->pdvLogs[$position][] = "[{$timestamp}] [ALERTA] PDV inativo por {$inactiveTime} segundos!";
             
             // Define um atributo para marcar o quadrante com alerta
             $this->dispatchBrowserEvent('inactivity-alert', [
                 'position' => $position,
                 'pdvIp' => $pdvIp,
-                'inactiveTime' => $inactiveTime
+                'inactiveTime' => $inactiveTime,
+                'timestamp' => $timestamp
             ]);
         }
     }
