@@ -13,7 +13,6 @@ class SelfsController extends Controller
     {
         $user = Auth::user();
         
-        // Obter todos os selfs do usuário através de suas unidades
         $selfsList = $user->unidades()
             ->with('selfs')
             ->get()
@@ -48,9 +47,11 @@ class SelfsController extends Controller
                 ->all();
         }
 
+        $unidade = !empty($selfsList) ? $selfsList->first()->unidade : null;
+
         $serverConfig = [
-            'rtspServer' => config('api_python.websocket_server'),
-            'pdvServer' => config('api_python.websocket_pdv_server')
+            'rtspServer' => $unidade ? $unidade->uni_api . ':8080' : config('api_python.websocket_server'),
+            'pdvServer' => $unidade ? $unidade->uni_api . ':8765' : config('api_python.websocket_pdv_server')
         ];
         
         return view('user.selfs.index', compact('pdvDataList', 'serverConfig'));
@@ -77,22 +78,54 @@ class SelfsController extends Controller
             ];
         })->toArray();
         
-        $serverConfig = [
-            'rtspServer' => config('api_python.websocket_server'),
-            'pdvServer' => config('api_python.websocket_pdv_server')
-        ];
-        
-        $pageTitle = 'Monitoramento de PDVs';
-
-        // Tratamento dos parâmetros de quadrantes
+        // Tratamento dos parâmetros de quadrantes - MOVIDO PARA ANTES DO USO
         $cols = $request->input('cols', 2);
         $rows = $request->input('rows', 2);
         $quadrants = $request->input('quadrants', 4);
-        $selectedPdvs = $request->input('pdv', []);
+        $selectedPdvs = $request->input('pdv', []);  // MOVIDO PARA ANTES DO USO
+        
+        // Obtenha a unidade do primeiro self, se existir
+        $unidade = !empty($selfsList) ? $selfsList->first()->unidade : null;
+        
+        $serverConfig = [
+            'rtspServer' => $unidade ? $unidade->uni_api . ':8080' : config('api_python.websocket_server'),
+            'pdvServer' => $unidade ? $unidade->uni_api . ':8765' : config('api_python.websocket_pdv_server')
+        ];
+        
+        // Prepare a configuração de conexão
+        $connectionConfig = [
+            'serverUrls' => [
+                'rtsp' => $serverConfig['rtspServer'],
+                'pdv' => $serverConfig['pdvServer'] 
+            ],
+            'connections' => []
+        ];
+        
+        // Configure as conexões para cada PDV selecionado
+        foreach($selectedPdvs as $index => $pdvId) {
+            $pdv = collect($pdvDataList)->firstWhere('id', $pdvId);
+            if ($pdv) {
+                $connectionConfig['connections'][$index+1] = [
+                    'pdvIp' => $pdv['pdvIp'],
+                    'rtspUrl' => $pdv['rtspUrl'],
+                    'selfId' => $pdv['id'],
+                    'pdvCode' => $pdv['pdvCodigo']
+                ];
+            }
+        }
+        
+        $pageTitle = 'Monitoramento de PDVs';
+        
+        // dd([
+        //     'unidade' => $unidade ? $unidade->toArray() : null,
+        //     'uni_api_raw' => $unidade ? $unidade->uni_api : null,
+        //     'serverConfig' => $serverConfig,
+        //     'connectionConfig' => $connectionConfig
+        // ]);
 
         return view('user.selfs.monitor', compact(
             'pdvDataList', 
-            'serverConfig', 
+            'connectionConfig',
             'pageTitle', 
             'cols', 
             'rows', 

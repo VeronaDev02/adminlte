@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Crypt;
 
 class Unidade extends Model
 {
@@ -15,8 +16,19 @@ class Unidade extends Model
     protected $fillable = [
         'uni_codigo',
         'uni_tip_id',
-        'uni_nome'
+        'uni_nome',
+        'uni_api'
     ];
+
+    public function setUniApiAttribute($value)
+    {
+        $this->attributes['uni_api'] = $value ? Crypt::encryptString($value) : null;
+    }
+
+    public function getUniApiAttribute($value)
+    {
+        return $value ? Crypt::decryptString($value) : null;
+    }
 
     public function tipoUnidade()
     {

@@ -46,6 +46,7 @@
             @php
                 $heads = [
                     'ID',
+                    'Código',
                     'Tipo Unidade',
                     'Nome',
                     'Usuários',
@@ -72,6 +73,7 @@
                 @foreach ($unidades as $unidade)
                     <tr>
                         <td>{{ $unidade->uni_id }}</td>
+                        <td>{{ $unidade->uni_codigo }}</td>
                         <td>{{ $unidade->tipoUnidade->tip_nome }}</td>
                         <td>{{ $unidade->uni_nome }}</td>
                         <td>
@@ -85,7 +87,7 @@
                             @if(count($unidade->selfs) > 0)
                                 {{ $unidade->selfs->pluck('sel_name')->implode(', ') }}
                             @else
-                                Nenhum self
+                                Nenhum SelfCheckout
                             @endif
                         </td>
                         <td>{{ $unidade->created_at ? date('d/m/Y', strtotime($unidade->created_at)) : 'N/A' }}</td>

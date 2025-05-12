@@ -57,12 +57,29 @@ class SelfMonitorScreen extends Component
         $this->rows = request()->input('rows', 0);
         $this->selectedPdvs = request()->input('pdv', []);
         
-        // Configurações do servidor - Importante: remover o http:// e a porta
-        $this->rtspServerUrl = config('api_python.websocket_server', '127.0.0.1:8080');
-        $this->pdvServerUrl = config('api_python.websocket_pdv_server', '127.0.0.1:8765');
-        
         // Carregar dados dos PDVs
         $this->loadPdvData();
+        
+        // Buscar diretamente o primeiro PDV selecionado e sua unidade
+        if (!empty($this->selectedPdvs)) {
+            $firstPdvId = reset($this->selectedPdvs); // Pega o primeiro PDV selecionado independente da posição
+            $self = Selfs::with('unidade')->find($firstPdvId);
+            
+            if ($self && $self->unidade && $self->unidade->uni_api) {
+                // Use o IP da unidade com as portas padrão
+                $apiIp = $self->unidade->uni_api;
+                $this->rtspServerUrl = $apiIp . ':8080';
+                $this->pdvServerUrl = $apiIp . ':8765';
+            } else {
+                // Fallback para as configurações do .env, use 127.0.0.1 como último recurso
+                $this->rtspServerUrl = env('WEBSOCKET_SERVER_PYTHON', '127.0.0.1:8080');
+                $this->pdvServerUrl = env('WEBSOCKET_PDV_SERVER_PYTHON', '127.0.0.1:8765');
+            }
+        } else {
+            // Se não houver PDVs selecionados, use 127.0.0.1 como último recurso
+            $this->rtspServerUrl = env('WEBSOCKET_SERVER_PYTHON', '127.0.0.1:8080');
+            $this->pdvServerUrl = env('WEBSOCKET_PDV_SERVER_PYTHON', '127.0.0.1:8765');
+        }
         
         // Inicializar arrays de status e logs
         foreach ($this->pdvData as $position => $pdv) {
@@ -81,7 +98,9 @@ class SelfMonitorScreen extends Component
             'columns' => $this->columns,
             'rows' => $this->rows,
             'selectedPdvs' => $this->selectedPdvs,
-            'pdvCount' => count($this->pdvData)
+            'pdvCount' => count($this->pdvData),
+            'rtspServerUrl' => $this->rtspServerUrl,  // Log para debug
+            'pdvServerUrl' => $this->pdvServerUrl     // Log para debug
         ]);
     }
     

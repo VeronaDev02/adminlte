@@ -36,12 +36,14 @@ class UnidadeController extends Controller
             'uni_codigo' => 'required|string|max:50|unique:unidade,uni_codigo',
             'uni_nome' => 'required|string|max:255',
             'uni_tip_id' => 'required|exists:tipo_unidade,tip_id',
+            'uni_api' => 'required|string|max:255',
             'usuarios' => 'nullable|array',
             'usuarios.*' => 'exists:users,use_id',
         ], [
             'uni_codigo.required' => 'O código da unidade é obrigatório.',
             'uni_codigo.unique' => 'Este código de unidade já está em uso.',
             'uni_nome.required' => 'O nome da unidade é obrigatório.',
+            'uni_api.required' => 'A API da unidade é obrigatória.',
             'uni_tip_id.required' => 'O tipo de unidade é obrigatório.',
         ]);
 
@@ -52,6 +54,7 @@ class UnidadeController extends Controller
                 'uni_codigo' => $request->uni_codigo,
                 'uni_nome' => $request->uni_nome,
                 'uni_tip_id' => $request->uni_tip_id,
+                'uni_api' => $request->uni_api,
             ]);
             
             if ($request->has('usuarios')) {
@@ -98,12 +101,14 @@ class UnidadeController extends Controller
             'uni_codigo' => 'required|string|max:50|unique:unidade,uni_codigo,'.$id.',uni_id',
             'uni_nome' => 'required|string|max:255',
             'uni_tip_id' => 'required|exists:tipo_unidade,tip_id',
+            'uni_api' => 'required|string|max:255',
             'usuarios' => 'nullable|array',
             'usuarios.*' => 'exists:users,use_id',
         ], [
             'uni_codigo.required' => 'O código da unidade é obrigatório.',
             'uni_codigo.unique' => 'Este código de unidade já está em uso.',
             'uni_nome.required' => 'O nome da unidade é obrigatório.',
+            'uni_api.required' => 'A API da unidade é obrigatória.',
             'uni_tip_id.required' => 'O tipo de unidade é obrigatório.',
         ]);
 
@@ -114,6 +119,7 @@ class UnidadeController extends Controller
                 'uni_codigo' => $request->uni_codigo,
                 'uni_nome' => $request->uni_nome,
                 'uni_tip_id' => $request->uni_tip_id,
+                'uni_api' => $request->uni_api,
             ]);
             
             if ($request->has('usuarios')) {

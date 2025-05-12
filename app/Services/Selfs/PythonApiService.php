@@ -3,20 +3,34 @@
 namespace App\Services\Selfs;
 
 use App\Interfaces\Selfs\PythonApiServiceInterface;
+use App\Models\Selfs;
 use Illuminate\Support\Facades\Log;
-use Ratchet\Client\WebSocket;
 use Exception;
 
 class PythonApiService implements PythonApiServiceInterface
 {
-    protected $websocketServer;
-    protected $pdvServer;
+    protected $websocketPort;
+    protected $pdvPort;
     protected $connection = null;
+    protected $apiIp;
 
-    public function __construct()
+    public function __construct(Selfs $self = null)
     {
-        $this->websocketServer = config('api_python.websocket_server');
-        $this->pdvServer = config('api_python.websocket_pdv_server');
+        // Portas padrão 
+        $this->websocketPort = '8080';
+        $this->pdvPort = '8765';
+        
+        // Se temos um self, obtemos o IP da API a partir da unidade
+        if ($self && $self->unidade && $self->unidade->uni_api) {
+            $this->apiIp = $self->unidade->uni_api;
+        } else {
+            // Caso contrário, usamos o valor do .env
+            $this->apiIp = parse_url(config('api_python.websocket_server'), PHP_URL_HOST) ?: '127.0.0.1';
+        }
+        
+        // Configuramos os servidores com o IP da unidade e as portas padrão
+        $this->websocketServer = $this->apiIp . ':' . $this->websocketPort;
+        $this->pdvServer = $this->apiIp . ':' . $this->pdvPort;
     }
 
     public function connect(string $pdvIp): bool

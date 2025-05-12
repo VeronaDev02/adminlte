@@ -11,7 +11,7 @@
             @method('PUT')
         @endif
         <div class="row">
-            <div class="col-3 form-group">
+            <div class="col-2 form-group">
                 <label for="uni_codigo">Código da Unidade</label>
                 <input type="text" class="form-control" id="uni_codigo" name="uni_codigo" placeholder="Código da Unidade"
                     value="{{ old('uni_codigo', $editMode ? $unidade->uni_codigo : '') }}">
@@ -21,7 +21,7 @@
                     </span>
                 @enderror
             </div>
-            <div class="col-5 form-group">
+            <div class="col-3 form-group">
                 <label for="uni_nome">Nome da Unidade</label>
                 <input type="text" class="form-control" id="uni_nome" name="uni_nome" placeholder="Nome da Unidade"
                     value="{{ old('uni_nome', $editMode ? $unidade->uni_nome : '') }}">
@@ -31,7 +31,17 @@
                     </span>
                 @enderror
             </div>
-            <div class="col-4 form-group">
+            <div class="col-2 form-group">
+                <label for="uni_nome">API da Unidade</label>
+                <input type="text" class="form-control" id="uni_api" name="uni_api" placeholder="URL da API da Unidade"
+                    value="{{ old('uni_api', $editMode ? $unidade->uni_api : '') }}">
+                @error('uni_api')
+                    <span class="invalid-feedback" style="display: unset;" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                @enderror
+            </div>
+            <div class="col-3 form-group">
                 <label for="uni_tip_id">Tipo de Unidade</label>
                 <select name="uni_tip_id" id="uni_tip_id" class="form-control">
                     <option value="">Selecione um tipo</option>
@@ -48,6 +58,18 @@
                         <strong>{{ $message }}</strong>
                     </span>
                 @enderror
+            </div>
+            <div class="col-2 form-group">
+                <label>&nbsp;</label> <!-- Espaço vazio para compensar os labels dos outros campos -->
+                <div>
+                    <button id="enviar" class="btn bg-primary">
+                        @if ($editMode)
+                            Atualizar
+                        @else
+                            Cadastrar
+                        @endif
+                    </button>
+                </div>
             </div>
         </div>
         <div class="form-group">
@@ -66,17 +88,6 @@
                     <strong>{{ $message }}</strong>
                 </span>
             @enderror
-        </div>
-        <div class="row mt-2">
-            <div class="col-2 form-group">
-                <button id="enviar" class="btn bg-primary">
-                    @if ($editMode)
-                        Atualizar
-                    @else
-                        Cadastrar
-                    @endif
-                </button>
-            </div>
         </div>
     </form>
 
