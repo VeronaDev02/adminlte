@@ -23,7 +23,6 @@ class ApiSSHController extends Controller
         Log::info("Iniciando criação de configuração SSH", ['unidade_id' => $unidadeId]);
         
         try {
-            // Busca a unidade no banco de dados
             $unidade = Unidade::findOrFail($unidadeId);
             Log::debug("Unidade encontrada", [
                 'unidade_id' => $unidade->uni_id,
@@ -31,7 +30,6 @@ class ApiSSHController extends Controller
                 'api' => $unidade->uni_api
             ]);
             
-            // Verifica se a unidade tem as informações necessárias
             if (empty($unidade->uni_api) || empty($unidade->uni_api_login) || empty($unidade->uni_api_password)) {
                 Log::warning("Dados de configuração SSH ausentes", [
                     'unidade_id' => $unidadeId,
@@ -44,14 +42,12 @@ class ApiSSHController extends Controller
                     ->with('error', 'Faltam dados de configuração SSH para esta unidade.');
             }
             
-            // Busca os SelfCheckouts ativos desta unidade
             $selfs = Selfs::where('sel_uni_id', $unidadeId)
                         ->where('sel_status', true)
                         ->get();
             
             Log::info("SelfCheckouts encontrados", ['count' => count($selfs)]);
             
-            // Prepara os dados para o arquivo de configuração
             $selfsData = [];
             foreach ($selfs as $self) {
                 $selfsData[] = [
@@ -69,16 +65,13 @@ class ApiSSHController extends Controller
                 ]);
             }
             
-            // Cria o conteúdo do arquivo JSON
             $fileContent = json_encode($selfsData, JSON_PRETTY_PRINT);
             Log::debug("Conteúdo JSON gerado", ['length' => strlen($fileContent)]);
             
-            // Define as credenciais SSH
             $host = $unidade->uni_api;
             $username = $unidade->uni_api_login;
             $password = $unidade->uni_api_password;
             
-            // Define o caminho do arquivo
             $filePath = "/home/{$unidade->uni_api_login}/api/config.json";
             Log::info("Caminho do arquivo remoto", ['path' => $filePath]);
             
@@ -122,6 +115,104 @@ class ApiSSHController extends Controller
             
             return redirect()->back()
                 ->with('error', 'Erro ao processar a configuração: ' . $e->getMessage());
+        }
+    }
+
+     public function checkApiStatus($unidadeId)
+    {
+        Log::info("Verificando status da API", ['unidade_id' => $unidadeId]);
+        
+        try {
+            $unidade = Unidade::findOrFail($unidadeId);
+            
+            if (empty($unidade->uni_api) || empty($unidade->uni_api_login) || empty($unidade->uni_api_password)) {
+                Log::warning("Dados de configuração SSH ausentes", [
+                    'unidade_id' => $unidadeId
+                ]);
+                
+                return false;
+            }
+            
+            $serviceName = 'api';
+            
+            $status = $this->sshService->checkServiceStatus(
+                $unidade->uni_api,
+                $unidade->uni_api_login,
+                $unidade->uni_api_password,
+                $serviceName
+            );
+            
+            return $status;
+        } catch (\Exception $e) {
+            Log::error("Erro ao verificar status da API", [
+                'unidade_id' => $unidadeId,
+                'error' => $e->getMessage()
+            ]);
+            
+            return false;
+        }
+    }
+    
+    public function toggleApiStatus(Request $request, $unidadeId)
+    {
+        $enable = $request->input('enable', true);
+        
+        Log::info("Alterando status da API", [
+            'unidade_id' => $unidadeId,
+            'enable' => $enable
+        ]);
+        
+        try {
+            $unidade = Unidade::findOrFail($unidadeId);
+            
+            if (empty($unidade->uni_api) || empty($unidade->uni_api_login) || empty($unidade->uni_api_password)) {
+                Log::warning("Dados de configuração SSH ausentes", [
+                    'unidade_id' => $unidadeId
+                ]);
+                
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Faltam dados de configuração SSH para esta unidade'
+                ]);
+            }
+            
+            $serviceName = 'api';
+            
+            $success = $this->sshService->toggleService(
+                $unidade->uni_api,
+                $unidade->uni_api_login,
+                $unidade->uni_api_password,
+                $serviceName,
+                $enable
+            );
+            
+            if ($success) {
+                $message = $enable ? 
+                    'API ativada com sucesso para a unidade ' . $unidade->uni_nome :
+                    'API desativada com sucesso para a unidade ' . $unidade->uni_nome;
+                    
+                return response()->json([
+                    'success' => true,
+                    'status' => $enable,
+                    'message' => $message
+                ]);
+            }
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Falha ao alterar o status da API'
+            ]);
+            
+        } catch (\Exception $e) {
+            Log::error("Erro ao alterar status da API", [
+                'unidade_id' => $unidadeId,
+                'error' => $e->getMessage()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Erro: ' . $e->getMessage()
+            ]);
         }
     }
 }

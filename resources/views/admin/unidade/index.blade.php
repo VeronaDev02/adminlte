@@ -52,6 +52,7 @@
                     'Usuários',
                     'Selfs',
                     'Data Criação',
+                    ['label' => 'API', 'no-export' => true], 
                     ['label' => 'Ações', 'no-export' => true, 'width' => 8],
                 ];
                 $config = [
@@ -64,6 +65,7 @@
                         null,
                         null,
                         null,
+                        ['orderable' => false],
                         ['orderData' => [6, 2]],
                     ],
                     'language' => ['url' => '/vendor/datatables/pt-br.json'],
@@ -92,6 +94,13 @@
                             @endif
                         </td>
                         <td>{{ $unidade->created_at ? date('d/m/Y', strtotime($unidade->created_at)) : 'N/A' }}</td>
+                        <td class="text-center align-middle">
+                            @if(!empty($unidade->uni_api) && !empty($unidade->uni_api_login) && !empty($unidade->uni_api_password))
+                                @livewire('admin.unidades.toggle-api-status', ['unidade' => $unidade], key('api-toggle-'.$unidade->uni_id))
+                            @else
+                                <span class="badge badge-secondary">Não configurado</span>
+                            @endif
+                        </td>
                         <td class="text-center">
                             <div class="btn-group">
                                 <a href="{{ route('admin.unidade.edit', $unidade->uni_id) }}" class="btn btn-xs btn-default mr-1">

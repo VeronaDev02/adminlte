@@ -19,11 +19,9 @@ class SSHService
         ]);
         
         try {
-            // Inicializa o cliente SFTP
             Log::debug("Inicializando cliente SFTP");
             $sftp = new SFTP($host);
             
-            // Tenta conectar com o usuário e senha
             Log::debug("Tentando login SSH com usuário: $username");
             if (!$sftp->login($username, $password)) {
                 throw new Exception('Falha no login: credenciais inválidas');
@@ -31,14 +29,12 @@ class SSHService
             
             Log::info("Login SSH bem-sucedido");
             
-            // Verifica se o diretório de destino existe
             $directory = dirname($remoteFilePath);
             Log::debug("Verificando diretório: $directory");
             
             if (!$sftp->is_dir($directory)) {
                 Log::debug("Diretório não existe, tentando criar: $directory");
                 
-                // Tenta criar o diretório recursivamente
                 if (!$sftp->mkdir($directory, -1, true)) {
                     throw new Exception("Não foi possível criar o diretório: $directory");
                 }
@@ -46,7 +42,6 @@ class SSHService
                 Log::info("Diretório criado com sucesso: $directory");
             }
             
-            // Cria o arquivo no servidor remoto
             Log::debug("Tentando criar arquivo: $remoteFilePath");
             if (!$sftp->put($remoteFilePath, $content)) {
                 throw new Exception("Não foi possível criar o arquivo: $remoteFilePath");
@@ -59,7 +54,6 @@ class SSHService
             
             return true;
         } catch (Exception $e) {
-            // Registra o erro e retorna falso
             Log::error('Erro ao criar arquivo remoto', [
                 'host' => $host,
                 'username' => $username,
@@ -80,11 +74,9 @@ class SSHService
         ]);
         
         try {
-            // Inicializa o cliente SSH
             Log::debug("Inicializando cliente SSH");
             $ssh = new SSH2($host);
             
-            // Tenta conectar com o usuário e senha
             Log::debug("Tentando login SSH com usuário: $username");
             if (!$ssh->login($username, $password)) {
                 throw new Exception('Falha no login: credenciais inválidas');
@@ -92,7 +84,6 @@ class SSHService
             
             Log::info("Login SSH bem-sucedido");
             
-            // Executa o comando
             Log::debug("Executando comando: $command");
             $result = $ssh->exec($command);
             
@@ -101,19 +92,89 @@ class SSHService
                 'result_length' => strlen($result)
             ]);
             
-            // Log do resultado (truncado se for muito grande)
             $truncated_result = (strlen($result) > 500) ? substr($result, 0, 500) . '...' : $result;
             Log::debug("Resultado do comando:", ['result' => $truncated_result]);
             
             return $result;
         } catch (Exception $e) {
-            // Registra o erro e retorna falso
             Log::error('Erro ao executar comando remoto', [
                 'host' => $host,
                 'username' => $username,
                 'command' => $command,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
+            ]);
+            return false;
+        }
+    }
+
+    public function toggleService($host, $username, $password, $serviceName, $enable = true)
+    {
+        $action = $enable ? "start" : "stop";
+        
+        Log::info("Alterando status do serviço", [
+            'host' => $host,
+            'username' => $username,
+            'service' => $serviceName,
+            'action' => $action
+        ]);
+        
+        try {
+            // Modificado para usar sudo -S e fornecer a senha via echo
+            $command = "echo '{$password}' | sudo -S systemctl {$action} {$serviceName}";
+            $result = $this->executeCommand($host, $username, $password, $command);
+            
+            $newStatus = $this->checkServiceStatus($host, $username, $password, $serviceName);
+            $success = ($enable) ? $newStatus : !$newStatus;
+            
+            Log::info("Status do serviço alterado", [
+                'service' => $serviceName,
+                'action' => $action,
+                'success' => $success,
+                'result' => trim($result)
+            ]);
+            
+            return $success;
+        } catch (Exception $e) {
+            Log::error('Erro ao alterar status do serviço', [
+                'host' => $host,
+                'username' => $username,
+                'service' => $serviceName,
+                'action' => $action,
+                'error' => $e->getMessage()
+            ]);
+            return false;
+        }
+    }
+
+    public function checkServiceStatus($host, $username, $password, $serviceName)
+    {
+        Log::info("Verificando status do serviço", [
+            'host' => $host,
+            'username' => $username,
+            'service' => $serviceName
+        ]);
+        
+        try {
+            // Verificar o status não requer sudo na maioria dos sistemas
+            $command = "systemctl is-active {$serviceName}";
+            $result = $this->executeCommand($host, $username, $password, $command);
+            
+            $isActive = trim($result) === "active";
+            
+            Log::info("Status do serviço verificado", [
+                'service' => $serviceName,
+                'is_active' => $isActive,
+                'result' => trim($result)
+            ]);
+            
+            return $isActive;
+        } catch (Exception $e) {
+            Log::error('Erro ao verificar status do serviço', [
+                'host' => $host,
+                'username' => $username,
+                'service' => $serviceName,
+                'error' => $e->getMessage()
             ]);
             return false;
         }

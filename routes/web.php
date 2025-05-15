@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\LoginController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\ApiSSHController;
 
 /*
 |--------------------------------------------------------------------------
@@ -45,8 +46,11 @@ Route::middleware(['auth:web', 'verifica.permissions.users'])->group(function ()
     Route::resource("admin/unidades", App\Http\Controllers\Admin\UnidadeController::class)
         ->names("admin.unidade");
 
-        Route::resource("admin/selfs", App\Http\Controllers\Admin\SelfsController::class)
+    Route::resource("admin/selfs", App\Http\Controllers\Admin\SelfsController::class)
         ->names("admin.selfs");
+
+    Route::get('/admin/unidades/{unidadeId}/api-status', [ApiSSHController::class, 'checkApiStatus'])->name('admin.unidades.api.status');
+    Route::post('/admin/unidades/{unidadeId}/toggle-api', [ApiSSHController::class, 'toggleApiStatus'])->name('admin.unidades.api.toggle');
     
 });
 
