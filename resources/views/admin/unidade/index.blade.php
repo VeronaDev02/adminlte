@@ -63,7 +63,8 @@
                         null,
                         null,
                         null,
-                        ['orderData' => [5, 2]],
+                        null,
+                        ['orderData' => [6, 2]],
                     ],
                     'language' => ['url' => '/vendor/datatables/pt-br.json'],
                 ];

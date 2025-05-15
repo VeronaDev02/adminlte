@@ -37,6 +37,8 @@ class UnidadeController extends Controller
             'uni_nome' => 'required|string|max:255',
             'uni_tip_id' => 'required|exists:tipo_unidade,tip_id',
             'uni_api' => 'required|string|max:255',
+            'uni_api_login' => 'required|string|max:255',
+            'uni_api_password' => 'required|string|max:255',
             'usuarios' => 'nullable|array',
             'usuarios.*' => 'exists:users,use_id',
         ], [
@@ -44,6 +46,8 @@ class UnidadeController extends Controller
             'uni_codigo.unique' => 'Este código de unidade já está em uso.',
             'uni_nome.required' => 'O nome da unidade é obrigatório.',
             'uni_api.required' => 'A API da unidade é obrigatória.',
+            'uni_api_login.required' => 'O login da API é obrigatório',
+            'uni_api_password.required' => 'A senha da API é obrigatória',
             'uni_tip_id.required' => 'O tipo de unidade é obrigatório.',
         ]);
 
@@ -55,6 +59,8 @@ class UnidadeController extends Controller
                 'uni_nome' => $request->uni_nome,
                 'uni_tip_id' => $request->uni_tip_id,
                 'uni_api' => $request->uni_api,
+                'uni_api_login' => $request->uni_api_login,
+                'uni_api_password' => $request->uni_api_password,
             ]);
             
             if ($request->has('usuarios')) {
@@ -102,6 +108,8 @@ class UnidadeController extends Controller
             'uni_nome' => 'required|string|max:255',
             'uni_tip_id' => 'required|exists:tipo_unidade,tip_id',
             'uni_api' => 'required|string|max:255',
+            'uni_api_login' => 'required|string|max:255',
+            'uni_api_password' => 'required|string|max:255', 
             'usuarios' => 'nullable|array',
             'usuarios.*' => 'exists:users,use_id',
         ], [
@@ -109,6 +117,8 @@ class UnidadeController extends Controller
             'uni_codigo.unique' => 'Este código de unidade já está em uso.',
             'uni_nome.required' => 'O nome da unidade é obrigatório.',
             'uni_api.required' => 'A API da unidade é obrigatória.',
+            'uni_api_login.required' => 'O login da API é obrigatório',
+            'uni_api_password.required' => 'A senha da API é obrigatória',
             'uni_tip_id.required' => 'O tipo de unidade é obrigatório.',
         ]);
 
@@ -120,6 +130,8 @@ class UnidadeController extends Controller
                 'uni_nome' => $request->uni_nome,
                 'uni_tip_id' => $request->uni_tip_id,
                 'uni_api' => $request->uni_api,
+                'uni_api_login' => $request->uni_api_login,
+                'uni_api_password' => $request->uni_api_password,
             ]);
             
             if ($request->has('usuarios')) {

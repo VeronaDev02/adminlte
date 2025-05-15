@@ -11,7 +11,7 @@
             @method('PUT')
         @endif
         <div class="row">
-            <div class="col-2 form-group">
+            <div class="col-3 form-group">
                 <label for="uni_codigo">Código da Unidade</label>
                 <input type="text" class="form-control" id="uni_codigo" name="uni_codigo" placeholder="Código da Unidade"
                     value="{{ old('uni_codigo', $editMode ? $unidade->uni_codigo : '') }}">
@@ -26,16 +26,6 @@
                 <input type="text" class="form-control" id="uni_nome" name="uni_nome" placeholder="Nome da Unidade"
                     value="{{ old('uni_nome', $editMode ? $unidade->uni_nome : '') }}">
                 @error('uni_nome')
-                    <span class="invalid-feedback" style="display: unset;" role="alert">
-                        <strong>{{ $message }}</strong>
-                    </span>
-                @enderror
-            </div>
-            <div class="col-2 form-group">
-                <label for="uni_nome">API da Unidade</label>
-                <input type="text" class="form-control" id="uni_api" name="uni_api" placeholder="URL da API da Unidade"
-                    value="{{ old('uni_api', $editMode ? $unidade->uni_api : '') }}">
-                @error('uni_api')
                     <span class="invalid-feedback" style="display: unset;" role="alert">
                         <strong>{{ $message }}</strong>
                     </span>
@@ -72,6 +62,40 @@
                 </div>
             </div>
         </div>
+
+        <div class="row">
+             <div class="col-2 form-group">
+                <label for="uni_api_login">Login da API da Unidade</label>
+                <input type="text" class="form-control" id="uni_api_login" name="uni_api_login" placeholder="login"
+                    value="{{ old('uni_api_login', $editMode ? $unidade->uni_api_login : '') }}">
+                @error('uni_api_login')
+                    <span class="invalid-feedback" style="display: unset;" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                @enderror
+            </div>
+            <div class="col-2 form-group">
+                <label for="uni_api_password">Senha da API da Unidade</label>
+                <input type="password" class="form-control" id="uni_api_password" name="uni_api_password" placeholder="password"
+                    value="{{ old('uni_api_password', $editMode ? $unidade->uni_api_password : '') }}">
+                @error('uni_api_password')
+                    <span class="invalid-feedback" style="display: unset;" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                @enderror
+            </div>
+            <div class="col-2 form-group">
+                <label for="uni_nome">API da Unidade</label>
+                <input type="text" class="form-control" id="uni_api" name="uni_api" placeholder="URL da API da Unidade"
+                    value="{{ old('uni_api', $editMode ? $unidade->uni_api : '') }}">
+                @error('uni_api')
+                    <span class="invalid-feedback" style="display: unset;" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                @enderror
+            </div>
+        </div>
+
         <div class="form-group">
             <label for="usuarios">Usuários</label>
             <select name="usuarios[]" id="usuarios" multiple>

@@ -17,7 +17,9 @@ class Unidade extends Model
         'uni_codigo',
         'uni_tip_id',
         'uni_nome',
-        'uni_api'
+        'uni_api',
+        'uni_api_login',
+        'uni_api_password'
     ];
 
     public function setUniApiAttribute($value)
@@ -26,6 +28,26 @@ class Unidade extends Model
     }
 
     public function getUniApiAttribute($value)
+    {
+        return $value ? Crypt::decryptString($value) : null;
+    }
+
+       public function setUniApiLoginAttribute($value)
+    {
+        $this->attributes['uni_api_login'] = $value ? Crypt::encryptString($value) : null;
+    }
+
+    public function getUniApiLoginAttribute($value)
+    {
+        return $value ? Crypt::decryptString($value) : null;
+    }
+    
+    public function setUniApiPasswordAttribute($value)
+    {
+        $this->attributes['uni_api_password'] = $value ? Crypt::encryptString($value) : null;
+    }
+
+    public function getUniApiPasswordAttribute($value)
     {
         return $value ? Crypt::decryptString($value) : null;
     }

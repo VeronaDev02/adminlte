@@ -41,7 +41,7 @@
                     @enderror
                 </div>
             </div>
-            <div class="col-3 form-group">
+            <div class="col-2 form-group">
                 <label for="use_name">Nome</label>
                 <input type="text" onkeyup="gera_username()" onchange="gera_username()" class="form-control"
                     id="use_name" name="use_name" placeholder="Nome"
@@ -52,7 +52,7 @@
                     </span>
                 @enderror
             </div>
-            <div class="col-3 form-group">
+            <div class="col-2 form-group">
                 <label for="use_username">Usuário</label>
                 <input class="form-control" readonly id="use_username" name="use_username" type="text"
                     value="{{ old('use_username', $editMode ? $user->use_username : '') }}">
@@ -79,6 +79,15 @@
                         <strong>{{ $message }}</strong>
                     </span>
                 @enderror
+            </div>
+            <div class="col-2 form-group d-flex align-items-end">
+                <button id="enviar" class="btn bg-primary">
+                    @if ($editMode)
+                        Atualizar
+                    @else
+                        Cadastrar
+                    @endif
+                </button>
             </div>
             <div class="col-3 form-group">
                 <label for="use_email">Email (Opcional)</label>
@@ -118,17 +127,6 @@
                     <strong>{{ $message }}</strong>
                 </span>
             @enderror
-        </div>
-        <div class="row mt-2">
-            <div class="col-2 form-group">
-                <button id="enviar" class="btn bg-primary">
-                    @if ($editMode)
-                        Atualizar
-                    @else
-                        Cadastrar
-                    @endif
-                </button>
-            </div>
         </div>
     </form>
 
