@@ -1,6 +1,6 @@
 @extends('adminlte::page')
 
-@section('title', 'Editar Usuário')
+@section('title', 'Editar SelfCheckouts')
 
 @section('content_header')
     <div class="row mb-2">

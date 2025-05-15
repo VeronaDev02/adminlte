@@ -41,6 +41,8 @@ class SelfsController extends Controller
             'sel_rtsp_path' => 'required|string|max:250',
             'sel_uni_id' => 'required|exists:unidade,uni_id',
             'sel_pdv_codigo' => 'required|string|max:3',
+            'sel_dvr_port' => 'required|numeric|max:65535',
+            'sel_pdv_listen_port' => 'required|numeric|max:65535',
         ], [
             'sel_name.required' => 'O nome do SelfCheckout é obrigatório.',
             'sel_name.string' => 'O nome do SelfCheckout deve ser um texto válido.',
@@ -63,6 +65,9 @@ class SelfsController extends Controller
 
             'sel_pdv_codigo.required' => 'O código do PDV é obrigatório',
             'sel_pdv_codigo.max' => 'O código do PDV não pode ter mais de 3 caracteres.',
+
+            'sel_dvr_port.required' => 'A porta do Envio para o DVR é obrigatória.',
+            'sel_pdv_listen_port.required' => 'A porta para escutar o PDV é obrigatória.',
         ]);
 
         DB::beginTransaction();
@@ -80,6 +85,8 @@ class SelfsController extends Controller
                 'sel_uni_id' => $request->sel_uni_id,
                 'sel_status' => $request->has('sel_status'),
                 'sel_pdv_codigo' => $request->sel_pdv_codigo,
+                'sel_dvr_port' => $request->sel_dvr_port,
+                'sel_pdv_listen_port' => $request->sel_pdv_listen_port,
             ];
             
             $selfs = Selfs::create($selfsData);
@@ -129,6 +136,8 @@ class SelfsController extends Controller
             'sel_rtsp_path' => 'required|string|max:250',
             'sel_uni_id' => 'required|exists:unidade,uni_id',
             'sel_pdv_codigo' => 'required|string|max:3',
+            'sel_dvr_port' => 'required|numeric|max:65535',
+            'sel_pdv_listen_port' => 'required|numeric|max:65535',
         ], [
             'sel_name.required' => 'O nome do SelfCheckout é obrigatório.',
             'sel_name.string' => 'O nome do SelfCheckout deve ser um texto válido.',
@@ -151,6 +160,9 @@ class SelfsController extends Controller
 
             'sel_pdv_codigo.required' => 'O código do PDV é obrigatório',
             'sel_pdv_codigo.max' => 'O código do PDV não pode ter mais de 3 caracteres.',
+
+            'sel_dvr_port.required' => 'A porta do Envio para o DVR é obrigatória.',
+            'sel_pdv_listen_port.required' => 'A porta para escutar o PDV é obrigatória.',
         ]);
 
         DB::beginTransaction();
@@ -168,6 +180,8 @@ class SelfsController extends Controller
                 'sel_uni_id' => $request->sel_uni_id,
                 'sel_status' => $request->has('sel_status'),
                 'sel_pdv_codigo' => $request->sel_pdv_codigo,
+                'sel_dvr_port' => $request->sel_dvr_port,
+                'sel_pdv_listen_port' => $request->sel_pdv_listen_port,
             ];
             
             $selfs->update($selfsData);

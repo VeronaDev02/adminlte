@@ -52,6 +52,16 @@
                 </span>
             @enderror
         </div>
+        <div class="col-2 form-group">
+            <label for="sel_pdv_listen_port">Porta Escuta PDV</label>
+            <input type="text" class="form-control" id="sel_pdv_listen_port" name="sel_pdv_listen_port" placeholder="38800"
+                value="{{ old('sel_pdv_listen_port', $editMode ? $selfs->sel_pdv_listen_port : '') }}">
+            @error('sel_pdv_listen_port')
+                <span class="invalid-feedback" style="display: unset;" role="alert">
+                    <strong>{{ $message }}</strong>
+                </span>
+            @enderror
+        </div>
         <div class="col-3 form-group">
             <label for="sel_uni_id">Unidade</label>
             <select name="sel_uni_id" id="sel_uni_id" class="form-control">
@@ -79,8 +89,68 @@
             <h5 class="mb-0">Configurações da Câmera/DVR</h5>
         </div>
         <div class="card-body">
+
             <div class="row">
-                <div class="col-md-5">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="sel_dvr_username">
+                            Usuário do DVR
+                            <span class="badge badge-info">Variável: {login_dvr}</span>
+                        </label>
+                        <input type="text" 
+                            class="form-control" 
+                            id="sel_dvr_username" 
+                            name="sel_dvr_username" 
+                            placeholder="Digite o usuário do DVR"
+                            value="{{ old('sel_dvr_username', $editMode ? $selfs->sel_dvr_username : '') }}">
+                        @error('sel_dvr_username')
+                            <span class="invalid-feedback" style="display: unset;" role="alert">
+                                <strong>{{ $message }}</strong>
+                            </span>
+                        @enderror
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="sel_dvr_password">
+                            Senha do DVR
+                            <span class="badge badge-info">Variável: {senha_dvr}</span>
+                        </label>
+                        <input type="password" 
+                            class="form-control" 
+                            id="sel_dvr_password" 
+                            name="sel_dvr_password" 
+                            placeholder="Digite a senha do DVR"
+                            value="{{ old('sel_dvr_password', $editMode ? $selfs->sel_dvr_password : '') }}">
+                        @error('sel_dvr_password')
+                            <span class="invalid-feedback" style="display: unset;" role="alert">
+                                <strong>{{ $message }}</strong>
+                            </span>
+                        @enderror
+                    </div>
+                </div>
+                 <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="sel_dvr_port">
+                            Porta Envio DVR
+                        </label>
+                        <input type="text" 
+                            class="form-control" 
+                            id="sel_dvr_port" 
+                            name="sel_dvr_port" 
+                            placeholder="38800"
+                            value="{{ old('sel_dvr_port', $editMode ? $selfs->sel_dvr_port : '') }}">
+                        @error('sel_dvr_port')
+                            <span class="invalid-feedback" style="display: unset;" role="alert">
+                                <strong>{{ $message }}</strong>
+                            </span>
+                        @enderror
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-3">
                     <div class="form-group">
                         <label for="sel_dvr_ip">
                             Endereço IP do DVR 
@@ -102,7 +172,7 @@
                 <div class="col-md-3">
                     <div class="form-group">
                         <label for="sel_dvr_porta">
-                            Porta do DVR
+                            Porta Câmera DVR
                             <span class="badge badge-info">Variável: {porta_dvr}</span>
                         </label>
                         <input type="text" 
@@ -118,7 +188,22 @@
                         @enderror
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="path_rtsp">
+                            Caminho RTSP
+                            <span class="badge badge-info">Variável: {path_rtsp}</span>
+                        </label>
+                        <input type="text" 
+                            class="form-control" 
+                            id="path_rtsp" 
+                            placeholder="Ex: cam/realmonitor">
+                        <small class="form-text text-muted">
+                            Campo auxiliar para template
+                        </small>
+                    </div>
+                </div>
+                <div class="col-md-3">
                     <div class="form-group">
                         <label for="sel_camera_canal">
                             Canal da Câmera
@@ -135,62 +220,6 @@
                                 <strong>{{ $message }}</strong>
                             </span>
                         @enderror
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="form-group">
-                        <label for="sel_dvr_username">
-                            Usuário do DVR
-                            <span class="badge badge-info">Variável: {login_dvr}</span>
-                        </label>
-                        <input type="text" 
-                            class="form-control" 
-                            id="sel_dvr_username" 
-                            name="sel_dvr_username" 
-                            placeholder="Digite o usuário do DVR"
-                            value="{{ old('sel_dvr_username', $editMode ? $selfs->sel_dvr_username : '') }}">
-                        @error('sel_dvr_username')
-                            <span class="invalid-feedback" style="display: unset;" role="alert">
-                                <strong>{{ $message }}</strong>
-                            </span>
-                        @enderror
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="form-group">
-                        <label for="sel_dvr_password">
-                            Senha do DVR
-                            <span class="badge badge-info">Variável: {senha_dvr}</span>
-                        </label>
-                        <input type="password" 
-                            class="form-control" 
-                            id="sel_dvr_password" 
-                            name="sel_dvr_password" 
-                            placeholder="Digite a senha do DVR"
-                            value="{{ old('sel_dvr_password', $editMode ? $selfs->sel_dvr_password : '') }}">
-                        @error('sel_dvr_password')
-                            <span class="invalid-feedback" style="display: unset;" role="alert">
-                                <strong>{{ $message }}</strong>
-                            </span>
-                        @enderror
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="form-group">
-                        <label for="path_rtsp">
-                            Caminho RTSP
-                            <span class="badge badge-info">Variável: {path_rtsp}</span>
-                        </label>
-                        <input type="text" 
-                            class="form-control" 
-                            id="path_rtsp" 
-                            placeholder="Ex: cam/realmonitor">
-                        <small class="form-text text-muted">
-                            Campo auxiliar para template
-                        </small>
                     </div>
                 </div>
             </div>

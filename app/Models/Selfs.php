@@ -25,11 +25,41 @@ class Selfs extends Model
         'sel_status',  
         'sel_uni_id',
         'sel_pdv_codigo',
+        'sel_dvr_port',
+        'sel_pdv_listen_port'
     ];
 
     protected $casts = [
         'sel_status' => 'boolean',
     ];
+
+    public function setSelDvrPortAttribute($value)
+    {
+        $this->attributes['sel_dvr_port'] = Crypt::encryptString($value);
+    }
+
+    public function getSelDvrPortAttribute($value)
+    {
+        try {
+            return Crypt::decryptString($value);
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
+    public function setSelPdvListenPortAttribute($value)
+    {
+        $this->attributes['sel_pdv_listen_port'] = Crypt::encryptString($value);
+    }
+
+    public function getSelPdvListenPortAttribute($value)
+    {
+        try {
+            return Crypt::decryptString($value);
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
 
     public function setSelPdvIpAttribute($value)
     {
