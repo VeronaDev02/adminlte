@@ -101,19 +101,17 @@
                                 <span class="badge badge-secondary">Não configurado</span>
                             @endif
                         </td>
-                        <td class="text-center">
-                            <div class="btn-group">
-                                <a href="{{ route('admin.unidade.edit', $unidade->uni_id) }}" class="btn btn-xs btn-default mr-1">
-                                    <i class="fa fa-lg fa-fw fa-pen text-primary"></i>
-                                </a>
-                                <form action="{{ route('admin.unidade.destroy', $unidade->uni_id) }}" method="POST" class="d-inline delete-form">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-xs btn-default delete-btn">
-                                        <i class="fa fa-lg fa-fw fa-trash text-danger"></i>
-                                    </button>
-                                </form>
-                            </div>
+                        <td class="text-center align-middle">
+                            <a href="{{ route('admin.unidade.edit', $unidade->uni_id) }}" class="btn btn-xs btn-default text-primary mx-1 shadow">
+                                <i class="fa fa-lg fa-fw fa-pen"></i>
+                            </a>
+                            <form action="{{ route('admin.unidade.destroy', $unidade->uni_id) }}" method="POST" class="d-inline delete-form">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-xs btn-default delete-btn">
+                                    <i class="fa fa-lg fa-fw fa-trash text-danger"></i>
+                                </button>
+                            </form>
                         </td>
                     </tr>
                 @endforeach

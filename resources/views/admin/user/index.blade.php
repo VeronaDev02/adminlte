@@ -77,7 +77,8 @@
                         <td>{{ $user->use_name }}</td>
                         <td>{{ $user->use_username }}</td>
                         <td>{{ $user->unidades_formatado }}</td>
-                        <td class="row mr-0 d-flex align-items-center">
+                        {{-- row mr-0 d-flex align-items-center --}}
+                        <td class="text-center align-middle">
                             <livewire:admin.user.toggle-on-login-ativo :user="$user" :wire:key="'login-'.$user->use_id" />
                         </td>
                         <td>{{ $user->created_at ? date('d/m/Y', strtotime($user->created_at)) : 'N/A' }}</td>
