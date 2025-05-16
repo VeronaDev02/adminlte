@@ -86,14 +86,14 @@
                                 Nenhum usuário
                             @endif
                         </td>
-                        <td>
+                        <td class="text-center align-middle">
                             @if(count($unidade->selfs) > 0)
                                 {{ $unidade->selfs->pluck('sel_name')->implode(', ') }}
                             @else
                                 Nenhum SelfCheckout
                             @endif
                         </td>
-                        <td>{{ $unidade->created_at ? date('d/m/Y', strtotime($unidade->created_at)) : 'N/A' }}</td>
+                        <td class="text-center align-middle">{{ $unidade->created_at ? date('d/m/Y', strtotime($unidade->created_at)) : 'N/A' }}</td>
                         <td class="text-center align-middle">
                             @if(!empty($unidade->uni_api) && !empty($unidade->uni_api_login) && !empty($unidade->uni_api_password))
                                 @livewire('admin.unidades.toggle-api-status', ['unidade' => $unidade], key('api-toggle-'.$unidade->uni_id))
@@ -124,10 +124,12 @@
     <style>
         #unidade_table td {
             font-weight: normal !important;
+            text-align: center;
         }
         
         #unidade_table th {
             font-weight: normal !important;
+            
         }
         
         .dataTables_paginate .page-link,
