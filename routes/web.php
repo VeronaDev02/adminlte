@@ -96,6 +96,8 @@ Route::middleware("auth:web")->group(function () {
         ->name('user.saveTelaPreferences');
     Route::post('/user/destroy-tela-preferences/{index}', [App\Http\Controllers\User\SelfsController::class, 'destroyTelaPreferences'])
         ->name('destroy.tela.preferences');
+    Route::post('/user/selfs/save-video-quality', [App\Http\Controllers\User\SelfsController::class, 'saveVideoQualityPreference'])
+    ->name('selfs.save-video-quality');
         
     Route::get('/selfs/monitor', [App\Http\Controllers\User\SelfsController::class, 'show'])
         ->name('selfs.monitor');

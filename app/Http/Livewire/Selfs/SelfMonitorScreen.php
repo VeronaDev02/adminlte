@@ -16,8 +16,7 @@ class SelfMonitorScreen extends Component
     public $selectedPdvs = [];
     public $pdvData = [];
     public $pageTitle = "Monitoramento de PDVs";
-    
-    // Novo estado para gerenciar logs e status
+    public $videoQuality = 'medium-low';
     public $pdvStatus = [];
     public $pdvLogs = [];
     // public $serverStatus = "Conectando ao servidor...";
@@ -25,13 +24,11 @@ class SelfMonitorScreen extends Component
     public $activeFullscreenQuadrant = null;
     public $isBrowserFullscreen = false;
     
-    // Configurações do servidor
     public $rtspServerUrl;
     public $pdvServerUrl;
     
     protected $gridLayoutService;
     
-    // Defina listeners para eventos do JavaScript
     protected $listeners = [
         'updateStatus' => 'updateStatus',
         // 'serverConnectionStatusChanged' => 'updateServerStatus',
@@ -51,37 +48,34 @@ class SelfMonitorScreen extends Component
     
     public function mount()
     {
-        // Obter parâmetros da URL
         $this->quadrants = request()->input('quadrants', 0);
         $this->columns = request()->input('cols', 0);
         $this->rows = request()->input('rows', 0);
         $this->selectedPdvs = request()->input('pdv', []);
+
+        $user = Auth::user();
+        $userPreferences = $user->ui_preferences ?? [];
+        $this->videoQuality = $userPreferences['video']['quality'] ?? 'medium-low';
         
-        // Carregar dados dos PDVs
         $this->loadPdvData();
         
-        // Buscar diretamente o primeiro PDV selecionado e sua unidade
         if (!empty($this->selectedPdvs)) {
-            $firstPdvId = reset($this->selectedPdvs); // Pega o primeiro PDV selecionado independente da posição
+            $firstPdvId = reset($this->selectedPdvs);
             $self = Selfs::with('unidade')->find($firstPdvId);
             
             if ($self && $self->unidade && $self->unidade->uni_api) {
-                // Use o IP da unidade com as portas padrão
                 $apiIp = $self->unidade->uni_api;
                 $this->rtspServerUrl = $apiIp . ':8080';
                 $this->pdvServerUrl = $apiIp . ':8765';
             } else {
-                // Fallback para as configurações do .env, use 127.0.0.1 como último recurso
                 $this->rtspServerUrl = env('WEBSOCKET_SERVER_PYTHON', '127.0.0.1:8080');
                 $this->pdvServerUrl = env('WEBSOCKET_PDV_SERVER_PYTHON', '127.0.0.1:8765');
             }
         } else {
-            // Se não houver PDVs selecionados, use 127.0.0.1 como último recurso
             $this->rtspServerUrl = env('WEBSOCKET_SERVER_PYTHON', '127.0.0.1:8080');
             $this->pdvServerUrl = env('WEBSOCKET_PDV_SERVER_PYTHON', '127.0.0.1:8765');
         }
         
-        // Inicializar arrays de status e logs
         foreach ($this->pdvData as $position => $pdv) {
             $this->pdvStatus[$position] = [
                 'message' => 'Desconectado',
@@ -90,7 +84,6 @@ class SelfMonitorScreen extends Component
             $this->pdvLogs[$position] = [];
         }
         
-        // Gerar o título personalizado da página
         $this->generatePageTitle();
         
         Log::info('SelfMonitorScreen montado', [
@@ -99,8 +92,8 @@ class SelfMonitorScreen extends Component
             'rows' => $this->rows,
             'selectedPdvs' => $this->selectedPdvs,
             'pdvCount' => count($this->pdvData),
-            'rtspServerUrl' => $this->rtspServerUrl,  // Log para debug
-            'pdvServerUrl' => $this->pdvServerUrl     // Log para debug
+            'rtspServerUrl' => $this->rtspServerUrl,
+            'pdvServerUrl' => $this->pdvServerUrl
         ]);
     }
     
@@ -112,7 +105,6 @@ class SelfMonitorScreen extends Component
         
         $user = Auth::user();
         
-        // Obter todos os selfs do usuário através de suas unidades
         $selfsList = $user->unidades()
             ->with('selfs')
             ->get()
@@ -120,7 +112,6 @@ class SelfMonitorScreen extends Component
                 return $unidade->selfs()->active()->get();
             });
         
-        // Preparar a lista de PDVs
         $allPdvData = $selfsList->map(function ($self) {
             return [
                 'id' => $self->sel_id,
@@ -174,7 +165,6 @@ class SelfMonitorScreen extends Component
             foreach ($this->selectedPdvs as $position => $pdvId) {
                 $pdv = $this->pdvData[$position] ?? null;
                 if ($pdv && !empty($pdv['pdvCodigo'])) {
-                    // Pega os dois últimos dígitos do código do PDV
                     $pdvCode = substr($pdv['pdvCodigo'], -2);
                     $pdvNames[] = $pdvCode;
                 }
@@ -188,7 +178,6 @@ class SelfMonitorScreen extends Component
         }
         
         if (!empty($pdvNames)) {
-            // Limita a 4 PDVs para evitar título muito longo
             $limitedPdvNames = array_slice($pdvNames, 0, 4);
             if (count($pdvNames) > 4) {
                 $limitedPdvNames[] = '+ ' . (count($pdvNames) - 4);
@@ -218,13 +207,13 @@ class SelfMonitorScreen extends Component
     
     public function getConnectionConfigData()
     {
-        // Preparar configuração para o JavaScript
         $connectionConfig = [
             'serverUrls' => [
                 'rtsp' => $this->rtspServerUrl,
                 'pdv' => $this->pdvServerUrl
             ],
-            'connections' => []
+            'connections' => [],
+            'videoQuality' => $this->videoQuality
         ];
         
         foreach ($this->pdvData as $position => $pdv) {
@@ -288,21 +277,16 @@ class SelfMonitorScreen extends Component
     
     public function handlePdvData($pdvIp, $message)
     {
-        // Obter posição pelo IP do PDV
         $position = $this->getPdvPositionByIp($pdvIp);
         
         if ($position) {
-            // $timestamp = now()->format('H:i:s');
             
-            // Escapar caracteres HTML na mensagem
             $safeMessage = htmlspecialchars($message);
 
             $safeMessage = trim($safeMessage);
-            // $safeMessage = preg_replace('/\n+/', ' |', $safeMessage);
             $safeMessage = preg_replace('/\s+/', ' ', $safeMessage);
 
 
-            // $this->pdvLogs[$position][] = "[{$timestamp}] {$safeMessage}";
             $this->pdvLogs[$position][] = "{$safeMessage}";
 
             if (count($this->pdvLogs[$position]) > 100) {
@@ -315,15 +299,12 @@ class SelfMonitorScreen extends Component
     
     public function handleInactivityAlert($pdvIp, $inactiveTime)
     {
-        // Obter posição pelo IP do PDV
         $position = $this->getPdvPositionByIp($pdvIp);
         
         if ($position) {
-            // Adiciona mensagem ao log (opcional, descomentado para melhor visibilidade)
             $timestamp = now()->format('H:i:s');
             $this->pdvLogs[$position][] = "[{$timestamp}] [ALERTA] PDV inativo por {$inactiveTime} segundos!";
             
-            // Define um atributo para marcar o quadrante com alerta
             $this->dispatchBrowserEvent('inactivity-alert', [
                 'position' => $position,
                 'pdvIp' => $pdvIp,
@@ -364,10 +345,10 @@ class SelfMonitorScreen extends Component
             'pageTitle' => $this->pageTitle,
             'pdvStatus' => $this->pdvStatus,
             'pdvLogs' => $this->pdvLogs,
-            // 'serverStatus' => $this->serverStatus,
             'serverStatusClass' => $this->serverStatusClass,
             'activeFullscreenQuadrant' => $this->activeFullscreenQuadrant,
-            'isBrowserFullscreen' => $this->isBrowserFullscreen
+            'isBrowserFullscreen' => $this->isBrowserFullscreen,
+            'videoQuality' => $this->videoQuality
         ]);
     }
 }

@@ -1,9 +1,29 @@
 <div>
     <div class="monitor-header">
-        <h1>{{ $pageTitle }}
-            <button id="browserFullscreenBtn" class="title-button" onclick="toggleBrowserFullscreen()">
-                <i class="fas fa-desktop"></i> {{ $isBrowserFullscreen ? 'Sair da Tela Cheia' : 'Tela Cheia (F11)' }}
-            </button>
+        <h1 class="d-flex align-items-center justify-content-between w-100">
+            <div class="d-flex align-items-center">
+                {{ $pageTitle }}
+            </div>
+            
+            <div class="d-flex align-items-center">
+                <div class="dropdown d-inline-block mr-2">
+                    <button id="qualityDropdownBtn" type="button" class="btn btn-dark dropdown-toggle" data-toggle="dropdown">
+                        <i class="fas fa-cog"></i> Qualidade
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="qualityDropdownBtn">
+                        <h6 class="dropdown-header">Qualidade do vídeo</h6>
+                        <a class="dropdown-item {{ $videoQuality == 'low' ? 'active' : '' }}" href="#" onclick="changeGlobalVideoQuality('low'); return false;">Baixa</a>
+                        <a class="dropdown-item {{ $videoQuality == 'medium-low' ? 'active' : '' }}" href="#" onclick="changeGlobalVideoQuality('medium-low'); return false;">Média-Baixa</a>
+                        <a class="dropdown-item {{ $videoQuality == 'medium' ? 'active' : '' }}" href="#" onclick="changeGlobalVideoQuality('medium'); return false;">Média</a>
+                        <a class="dropdown-item {{ $videoQuality == 'high' ? 'active' : '' }}" href="#" onclick="changeGlobalVideoQuality('high'); return false;">Alta</a>
+                    </div>
+                    <button id="browserFullscreenBtn" class="btn btn-dark" onclick="toggleBrowserFullscreen()">
+                        <i class="fas fa-desktop"></i> {{ $isBrowserFullscreen ? 'Sair da Tela Cheia' : 'Tela Cheia (F11)' }}
+                    </button>
+                </div>
+                
+                
+            </div>
         </h1>
     </div>
     

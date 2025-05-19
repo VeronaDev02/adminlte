@@ -20,7 +20,6 @@ class SelfsController extends Controller
                 return $unidade->selfs()->active()->get();
             });
         
-        // Preparar a lista de PDVs
         $pdvDataList = $selfsList->map(function ($self) {
             return [
                 'id' => $self->sel_id,
@@ -37,7 +36,6 @@ class SelfsController extends Controller
         
         $selectedPdvs = $request->input('pdv', []);
         
-        // Ordenar PDVs selecionados se houver seleção e quadrantes ativos
         if (!empty($selectedPdvs) && $activeQuadrants) {
             $pdvDataList = collect($pdvDataList)
                 ->sortBy(function($pdv) use ($selectedPdvs) {
@@ -78,13 +76,15 @@ class SelfsController extends Controller
             ];
         })->toArray();
         
-        // Tratamento dos parâmetros de quadrantes - MOVIDO PARA ANTES DO USO
         $cols = $request->input('cols', 2);
         $rows = $request->input('rows', 2);
         $quadrants = $request->input('quadrants', 4);
-        $selectedPdvs = $request->input('pdv', []);  // MOVIDO PARA ANTES DO USO
+        $selectedPdvs = $request->input('pdv', []);
         
-        // Obtenha a unidade do primeiro self, se existir
+        // Obter a preferência de qualidade do usuário
+        $userPreferences = $user->ui_preferences ?? [];
+        $videoQuality = $userPreferences['video']['quality'] ?? 'medium-low';
+        
         $unidade = !empty($selfsList) ? $selfsList->first()->unidade : null;
         
         $serverConfig = [
@@ -92,16 +92,15 @@ class SelfsController extends Controller
             'pdvServer' => $unidade ? $unidade->uni_api . ':8765' : config('api_python.websocket_pdv_server')
         ];
         
-        // Prepare a configuração de conexão
         $connectionConfig = [
             'serverUrls' => [
                 'rtsp' => $serverConfig['rtspServer'],
                 'pdv' => $serverConfig['pdvServer'] 
             ],
-            'connections' => []
+            'connections' => [],
+            'videoQuality' => $videoQuality // Adicionar a qualidade aqui
         ];
         
-        // Configure as conexões para cada PDV selecionado
         foreach($selectedPdvs as $index => $pdvId) {
             $pdv = collect($pdvDataList)->firstWhere('id', $pdvId);
             if ($pdv) {
@@ -115,13 +114,6 @@ class SelfsController extends Controller
         }
         
         $pageTitle = 'Monitoramento de PDVs';
-        
-        // dd([
-        //     'unidade' => $unidade ? $unidade->toArray() : null,
-        //     'uni_api_raw' => $unidade ? $unidade->uni_api : null,
-        //     'serverConfig' => $serverConfig,
-        //     'connectionConfig' => $connectionConfig
-        // ]);
 
         return view('user.selfs.monitor', compact(
             'pdvDataList', 
@@ -130,7 +122,8 @@ class SelfsController extends Controller
             'cols', 
             'rows', 
             'quadrants', 
-            'selectedPdvs'
+            'selectedPdvs',
+            'videoQuality' 
         ));
     }
 
@@ -175,6 +168,35 @@ class SelfsController extends Controller
             }
 
             return response()->json(['success' => false, 'message' => 'Preferência não encontrada'], 404);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+    public function saveVideoQualityPreference(Request $request)
+    {
+        try {
+            $user = auth()->user();
+            $quality = $request->input('quality');
+            
+            // Validar a qualidade
+            $allowedQualities = ['low', 'medium-low', 'medium', 'high'];
+            if (!in_array($quality, $allowedQualities)) {
+                return response()->json(['success' => false, 'message' => 'Qualidade inválida'], 400);
+            }
+            
+            $currentPreferences = $user->ui_preferences ?? [];
+            
+            // Adicionar preferência de qualidade de vídeo
+            if (!isset($currentPreferences['video'])) {
+                $currentPreferences['video'] = [];
+            }
+            
+            $currentPreferences['video']['quality'] = $quality;
+            
+            $user->ui_preferences = $currentPreferences;
+            $user->save();
+            
+            return response()->json(['success' => true, 'message' => 'Preferência de qualidade salva com sucesso']);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }

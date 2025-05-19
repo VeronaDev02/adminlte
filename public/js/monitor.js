@@ -1,4 +1,4 @@
-// Estado global mínimo necessário
+// Estado global
 const state = {
     rtspWebsockets: {},
     pdvConnection: null,
@@ -12,6 +12,81 @@ const state = {
 const iceServers = {
     iceServers: []
 };
+
+if (!state.globalVideoQuality) {
+    state.globalVideoQuality = window.monitorConfig.connectionConfig.videoQuality || "medium-low";
+}
+
+function changeGlobalVideoQuality(quality) {
+    // Atualiza o estado global
+    state.globalVideoQuality = quality;
+    
+    // Para cada quadrante ativo
+    for (let position in state.rtspWebsockets) {
+        if (state.rtspWebsockets[position] && 
+            state.rtspWebsockets[position].readyState === WebSocket.OPEN) {
+            
+            try {
+                // Notifica a interface
+                const statusElement = document.getElementById(`status${position}`);
+                if (statusElement) {
+                    const originalText = statusElement.textContent;
+                    statusElement.textContent = "Alterando qualidade...";
+                    
+                    // Restaurar o texto original após 3 segundos
+                    setTimeout(() => {
+                        statusElement.textContent = originalText;
+                    }, 3000);
+                }
+                
+                // Envia a mensagem para alterar a qualidade
+                state.rtspWebsockets[position].send(JSON.stringify({
+                    change_quality: quality
+                }));
+            } catch (error) {
+                console.error(`Erro ao alterar qualidade do quadrante ${position}: ${error}`);
+            }
+        }
+    }
+    
+    // Salvar no servidor
+    saveQualityPreference(quality);
+    
+    // Atualizar a classe ativa no menu dropdown
+    document.querySelectorAll('#qualityDropdownBtn + .dropdown-menu .dropdown-item').forEach(item => {
+        if (item.getAttribute('onclick').includes(`'${quality}'`)) {
+            item.classList.add('active');
+        } else {
+            item.classList.remove('active');
+        }
+    });
+}
+function saveQualityPreference(quality) {
+    // Pegar o token CSRF
+    const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    
+    // Enviar a preferência para o servidor
+    fetch('/user/selfs/save-video-quality', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': token
+        },
+        body: JSON.stringify({
+            quality: quality
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (!data.success) {
+            console.error('Erro ao salvar preferência:', data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Erro ao salvar preferência:', error);
+    });
+}
+
 
 // Inicialização principal
 document.addEventListener('DOMContentLoaded', function() {
@@ -306,6 +381,12 @@ function connectCamera(position, rtspUrl, serverUrl) {
         
         state.rtspWebsockets[position].onopen = async () => {
             state.rtspWebsockets[position].send(rtspUrl);
+
+            setTimeout(() => {
+                state.rtspWebsockets[position].send(JSON.stringify({
+                    quality: state.globalVideoQuality
+                }));
+            }, 100);
         };
         
         state.rtspWebsockets[position].onmessage = async (event) => {
@@ -745,3 +826,4 @@ Livewire.on('logsUpdated', () => {
 window.toggleBrowserFullscreen = toggleBrowserFullscreen;
 window.toggleQuadrantFullscreen = toggleQuadrantFullscreen;
 window.scrollLogsToBottom = scrollLogsToBottom;
+window.changeGlobalVideoQuality = changeGlobalVideoQuality;
