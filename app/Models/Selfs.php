@@ -26,7 +26,8 @@ class Selfs extends Model
         'sel_uni_id',
         'sel_pdv_codigo',
         'sel_dvr_port',
-        'sel_pdv_listen_port'
+        'sel_pdv_listen_port',
+        'sel_origin_port'
     ];
 
     protected $casts = [
@@ -47,6 +48,19 @@ class Selfs extends Model
         }
     }
 
+    public function setSelOriginPortAttribute($value)
+    {
+        $this->attributes['sel_origin_port'] = Crypt::encryptString($value);
+    }
+    public function getSelOriginPortAttribute($value)
+    {
+        try {
+            return Crypt::decryptString($value);
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+    
     public function setSelPdvListenPortAttribute($value)
     {
         $this->attributes['sel_pdv_listen_port'] = Crypt::encryptString($value);

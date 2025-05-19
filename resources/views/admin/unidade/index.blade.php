@@ -93,7 +93,7 @@
                                 Nenhum SelfCheckout
                             @endif
                         </td>
-                        <td class="text-center align-middle">{{ $unidade->created_at ? date('d/m/Y', strtotime($unidade->created_at)) : 'N/A' }}</td>
+                        <td class="text-center">{{ $unidade->created_at ? date('d/m/Y', strtotime($unidade->created_at)) : 'N/A' }}</td>
                         <td class="text-center align-middle">
                             @if(!empty($unidade->uni_api) && !empty($unidade->uni_api_login) && !empty($unidade->uni_api_password))
                                 @livewire('admin.unidades.toggle-api-status', ['unidade' => $unidade], key('api-toggle-'.$unidade->uni_id))
@@ -101,7 +101,7 @@
                                 <span class="badge badge-secondary">Não configurado</span>
                             @endif
                         </td>
-                        <td class="text-center align-middle">
+                        <td class="text-center">
                             <a href="{{ route('admin.unidade.edit', $unidade->uni_id) }}" class="btn btn-xs btn-default text-primary mx-1 shadow">
                                 <i class="fa fa-lg fa-fw fa-pen"></i>
                             </a>
@@ -124,7 +124,7 @@
     <style>
         #unidade_table td {
             font-weight: normal !important;
-            text-align: center;
+            vertical-align: middle;
         }
         
         #unidade_table th {

@@ -43,6 +43,7 @@ class SelfsController extends Controller
             'sel_pdv_codigo' => 'required|string|max:3',
             'sel_dvr_port' => 'required|numeric|max:65535',
             'sel_pdv_listen_port' => 'required|numeric|max:65535',
+            'sel_origin_port' => 'required|numeric|max:65535',
         ], [
             'sel_name.required' => 'O nome do SelfCheckout é obrigatório.',
             'sel_name.string' => 'O nome do SelfCheckout deve ser um texto válido.',
@@ -68,6 +69,10 @@ class SelfsController extends Controller
 
             'sel_dvr_port.required' => 'A porta do Envio para o DVR é obrigatória.',
             'sel_pdv_listen_port.required' => 'A porta para escutar o PDV é obrigatória.',
+
+            'sel_origin_port.required' => 'A porta de origem é obrigatória.',
+            'sel_origin_port.numeric' => 'A porta de origem deve ser um número.',
+            'sel_origin_port.max' => 'A porta de origem não pode ser maior que 65535.',
         ]);
 
         DB::beginTransaction();
@@ -87,6 +92,7 @@ class SelfsController extends Controller
                 'sel_pdv_codigo' => $request->sel_pdv_codigo,
                 'sel_dvr_port' => $request->sel_dvr_port,
                 'sel_pdv_listen_port' => $request->sel_pdv_listen_port,
+                'sel_origin_port' => $request->sel_origin_port,
             ];
             
             $selfs = Selfs::create($selfsData);
@@ -138,6 +144,7 @@ class SelfsController extends Controller
             'sel_pdv_codigo' => 'required|string|max:3',
             'sel_dvr_port' => 'required|numeric|max:65535',
             'sel_pdv_listen_port' => 'required|numeric|max:65535',
+            'sel_origin_port' => 'required|numeric|max:65535',
         ], [
             'sel_name.required' => 'O nome do SelfCheckout é obrigatório.',
             'sel_name.string' => 'O nome do SelfCheckout deve ser um texto válido.',
@@ -163,6 +170,10 @@ class SelfsController extends Controller
 
             'sel_dvr_port.required' => 'A porta do Envio para o DVR é obrigatória.',
             'sel_pdv_listen_port.required' => 'A porta para escutar o PDV é obrigatória.',
+
+            'sel_origin_port.required' => 'A porta de origem é obrigatória.',
+            'sel_origin_port.numeric' => 'A porta de origem deve ser um número.',
+            'sel_origin_port.max' => 'A porta de origem não pode ser maior que 65535.',
         ]);
 
         DB::beginTransaction();
@@ -182,6 +193,7 @@ class SelfsController extends Controller
                 'sel_pdv_codigo' => $request->sel_pdv_codigo,
                 'sel_dvr_port' => $request->sel_dvr_port,
                 'sel_pdv_listen_port' => $request->sel_pdv_listen_port,
+                'sel_origin_port' => $request->sel_origin_port,
             ];
             
             $selfs->update($selfsData);

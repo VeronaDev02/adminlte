@@ -129,7 +129,7 @@
                         @enderror
                     </div>
                 </div>
-                 <div class="col-md-3">
+                <div class="col-md-3">
                     <div class="form-group">
                         <label for="sel_dvr_port">
                             Porta Envio DVR
@@ -141,6 +141,24 @@
                             placeholder="38800"
                             value="{{ old('sel_dvr_port', $editMode ? $selfs->sel_dvr_port : '') }}">
                         @error('sel_dvr_port')
+                            <span class="invalid-feedback" style="display: unset;" role="alert">
+                                <strong>{{ $message }}</strong>
+                            </span>
+                        @enderror
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="sel_dvr_port">
+                            Porta Origem DVR
+                        </label>
+                        <input type="text" 
+                            class="form-control" 
+                            id="sel_origin_port" 
+                            name="sel_origin_port" 
+                            placeholder="8+pdv_codigo"
+                            value="{{ old('sel_origin_port', $editMode ? $selfs->sel_origin_port : '') }}">
+                        @error('sel_origin_port')
                             <span class="invalid-feedback" style="display: unset;" role="alert">
                                 <strong>{{ $message }}</strong>
                             </span>

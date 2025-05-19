@@ -55,7 +55,8 @@ class ApiSSHController extends Controller
                     'pdv_port' => $self->sel_pdv_listen_port,
                     'dvr_ip' => $self->sel_dvr_ip,
                     'dvr_port' => $self->sel_dvr_port,
-                    'rtsp_url' => $self->sel_rtsp_path
+                    'rtsp_url' => $self->sel_rtsp_path,
+                    'origin_port' => $self->sel_origin_port,
                 ];
                 
                 Log::debug("Self adicionado à configuração", [
@@ -83,7 +84,6 @@ class ApiSSHController extends Controller
                 'password_length' => $password ? strlen($password) : 0
             ]);
 
-            // Cria o arquivo no servidor remoto
             $result = $this->sshService->createRemoteFile(
                 $host, $username, $password, $filePath, $fileContent
             );
