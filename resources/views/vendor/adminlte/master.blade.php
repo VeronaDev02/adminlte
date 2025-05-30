@@ -9,7 +9,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="user-preferences" content="{{ Auth::check() ? json_encode(Auth::user()->ui_preferences ?? []) : '{}' }}">
-
+    
     {{-- Custom Meta Tags --}}
     @yield('meta_tags')
 
@@ -34,6 +34,7 @@
         <link rel="stylesheet" href="{{ asset('vendor/fontawesome-free/css/all.min.css') }}">
         <link rel="stylesheet" href="{{ asset('vendor/overlayScrollbars/css/OverlayScrollbars.min.css') }}">
         <link rel="stylesheet" href="{{ asset('vendor/adminlte/dist/css/adminlte.min.css') }}">
+        <link rel="stylesheet" href="{{ asset('css/shepherd.css') }}">
 
         @if (config('adminlte.google_fonts.allowed', true))
             <link rel="stylesheet"
@@ -42,6 +43,9 @@
     @else
         <link rel="stylesheet" href="{{ mix(config('adminlte.laravel_mix_css_path', 'css/app.css')) }}">
     @endif
+    
+    {{-- Extra Configured Stylesheets --}}
+    {{-- <link rel="stylesheet" href="{{ asset('shepherd.js/dist/css/shepherd.css') }}"/> --}}
 
     {{-- Extra Configured Plugins Stylesheets --}}
     @include('adminlte::plugins', ['type' => 'css'])
@@ -98,6 +102,8 @@
         <script src="{{ mix(config('adminlte.laravel_mix_js_path', 'js/app.js')) }}"></script>
     @endif
 
+    {{-- <script type="module" src="shepherd.js/dist/shepherd.mjs"></script> --}}
+
     {{-- <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> --}}
     {{-- Extra Configured Plugins Scripts --}}
     @include('adminlte::plugins', ['type' => 'js'])
@@ -108,7 +114,7 @@
     @endif
     <script src="/js/app.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-
+    <script src="{{ asset('/js/shepherd.min.js') }}"></script>
     {{-- Custom Scripts --}}
     @yield('adminlte_js')
 

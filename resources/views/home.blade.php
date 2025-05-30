@@ -3,7 +3,11 @@
 @section('title', 'Dashboard do Usuário')
 
 @section('content_header')
-    <h1>Dashboard do Usuário</h1>
+    <h1>Dashboard do Usuário
+        <a title="Ajuda" class="btn" onclick="tour.start();" style="padding-left: 0px;padding-top: 3px;">
+            <i class="fas fa-question-circle" style="color: #8ac1f5;"></i>
+        </a>
+    </h1>
 @stop
 
 @section('content')
@@ -42,10 +46,10 @@
                         </div>
                     </div>
                     <div class="mt-3">
-                        <a href="{{ route('user.profile') }}" class="btn btn-sm btn-primary mr-1">
+                        <a href="{{ route('user.profile') }}" class="btn btn-sm btn-primary mr-1 first">
                             <i class="fas fa-user-edit mr-1"></i> Editar Perfil
                         </a>
-                        <a href="{{ route('user.redefinirSenhaPage') }}" class="btn btn-sm btn-outline-secondary">
+                        <a href="{{ route('user.redefinirSenhaPage') }}" class="btn btn-sm btn-outline-secondary second">
                             <i class="fas fa-lock mr-1"></i> Alterar Senha
                         </a>
                     </div>
@@ -62,7 +66,7 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-6 col-md-4 text-center mb-3">
-                            <a href="{{ route('selfcheckout.index') }}" class="btn btn-app bg-warning">
+                            <a href="{{ route('selfcheckout.index') }}" class="btn btn-app bg-warning third">
                                 <i class="fas fa-desktop"></i> Self Checkouts
                             </a>
                         </div>
@@ -77,11 +81,11 @@
                                 </a>
                             </div>
                         @endif --}}
-                        <div class="col-6 col-md-4 text-center mb-3">
-                            <a href="{{ route('user.profile') }}" class="btn btn-app bg-primary">
+                        {{-- <div class="col-6 col-md-4 text-center mb-3">
+                            <a href="{{ route('user.profile') }}" class="btn btn-app bg-primary fourth">
                                 <i class="fas fa-user-cog"></i> Perfil
                             </a>
-                        </div>
+                        </div> --}}
                     </div>
                 </div>
             </div>
@@ -99,21 +103,20 @@
                     <div class="card-body">
                         <div class="row">
                             @foreach(Auth::user()->ui_preferences['tela'] as $index => $tela)
-                                @php
-                                    // Gerar URL correta com PDVs usando a mesma lógica que o DynamicMenu
-                                    $pdvs = [];
-                                    foreach ($tela['selectedPdvs'] as $key => $value) {
-                                        if (!empty($value)) {
-                                            $pdvs["pdv[{$key}]"] = $value;
+                                    @php
+                                        $pdvs = [];
+                                        foreach ($tela['selectedPdvs'] as $key => $value) {
+                                            if (!empty($value)) {
+                                                $pdvs["pdv[{$key}]"] = $value;
+                                            }
                                         }
-                                    }
-                                    
-                                    $monitorUrl = route('selfs.monitor', array_merge([
-                                        'quadrants' => $tela['quadrants'],
-                                        'cols' => $tela['columns'],
-                                        'rows' => $tela['rows']
-                                    ], $pdvs));
-                                @endphp
+                                        
+                                        $monitorUrl = route('selfs.monitor', array_merge([
+                                            'quadrants' => $tela['quadrants'],
+                                            'cols' => $tela['columns'],
+                                            'rows' => $tela['rows']
+                                        ], $pdvs));
+                                    @endphp
                                 <div class="col-md-4">
                                     <div class="info-box">
                                         <span class="info-box-icon bg-success"><i class="fas fa-tv"></i></span>
@@ -123,7 +126,7 @@
                                                 {{ $tela['quadrants'] }} quadrantes ({{ $tela['columns'] }}x{{ $tela['rows'] }})
                                             </span>
                                             <div class="mt-2">
-                                                <a href="{{ $monitorUrl }}" class="btn btn-xs btn-success mr-1" target="_blank">
+                                                <a href="{{ $monitorUrl }}" class="btn btn-xs btn-success mr-1 fifth" target="_blank">
                                                     <i class="fas fa-eye"></i> Visualizar
                                                 </a>
                                                 <button type="button" class="btn btn-xs btn-danger" 
@@ -209,8 +212,8 @@
 @stop
 
 @section('js')
+    <script src="/js/Guides/DashboardGuide.js"></script>
     <script>
-        // Função para deletar uma tela salva
         function deleteTela(index) {
             fetch(`/user/destroy-tela-preferences/${index}`, {
                 method: 'POST',
@@ -222,7 +225,6 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Recarregar a página após excluir com sucesso
                     window.location.reload();
                 } else {
                     alert('Erro ao excluir: ' + data.message);
@@ -234,7 +236,6 @@
             });
         }
 
-        // Inicializar tooltips
         $(function () {
             $('[data-toggle="tooltip"]').tooltip();
         });
