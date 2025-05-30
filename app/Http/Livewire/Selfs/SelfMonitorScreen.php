@@ -39,8 +39,12 @@ class SelfMonitorScreen extends Component
         'handleInactivityAlert' => 'handleInactivityAlert',
         'quadrantFullscreenChanged' => 'updateFullscreenQuadrant',
         'browserFullscreenChanged' => 'updateBrowserFullscreen',
+        'videoQualityUpdated' => 'updateVideoQualityFromJs'
     ];
-    
+    public function updateVideoQualityFromJs(string $quality)
+    {
+        $this->videoQuality = $quality;
+    } 
     public function boot(GridLayoutService $gridLayoutService)
     {
         $this->gridLayoutService = $gridLayoutService;

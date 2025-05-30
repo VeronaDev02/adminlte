@@ -17,7 +17,7 @@
                         <a class="dropdown-item {{ $videoQuality == 'medium' ? 'active' : '' }}" href="#" onclick="changeGlobalVideoQuality('medium'); return false;">Média</a>
                         <a class="dropdown-item {{ $videoQuality == 'high' ? 'active' : '' }}" href="#" onclick="changeGlobalVideoQuality('high'); return false;">Alta</a>
                     </div>
-                    <button id="browserFullscreenBtn" class="btn btn-dark" onclick="toggleBrowserFullscreen()">
+                    <button id="browserFullscreenBtn btn btn-dark" class="btn btn-dark" onclick="toggleBrowserFullscreen()">
                         <i class="fas fa-desktop"></i> {{ $isBrowserFullscreen ? 'Sair da Tela Cheia' : 'Tela Cheia (F11)' }}
                     </button>
                 </div>
@@ -69,9 +69,9 @@
             // Sistema de fila de alertas (deixamos esta inicialização para o arquivo principal)
             if (!window.alertSystem) {
                 window.alertSystem = {
-                    queue: [],
-                    activeAlert: null,
-                    alertingLogs: new Set()
+                    queue: [],           // Fila de posições com alertas pendentes
+                    activeAlert: null,   // Alerta atualmente sendo exibido em fullscreen
+                    alertingLogs: new Set() // Mantemos o set para rastrear todos os logs em alerta
                 };
             }
             

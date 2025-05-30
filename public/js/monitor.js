@@ -18,28 +18,23 @@ if (!state.globalVideoQuality) {
 }
 
 function changeGlobalVideoQuality(quality) {
-    // Atualiza o estado global
     state.globalVideoQuality = quality;
-    
-    // Para cada quadrante ativo
+
     for (let position in state.rtspWebsockets) {
-        if (state.rtspWebsockets[position] && 
+        if (state.rtspWebsockets[position] &&
             state.rtspWebsockets[position].readyState === WebSocket.OPEN) {
-            
+
             try {
-                // Notifica a interface
                 const statusElement = document.getElementById(`status${position}`);
                 if (statusElement) {
                     const originalText = statusElement.textContent;
                     statusElement.textContent = "Alterando qualidade...";
-                    
-                    // Restaurar o texto original após 3 segundos
+
                     setTimeout(() => {
                         statusElement.textContent = originalText;
                     }, 3000);
                 }
-                
-                // Envia a mensagem para alterar a qualidade
+
                 state.rtspWebsockets[position].send(JSON.stringify({
                     change_quality: quality
                 }));
@@ -48,24 +43,15 @@ function changeGlobalVideoQuality(quality) {
             }
         }
     }
-    
-    // Salvar no servidor
+
     saveQualityPreference(quality);
-    
-    // Atualizar a classe ativa no menu dropdown
-    document.querySelectorAll('#qualityDropdownBtn + .dropdown-menu .dropdown-item').forEach(item => {
-        if (item.getAttribute('onclick').includes(`'${quality}'`)) {
-            item.classList.add('active');
-        } else {
-            item.classList.remove('active');
-        }
-    });
+
+    Livewire.emit('videoQualityUpdated', quality);
 }
+
 function saveQualityPreference(quality) {
-    // Pegar o token CSRF
     const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-    
-    // Enviar a preferência para o servidor
+
     fetch('/user/selfs/save-video-quality', {
         method: 'POST',
         headers: {
