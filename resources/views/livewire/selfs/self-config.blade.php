@@ -3,6 +3,9 @@
         <div class="card-header">
             <h3 class="card-title">
                 <i class="fas fa-tv mr-2"></i>Configurações de Tela
+                <a title="Ajuda" class="btn" onclick="tour.start();" style="padding-left: 0px;padding-top: 3px;">
+                    <i class="fas fa-question-circle" style="color: #8ac1f5;"></i>
+                </a>
             </h3>
         </div>
         
@@ -23,7 +26,7 @@
                 <div class="col-md-3">
                     <div class="form-group">
                         <label>Quantidade de Telas</label>
-                        <select wire:model="selectedQuadrants" class="form-control">
+                        <select wire:model="selectedQuadrants" class="form-control first">
                             <option value="0">Selecione a quantidade de telas</option>
                             @foreach($quadrantOptions as $option)
                                 <option value="{{ $option }}">{{ $option }} Telas</option>
@@ -37,7 +40,7 @@
                         <label>Número de Colunas</label>
                         <select 
                             wire:model="selectedColumns" 
-                            class="form-control" 
+                            class="form-control second" 
                             {{ $selectedQuadrants == 0 ? 'disabled' : '' }}
                         >
                             <option value="0">Selecione o número de colunas</option>
@@ -66,7 +69,7 @@
             </div>
 
             @if($layoutPreviewHtml)
-                <div class="row mt-3">
+                <div class="row mt-3 preview-container">
                     <div class="col-12">
                         {!! $layoutPreviewHtml !!}
                     </div>
@@ -111,7 +114,7 @@
             <div class="card-footer">
                 <button 
                     wire:click="applyConfiguration" 
-                    class="btn btn-primary"
+                    class="btn btn-primary create"
                     {{ !$this->isConfigurationValid() ? 'disabled' : '' }}
                 >
                     <i class="fas fa-check mr-2"></i>Criar preferência
@@ -123,3 +126,6 @@
         </div>
     </div>
 </div>
+@section('js')
+    <script src="/js/Guides/SelfCheckoutsGuide.js"></script>
+@stop

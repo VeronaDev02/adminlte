@@ -1,5 +1,5 @@
 <div class="layout-preview-container">
-    <label style="margin-bottom: 8px; display: block; text-align: center; color: #ecf0f1;">Layout</label>
+
     <div class="layout-grid" style="
         display: grid;
         grid-template-columns: repeat({{ $columns }}, 1fr);

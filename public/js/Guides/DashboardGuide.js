@@ -9,7 +9,7 @@ const tour = new Shepherd.Tour({
 });
 
 tour.addStep({
-    title: 'Bem-vindo a tela inicial',
+    title: 'Bem-vindo a página inicial',
     text: 'Nessa tela você verá todas as suas opções.',
     buttons: [
         {
@@ -82,7 +82,7 @@ else {
         attachTo: { element: '.third', on: 'right' },
         buttons: [
             { action() { return this.back(); }, classes: 'shepherd-button-secondary', text: 'Anterior' },
-            { action() { return this.complete(); }, text: 'Finalizar' }
+            { action() { return this.complete(); }, text: 'Finalizar Tour' }
         ],
         id: 'selfcheckouts'
     });
