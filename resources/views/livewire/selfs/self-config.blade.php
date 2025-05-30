@@ -128,4 +128,15 @@
 </div>
 @section('js')
     <script src="/js/Guides/SelfCheckoutsGuide.js"></script>
+    @if(!isset(Auth::user()->ui_preferences['tela']) || count(Auth::user()->ui_preferences['tela']) == 0)
+        <script>
+            window.addEventListener('load', function() {
+                if (typeof tour !== 'undefined') {
+                    tour.start();
+                } else {
+                    console.error("Erro: A variável 'tour' não está definida. Verifique se DashboardGuide.js carregou corretamente.");
+                }
+            });
+        </script>
+    @endif
 @stop

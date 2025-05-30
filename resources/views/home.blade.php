@@ -11,7 +11,6 @@
 @stop
 
 @section('content')
-    <!-- Mensagem de Boas-vindas e Status -->
     <div class="row">
         <div class="col-md-12">
             @if (session('status'))
@@ -22,7 +21,6 @@
         </div>
     </div>
 
-    <!-- Card de Boas-vindas e Informações do Usuário -->
     <div class="row">
         <div class="col-md-6">
             <div class="card card-primary">
@@ -34,10 +32,10 @@
                         @if(Auth::user()->img_user)
                             <img src="{{ Auth::user()->img_user }}" class="img-circle mr-3" style="width: 70px; height: 70px; object-fit: cover;" alt="Imagem do usuário">
                         @else
-                            <div class="img-circle mr-3 d-flex align-items-center justify-content-center bg-primary" style="width: 70px; height: 70px;">
-                                <i class="fas fa-user fa-2x text-white"></i>
-                            </div>
-                        @endif
+                            <img src="images/grupowhite.png"
+                                class="img-circle mr-3"
+                                style="width: 70px; height: 70px; object-fit: contain; background-color: black;"
+                                alt="Imagem do usuário"/>                        @endif
                         <div>
                             <h4 class="mb-1">{{ Auth::user()->use_name ?? Auth::user()->name }}</h4>
                             <p class="text-muted mb-0">
@@ -240,4 +238,15 @@
             $('[data-toggle="tooltip"]').tooltip();
         });
     </script>
+    @if(!isset(Auth::user()->ui_preferences['tela']) || count(Auth::user()->ui_preferences['tela']) == 0)
+        <script>
+            window.addEventListener('load', function() {
+                if (typeof tour !== 'undefined') {
+                    tour.start();
+                } else {
+                    console.error("Erro: A variável 'tour' não está definida. Verifique se DashboardGuide.js carregou corretamente.");
+                }
+            });
+        </script>
+    @endif
 @stop

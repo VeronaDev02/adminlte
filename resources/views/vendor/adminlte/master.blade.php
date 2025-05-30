@@ -60,7 +60,7 @@
 
     {{-- Favicon --}}
     @if (config('adminlte.use_ico_only'))
-        <link rel="shortcut icon" href="{{ asset('images/grupowrite-pq.png') }}" />
+        <link rel="shortcut icon" href="{{ asset('images/grupowhite.png') }}" />
     @elseif(config('adminlte.use_full_favicon'))
         <link rel="shortcut icon" href="{{ asset('favicons/favicon.ico') }}" />
         <link rel="apple-touch-icon" sizes="57x57" href="{{ asset('favicons/apple-icon-57x57.png') }}">

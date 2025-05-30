@@ -88,9 +88,10 @@ else {
     });
 }
 
-function startTour(id){
-    if(localStorage.getItem(id+"dashboard_guide") == null){
-        tour.start();
-        localStorage.setItem(id+"dashboard_guide", "true");
-    }
+function startTour(){
+    // colocar parâmetro de id do usuário caso queira salvar no localStorage
+    // if(localStorage.getItem(id+"dashboard_guide") == null){
+    tour.start();
+    // localStorage.setItem(id+"dashboard_guide", "true");
+    // }
 }
