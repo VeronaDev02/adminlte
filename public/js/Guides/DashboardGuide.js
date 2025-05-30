@@ -23,7 +23,7 @@ tour.addStep({
 tour.addStep({
     title: 'Editar Perfil',
     text: 'Utilizado para alterar e exibir informações relacionadas ao seu perfil.',
-    attachTo: { element: '.first', on: 'top' },
+    attachTo: { element: '.first', on: 'bottom' },
     buttons: [
         { action() { return this.back(); }, classes: 'shepherd-button-secondary', text: 'Anterior' },
         { action() { return this.next(); }, text: 'Próximo' }
@@ -34,7 +34,7 @@ tour.addStep({
 tour.addStep({
     title: 'Alterar senha',
     text: 'Aqui você pode alterar diretamente sua senha de acesso ao sistema.',
-    attachTo: { element: '.second', on: 'top' },
+    attachTo: { element: '.second', on: 'bottom' },
     buttons: [
         { action() { return this.back(); }, classes: 'shepherd-button-secondary', text: 'Anterior' },
         { action() { return this.next(); }, text: 'Próximo' }
@@ -67,7 +67,7 @@ if(document.querySelector('.fifth')) {
     tour.addStep({
         title: 'Monitoramento',
         text: 'É aqui que pode clicar em visualizar a tela do selfcheckout, onde você pode ver o que está acontecendo em tempo real.',
-        attachTo: { element: '.fifth', on: 'left' },
+        attachTo: { element: '.fifth', on: 'bottom' },
         buttons: [
             { action() { return this.back(); }, classes: 'shepherd-button-secondary', text: 'Anterior' },
             { action() { return this.complete(); }, text: 'Finalizar' }

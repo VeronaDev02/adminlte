@@ -115,9 +115,9 @@ if(document.querySelector('.fifth')) {
     });
 }
 
-function startTour(id){
-    if(typeof warning !== 'undefined' && localStorage.getItem(id+"dashboard_guide") == null){
-        tour.start();
-        localStorage.setItem(id+"dashboard_guide", "true");
-    }
+function startTour(){
+    // if(typeof warning !== 'undefined' && localStorage.getItem(id+"dashboard_guide") == null){
+    tour.start();
+    // localStorage.setItem(id+"dashboard_guide", "true");
+    // }
 }
