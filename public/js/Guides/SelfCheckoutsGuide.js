@@ -32,7 +32,7 @@ tour.addStep({
                 if (selectedQuadrants && selectedQuadrants !== '0') {
                     return this.next();
                 } else {
-                    warning.fire('Aviso!', 'Por favor, selecione a quantidade de telas antes de continuar.', 'warning');
+                    return tour.show('validation-error-quadrants');
                 }
             },
             text: 'Próximo'
@@ -60,7 +60,7 @@ tour.addStep({
                         }
                     }, 100);
                 } else {
-                    warning.fire('Aviso!', 'Por favor, selecione o número de colunas antes de continuar.', 'warning');
+                    return tour.show('validation-error-columns');
                 }
             },
             text: 'Próximo'
@@ -115,9 +115,52 @@ if(document.querySelector('.fifth')) {
     });
 }
 
+tour.addStep({
+    title: 'Campo Requerido!',
+    text: 'Ops! Por favor, selecione um valor para a quantidade de telas antes de continuar.',
+    buttons: [
+        {
+            action() {
+                return tour.show('select-quadrants');
+            },
+            classes: 'shepherd-button-secondary',
+            text: 'Voltar e Corrigir'
+        },
+        {
+            action() {
+                return tour.complete();
+            },
+            text: 'Fechar Tour'
+        }
+    ],
+    id: 'validation-error-quadrants',
+    cancelIcon: { enabled: true },
+    useModalOverlay: true
+});
+
+tour.addStep({
+    title: 'Campo Requerido!',
+    text: 'Ops! Por favor, selecione um valor para o número de colunas antes de continuar.',
+    buttons: [
+        {
+            action() {
+                return tour.show('select-columns');
+            },
+            classes: 'shepherd-button-secondary',
+            text: 'Voltar e Corrigir'
+        },
+        {
+            action() {
+                return tour.complete();
+            },
+            text: 'Fechar Tour'
+        }
+    ],
+    id: 'validation-error-columns',
+    cancelIcon: { enabled: true },
+    useModalOverlay: true
+});
+
 function startTour(){
-    // if(typeof warning !== 'undefined' && localStorage.getItem(id+"dashboard_guide") == null){
     tour.start();
-    // localStorage.setItem(id+"dashboard_guide", "true");
-    // }
 }

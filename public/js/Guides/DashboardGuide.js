@@ -56,7 +56,7 @@ tour.addStep({
 if(document.querySelector('.fifth')) {
     tour.addStep({
         title: 'Self Checkouts',
-        text: 'Utilizado para criar uma configuração de tela, os PDVs que deseja ver e qual o jeito que quer exibi-los.',
+        text: 'Utilizado para criar uma configuração de tela, os PDVs que deseja exibir. Qual a forma que deseja exibi-los.',
         attachTo: { element: '.third', on: 'right' },
         buttons: [
             { action() { return this.back(); }, classes: 'shepherd-button-secondary', text: 'Anterior' },
@@ -78,7 +78,7 @@ if(document.querySelector('.fifth')) {
 else {
     tour.addStep({
         title: 'Self Checkouts',
-        text: 'Utilizado para criar uma configuração de tela, os PDVs que deseja ver e qual o jeito que quer exibi-los.',
+        text: 'Utilizado para criar uma configuração de tela. Os PDVs que deseja exibir/qual a forma que deseja exibi-los.',
         attachTo: { element: '.third', on: 'right' },
         buttons: [
             { action() { return this.back(); }, classes: 'shepherd-button-secondary', text: 'Anterior' },

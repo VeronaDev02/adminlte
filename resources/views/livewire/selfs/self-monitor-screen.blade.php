@@ -69,9 +69,9 @@
             // Sistema de fila de alertas (deixamos esta inicialização para o arquivo principal)
             if (!window.alertSystem) {
                 window.alertSystem = {
-                    queue: [],           // Fila de posições com alertas pendentes
-                    activeAlert: null,   // Alerta atualmente sendo exibido em fullscreen
-                    alertingLogs: new Set() // Mantemos o set para rastrear todos os logs em alerta
+                    queue: [],
+                    activeAlert: null,
+                    alertingLogs: new Set()
                 };
             }
             
